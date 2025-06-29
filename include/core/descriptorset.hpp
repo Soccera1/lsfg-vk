@@ -10,9 +10,9 @@
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
-#include <variant>
 #include <vulkan/vulkan_core.h>
 
+#include <variant>
 #include <memory>
 
 namespace Vulkan::Core {
@@ -31,7 +31,7 @@ namespace Vulkan::Core {
         /// @param pool Descriptor pool to allocate from
         /// @param shaderModule Shader module to use for the descriptor set
         ///
-        /// @throws std::invalid_argument if the device or pool is invalid.
+        /// @throws std::invalid_argument if the device, pool or shader module is invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
         DescriptorSet(const Device& device,

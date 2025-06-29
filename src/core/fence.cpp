@@ -27,9 +27,6 @@ Fence::Fence(const Device& device) {
 }
 
 void Fence::reset() const {
-    if (!this->isValid())
-        throw std::logic_error("Invalid fence");
-
     VkFence fenceHandle = this->handle();
     auto res = vkResetFences(this->device, 1, &fenceHandle);
     if (res != VK_SUCCESS)
@@ -37,9 +34,6 @@ void Fence::reset() const {
 }
 
 bool Fence::wait(uint64_t timeout) const {
-    if (!this->isValid())
-        throw std::logic_error("Invalid fence");
-
     VkFence fenceHandle = this->handle();
     auto res = vkWaitForFences(this->device, 1, &fenceHandle, VK_TRUE, timeout);
     if (res != VK_SUCCESS && res != VK_TIMEOUT)

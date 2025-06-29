@@ -4,8 +4,8 @@
 using namespace Vulkan::Core;
 
 Pipeline::Pipeline(const Device& device, const ShaderModule& shader) {
-    if (!device)
-        throw std::invalid_argument("Invalid Vulkan device");
+    if (!device || !shader)
+        throw std::invalid_argument("Invalid Vulkan device or shader module");
 
     // create pipeline layout
     VkDescriptorSetLayout shaderLayout = shader.getDescriptorSetLayout();

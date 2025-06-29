@@ -6,7 +6,7 @@
 
 using namespace Vulkan::Core;
 
-Buffer::Buffer(const Device& device, uint32_t size, std::vector<uint8_t> data,
+Buffer::Buffer(const Device& device, size_t size, std::vector<uint8_t> data,
         VkBufferUsageFlags usage) : size(size) {
     if (!device)
         throw std::invalid_argument("Invalid Vulkan device");

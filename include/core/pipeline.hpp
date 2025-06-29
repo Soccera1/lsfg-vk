@@ -24,7 +24,7 @@ namespace Vulkan::Core {
         /// @param device Vulkan device
         /// @param shader Shader module to use for the pipeline.
         ///
-        /// @throws std::invalid_argument if the device is invalid.
+        /// @throws std::invalid_argument if the device or shader module is invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
         Pipeline(const Device& device, const ShaderModule& shader);

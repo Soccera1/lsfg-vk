@@ -2,7 +2,6 @@
 #include "utils/exceptions.hpp"
 
 #include <fstream>
-#include <vector>
 
 using namespace Vulkan::Core;
 

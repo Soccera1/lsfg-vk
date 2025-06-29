@@ -21,7 +21,7 @@ namespace Vulkan::Core {
         ///
         /// @param device Vulkan device
         ///
-        /// @throws std::invalid_argument if the device is null.
+        /// @throws std::invalid_argument if the device is invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
         Fence(const Device& device);
@@ -29,7 +29,6 @@ namespace Vulkan::Core {
         ///
         /// Reset the fence to an unsignaled state.
         ///
-        /// @throws std::logic_error if the fence is not valid.
         /// @throws ls::vulkan_error if resetting fails.
         ///
         void reset() const;
@@ -40,7 +39,6 @@ namespace Vulkan::Core {
         /// @param timeout The timeout in nanoseconds, or UINT64_MAX for no timeout.
         /// @returns true if the fence signaled, false if it timed out.
         ///
-        /// @throws std::logic_error if the fence is not valid.
         /// @throws ls::vulkan_error if waiting fails.
         ///
         [[nodiscard]] bool wait(uint64_t timeout = UINT64_MAX) const;
