@@ -2,6 +2,7 @@
 #define COMMANDBUFFER_HPP
 
 #include "core/commandpool.hpp"
+#include "core/fence.hpp"
 #include "core/semaphore.hpp"
 #include "device.hpp"
 
@@ -65,6 +66,7 @@ namespace Vulkan::Core {
         /// Submit the command buffer to a queue.
         ///
         /// @param queue Vulkan queue to submit to
+        /// @param fence Optional fence to signal when the command buffer has finished executing
         /// @param waitSemaphores Semaphores to wait on before executing the command buffer
         /// @param waitSemaphoreValues Values for the semaphores to wait on
         /// @param signalSemaphores Semaphores to signal after executing the command buffer
@@ -74,7 +76,7 @@ namespace Vulkan::Core {
         /// @throws std::logic_error if the command buffer is not in Full state.
         /// @throws ls::vulkan_error if submission fails.
         ///
-        void submit(VkQueue queue, // TODO: fence
+        void submit(VkQueue queue, std::optional<Fence> fence,
             const std::vector<Semaphore>& waitSemaphores = {},
             std::optional<std::vector<uint64_t>> waitSemaphoreValues = std::nullopt,
             const std::vector<Semaphore>& signalSemaphores = {},

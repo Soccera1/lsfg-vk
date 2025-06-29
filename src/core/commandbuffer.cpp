@@ -55,7 +55,7 @@ void CommandBuffer::end() {
     *this->state = CommandBufferState::Full;
 }
 
-void CommandBuffer::submit(VkQueue queue,
+void CommandBuffer::submit(VkQueue queue, std::optional<Fence> fence,
         const std::vector<Semaphore>& waitSemaphores,
         std::optional<std::vector<uint64_t>> waitSemaphoreValues,
         const std::vector<Semaphore>& signalSemaphores,
@@ -106,7 +106,7 @@ void CommandBuffer::submit(VkQueue queue,
         .signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size()),
         .pSignalSemaphores = signalSemaphoresHandles.data()
     };
-    auto res = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+    auto res = vkQueueSubmit(queue, 1, &submitInfo, fence ? fence->handle() : VK_NULL_HANDLE);
     if (res != VK_SUCCESS)
         throw ls::vulkan_error(res, "Unable to submit command buffer");
 
