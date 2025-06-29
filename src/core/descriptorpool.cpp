@@ -1,0 +1,37 @@
+#include "core/descriptorpool.hpp"
+#include "utils/exceptions.hpp"
+
+#include <array>
+
+using namespace Vulkan::Core;
+
+DescriptorPool::DescriptorPool(const Device& device) {
+    if (!device)
+        throw std::invalid_argument("Invalid Vulkan device");
+
+    // create descriptor pool
+    const std::array<VkDescriptorPoolSize, 4> pools{{ // arbitrary limits
+        { .type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = 4096 },
+        { .type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = 4096 },
+        { .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = 4096 },
+        { .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 4096 }
+    }};
+    const VkDescriptorPoolCreateInfo desc{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = 16384, // arbitrary limit
+        .poolSizeCount = static_cast<uint32_t>(pools.size()),
+        .pPoolSizes = pools.data()
+    };
+    VkDescriptorPool poolHandle{};
+    auto res = vkCreateDescriptorPool(device.handle(), &desc, nullptr, &poolHandle);
+    if (res != VK_SUCCESS || poolHandle == VK_NULL_HANDLE)
+        throw ls::vulkan_error(res, "Unable to create descriptor pool");
+
+    /// store pool in shared ptr
+    this->descriptorPool = std::shared_ptr<VkDescriptorPool>(
+        new VkDescriptorPool(poolHandle),
+        [dev = device.handle()](VkDescriptorPool* poolHandle) {
+            vkDestroyDescriptorPool(dev, *poolHandle, nullptr);
+        }
+    );
+}
