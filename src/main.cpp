@@ -7,6 +7,7 @@
 #include "instance.hpp"
 #include "shaderchains/downsample.hpp"
 #include "utils/global.hpp"
+#include "utils/upload.hpp"
 
 #include <iostream>
 
@@ -23,11 +24,13 @@ int main() {
     Globals::initializeGlobals(device);
 
     // create initialization resources
-    const Core::Image inputImage(
+    Core::Image inputImage(
         device, { 2560, 1411 }, VK_FORMAT_R8G8B8A8_UNORM,
-        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
+        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT
+        | VK_IMAGE_USAGE_HOST_TRANSFER_BIT, // (remove in prod)
         VK_IMAGE_ASPECT_COLOR_BIT
     );
+    Upload::upload(device, inputImage, "rsc/images/source.dds");
 
     // create the shaderchains
     Shaderchains::Downsample downsample(device, descriptorPool, inputImage);
