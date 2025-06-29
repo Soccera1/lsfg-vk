@@ -17,7 +17,7 @@ int main() {
     const Device device(instance);
 
     // prepare render pass
-    const Core::CommandPool commandPool(device, Core::CommandPoolType::Compute);
+    const Core::CommandPool commandPool(device);
 
     // prepare shader
     const Core::ShaderModule computeShader(device, "shaders/downsample.spv",

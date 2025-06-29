@@ -53,3 +53,10 @@ Pipeline::Pipeline(const Device& device, const ShaderModule& shader) {
         }
     );
 }
+
+void Pipeline::bind(const CommandBuffer& commandBuffer) const {
+    if (!commandBuffer)
+        throw std::invalid_argument("Invalid command buffer");
+
+    vkCmdBindPipeline(commandBuffer.handle(), VK_PIPELINE_BIND_POINT_COMPUTE, *this->pipeline);
+}

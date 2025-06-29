@@ -44,6 +44,13 @@ void CommandBuffer::begin() {
     *this->state = CommandBufferState::Recording;
 }
 
+void CommandBuffer::dispatch(uint32_t x, uint32_t y, uint32_t z) {
+    if (*this->state != CommandBufferState::Recording)
+        throw std::logic_error("Command buffer is not in Recording state");
+
+    vkCmdDispatch(*this->commandBuffer, x, y, z);
+}
+
 void CommandBuffer::end() {
     if (*this->state != CommandBufferState::Recording)
         throw std::logic_error("Command buffer is not in Recording state");

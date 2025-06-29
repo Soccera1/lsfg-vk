@@ -3,21 +3,14 @@
 
 using namespace Vulkan::Core;
 
-CommandPool::CommandPool(const Device& device, CommandPoolType type) {
+CommandPool::CommandPool(const Device& device) {
     if (!device)
         throw std::invalid_argument("Invalid Vulkan device");
-
-    uint32_t familyIdx{};
-    switch (type) {
-        case CommandPoolType::Compute:
-            familyIdx = device.getComputeFamilyIdx();
-            break;
-    }
 
     // create command pool
     const VkCommandPoolCreateInfo desc = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        .queueFamilyIndex = familyIdx
+        .queueFamilyIndex = device.getComputeFamilyIdx()
     };
     VkCommandPool commandPoolHandle{};
     auto res = vkCreateCommandPool(device.handle(), &desc, nullptr, &commandPoolHandle);

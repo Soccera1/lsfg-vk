@@ -55,6 +55,17 @@ namespace Vulkan::Core {
         void begin();
 
         ///
+        /// Dispatch a compute command.
+        ///
+        /// @param x Number of groups in the X dimension
+        /// @param y Number of groups in the Y dimension
+        /// @param z Number of groups in the Z dimension
+        ///
+        /// @throws std::logic_error if the command buffer is not in Recording state
+        ///
+        void dispatch(uint32_t x, uint32_t y, uint32_t z);
+
+        ///
         /// End recording commands in the command buffer.
         ///
         /// @throws std::logic_error if the command buffer is not in Recording state
@@ -85,7 +96,7 @@ namespace Vulkan::Core {
         /// Get the state of the command buffer.
         [[nodiscard]] CommandBufferState getState() const { return *this->state; }
         /// Get the Vulkan handle.
-        [[nodiscard]] auto handle() const { *this->commandBuffer; }
+        [[nodiscard]] auto handle() const { return *this->commandBuffer; }
 
         /// Check whether the object is valid.
         [[nodiscard]] bool isValid() const { return static_cast<bool>(this->commandBuffer); }

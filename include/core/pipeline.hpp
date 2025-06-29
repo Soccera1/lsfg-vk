@@ -1,6 +1,7 @@
 #ifndef PIPELINE_HPP
 #define PIPELINE_HPP
 
+#include "core/commandbuffer.hpp"
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
@@ -27,6 +28,15 @@ namespace Vulkan::Core {
         /// @throws ls::vulkan_error if object creation fails.
         ///
         Pipeline(const Device& device, const ShaderModule& shader);
+
+        ///
+        /// Bind the pipeline to a command buffer.
+        ///
+        /// @param commandBuffer Command buffer to bind the pipeline to.
+        ///
+        /// @throws std::invalid_argument if the command buffer is invalid.
+        ///
+        void bind(const CommandBuffer& commandBuffer) const;
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->pipeline; }

@@ -9,12 +9,6 @@
 
 namespace Vulkan::Core {
 
-    /// Enumeration for different types of command pools.
-    enum class CommandPoolType {
-        /// Used for compute-type command buffers.
-        Compute
-    };
-
     ///
     /// C++ wrapper class for a Vulkan command pool.
     ///
@@ -26,12 +20,11 @@ namespace Vulkan::Core {
         /// Create the command pool.
         ///
         /// @param device Vulkan device
-        /// @param type Type of command pool to create.
         ///
         /// @throws std::invalid_argument if the device is invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
-        CommandPool(const Device& device, CommandPoolType type);
+        CommandPool(const Device& device);
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->commandPool; }
