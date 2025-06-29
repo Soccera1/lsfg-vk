@@ -10,6 +10,7 @@
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 #include "instance.hpp"
+#include "utils/memorybarriers.hpp"
 
 #include <algorithm>
 #include <array>
@@ -40,27 +41,22 @@ const static DataBuffer data{
 };
 
 int main() {
-    // initialize Vulkan
+    // initialize application
     const Instance instance;
     const Device device(instance);
+    const Core::DescriptorPool descriptorPool(device);
+    const Core::CommandPool commandPool(device);
 
-    // load shader
     const Core::ShaderModule computeShader(device, "shaders/downsample.spv",
         { { 1, VK_DESCRIPTOR_TYPE_SAMPLER},
           { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE},
           { 7, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE},
           { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER} });
-
-    // prepare render pass
-    const Core::CommandPool commandPool(device);
-    const Core::DescriptorPool descriptorPool(device);
     const Core::Pipeline computePipeline(device, computeShader);
-    const Core::DescriptorSet descriptorSet(device, descriptorPool, computeShader);
 
-    // create shader inputs
     const Core::Sampler sampler(device, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER);
 
-    const std::vector<Core::Image> images(1, Core::Image(
+    const std::vector<Core::Image> inputImages(1, Core::Image(
         device, { 2560, 1411 }, VK_FORMAT_R8G8B8A8_UNORM,
         VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT
@@ -72,51 +68,22 @@ int main() {
     const Core::Buffer buffer(device, dataVec.size(), dataVec,
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
-    // create shader outputs
-    const std::vector<Core::Image> outputImages = {
-        Core::Image(
-            device, { 1280, 705 }, VK_FORMAT_R8G8B8A8_UNORM,
+    std::vector<Core::Image> outputImages;
+    outputImages.reserve(7);
+    for (size_t i = 0; i < 7; ++i)
+        outputImages.emplace_back(device,
+            VkExtent2D { .width = 2560U >> i, .height = 1411U >> i },
+            VK_FORMAT_R8G8B8A8_UNORM,
             VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT
-        ),
-        Core::Image(
-            device, { 640, 352 }, VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT
-        ),
-        Core::Image(
-            device, { 320, 176 }, VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT
-        ),
-        Core::Image(
-            device, { 160, 88 }, VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT
-        ),
-        Core::Image(
-            device, { 80, 44 }, VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT
-        ),
-        Core::Image(
-            device, { 40, 22 }, VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT
-        ),
-        Core::Image(
-            device, { 20, 11 }, VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT
-        )
-    };
+            VK_IMAGE_ASPECT_COLOR_BIT);
 
     // load descriptor set
+    const Core::DescriptorSet descriptorSet(device, descriptorPool, computeShader);
     descriptorSet.update(
         device,
         {
             {{ VK_DESCRIPTOR_TYPE_SAMPLER, sampler }},
-            {{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, images[0] }},
+            {{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, inputImages[0] }},
             {
                 { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outputImages[0] },
                 { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outputImages[1] },
@@ -137,6 +104,13 @@ int main() {
     commandBuffer.begin();
 
     // render
+    Barriers::insertBarrier(
+        commandBuffer,
+        inputImages,
+        outputImages,
+        VK_IMAGE_LAYOUT_UNDEFINED
+    );
+
     computePipeline.bind(commandBuffer);
     descriptorSet.bind(commandBuffer, computePipeline);
     commandBuffer.dispatch(40, 23, 1);

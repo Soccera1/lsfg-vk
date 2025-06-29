@@ -3,6 +3,7 @@
 
 #include <optional>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 using namespace Vulkan;
 
@@ -49,10 +50,15 @@ Device::Device(const Instance& instance) {
 
     // create logical device
     const float queuePriority{1.0F}; // highest priority
-    const VkPhysicalDeviceVulkan12Features features{
+    VkPhysicalDeviceVulkan13Features features13{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+        .synchronization2 = VK_TRUE
+    };
+    const VkPhysicalDeviceVulkan12Features features12{
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+        .pNext = &features13,
         .timelineSemaphore = VK_TRUE,
-        .vulkanMemoryModel = VK_TRUE,
+        .vulkanMemoryModel = VK_TRUE
     };
     const VkDeviceQueueCreateInfo computeQueueDesc{
         .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
@@ -62,7 +68,7 @@ Device::Device(const Instance& instance) {
     };
     const VkDeviceCreateInfo deviceCreateInfo{
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-        .pNext = &features,
+        .pNext = &features12,
         .queueCreateInfoCount = 1,
         .pQueueCreateInfos = &computeQueueDesc
     };

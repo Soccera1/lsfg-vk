@@ -7,7 +7,7 @@ using namespace Vulkan::Core;
 
 Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
         VkImageUsageFlags usage, VkImageAspectFlags aspectFlags)
-        : extent(extent), format(format) {
+        : extent(extent), format(format), aspectFlags(aspectFlags) {
     // create image
     const VkImageCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,

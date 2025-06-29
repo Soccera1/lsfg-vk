@@ -38,6 +38,8 @@ namespace Vulkan::Core {
         [[nodiscard]] VkExtent2D getExtent() const { return this->extent; }
         /// Get the format of the image.
         [[nodiscard]] VkFormat getFormat() const { return this->format; }
+        /// Get the aspect flags of the image.
+        [[nodiscard]] VkImageAspectFlags getAspectFlags() const { return this->aspectFlags; }
 
         /// Trivially copyable, moveable and destructible
         Image(const Image&) noexcept = default;
@@ -52,6 +54,7 @@ namespace Vulkan::Core {
 
         VkExtent2D extent;
         VkFormat format;
+        VkImageAspectFlags aspectFlags;
     };
 
 }

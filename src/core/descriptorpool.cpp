@@ -15,6 +15,7 @@ DescriptorPool::DescriptorPool(const Device& device) {
     }};
     const VkDescriptorPoolCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
         .maxSets = 16384,
         .poolSizeCount = static_cast<uint32_t>(pools.size()),
         .pPoolSizes = pools.data()
