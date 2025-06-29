@@ -1,3 +1,4 @@
+#include "core/pipeline.hpp"
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 #include "instance.hpp"
@@ -23,6 +24,7 @@ int main() {
             VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
         }
     );
+    const Vulkan::Core::Pipeline computePipeline(device, computeShader);
 
     std::cerr << "Application finished" << '\n';
     return 0;
