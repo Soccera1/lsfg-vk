@@ -45,6 +45,11 @@ namespace Vulkan::Core {
         /// Get the aspect flags of the image.
         [[nodiscard]] VkImageAspectFlags getAspectFlags() const { return this->aspectFlags; }
 
+        /// Set the layout of the image.
+        void setLayout(VkImageLayout layout) { *this->layout = layout; }
+        /// Get the current layout of the image.
+        [[nodiscard]] VkImageLayout getLayout() const { return *this->layout; }
+
         /// Trivially copyable, moveable and destructible
         Image(const Image&) noexcept = default;
         Image& operator=(const Image&) noexcept = default;
@@ -55,6 +60,8 @@ namespace Vulkan::Core {
         std::shared_ptr<VkImage> image;
         std::shared_ptr<VkDeviceMemory> memory;
         std::shared_ptr<VkImageView> view;
+
+        std::shared_ptr<VkImageLayout> layout;
 
         VkExtent2D extent{};
         VkFormat format{};

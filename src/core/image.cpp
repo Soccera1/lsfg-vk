@@ -90,6 +90,7 @@ Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
         throw ls::vulkan_error(res, "Failed to create image view");
 
     // store objects in shared ptr
+    this->layout = std::make_shared<VkImageLayout>(VK_IMAGE_LAYOUT_UNDEFINED);
     this->image = std::shared_ptr<VkImage>(
         new VkImage(imageHandle),
         [dev = device.handle()](VkImage* img) {

@@ -7,5 +7,5 @@
 /.cache
 /.ccls
 
-# private shaders
-/shaders
+# private resources
+/rsc
