@@ -16,6 +16,8 @@ namespace Vulkan::Core {
     ///
     class CommandPool {
     public:
+        CommandPool() noexcept = default;
+
         ///
         /// Create the command pool.
         ///

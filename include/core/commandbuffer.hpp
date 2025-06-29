@@ -35,6 +35,8 @@ namespace Vulkan::Core {
     ///
     class CommandBuffer {
     public:
+        CommandBuffer() noexcept = default;
+
         ///
         /// Create the command buffer.
         ///
@@ -62,7 +64,7 @@ namespace Vulkan::Core {
         ///
         /// @throws std::logic_error if the command buffer is not in Recording state
         ///
-        void dispatch(uint32_t x, uint32_t y, uint32_t z);
+        void dispatch(uint32_t x, uint32_t y, uint32_t z) const;
 
         ///
         /// End recording commands in the command buffer.

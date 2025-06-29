@@ -16,6 +16,8 @@ namespace Vulkan::Core {
     ///
     class Image {
     public:
+        Image() noexcept = default;
+
         ///
         /// Create the image.
         ///
@@ -32,6 +34,8 @@ namespace Vulkan::Core {
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->image; }
+        /// Get the Vulkan device memory handle.
+        [[nodiscard]] auto getMemory() const { return *this->memory; }
         /// Get the Vulkan image view handle.
         [[nodiscard]] auto getView() const { return *this->view; }
         /// Get the extent of the image.
@@ -52,9 +56,9 @@ namespace Vulkan::Core {
         std::shared_ptr<VkDeviceMemory> memory;
         std::shared_ptr<VkImageView> view;
 
-        VkExtent2D extent;
-        VkFormat format;
-        VkImageAspectFlags aspectFlags;
+        VkExtent2D extent{};
+        VkFormat format{};
+        VkImageAspectFlags aspectFlags{};
     };
 
 }

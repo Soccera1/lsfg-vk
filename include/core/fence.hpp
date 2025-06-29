@@ -16,6 +16,8 @@ namespace Vulkan::Core {
     ///
     class Fence {
     public:
+        Fence() noexcept = default;
+
         ///
         /// Create the fence.
         ///

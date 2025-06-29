@@ -17,6 +17,8 @@ namespace Vulkan::Core {
     ///
     class Semaphore {
     public:
+        Semaphore() noexcept = default;
+
         ///
         /// Create the semaphore.
         ///

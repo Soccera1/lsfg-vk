@@ -19,6 +19,8 @@ namespace Vulkan::Core {
     ///
     class ShaderModule {
     public:
+        ShaderModule() noexcept = default;
+
         ///
         /// Create the shader module.
         ///
@@ -35,7 +37,7 @@ namespace Vulkan::Core {
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->shaderModule; }
         /// Get the descriptor set layout.
-        [[nodiscard]] auto getDescriptorSetLayout() const { return *this->descriptorSetLayout; }
+        [[nodiscard]] auto getLayout() const { return *this->descriptorSetLayout; }
 
         /// Trivially copyable, moveable and destructible
         ShaderModule(const ShaderModule&) noexcept = default;

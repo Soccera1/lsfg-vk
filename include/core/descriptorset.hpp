@@ -12,7 +12,6 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include <variant>
 #include <memory>
 
 namespace Vulkan::Core {
@@ -26,6 +25,8 @@ namespace Vulkan::Core {
     ///
     class DescriptorSet {
     public:
+        DescriptorSet() noexcept = default;
+
         ///
         /// Create the descriptor set.
         ///
@@ -36,13 +37,7 @@ namespace Vulkan::Core {
         /// @throws ls::vulkan_error if object creation fails.
         ///
         DescriptorSet(const Device& device,
-            DescriptorPool pool, const ShaderModule& shaderModule);
-
-        using ResourceList = std::variant<
-            std::pair<VkDescriptorType, const std::vector<Image>&>,
-            std::pair<VkDescriptorType, const std::vector<Sampler>&>,
-            std::pair<VkDescriptorType, const std::vector<Buffer>&>
-        >;
+            const DescriptorPool& pool, const ShaderModule& shaderModule);
 
         ///
         /// Update the descriptor set with resources.
@@ -89,6 +84,17 @@ namespace Vulkan::Core {
         DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::vector<Sampler>& samplers) {
             for (const auto& sampler : samplers) this->add(type, sampler); return *this; }
         DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::vector<Buffer>& buffers) {
+            for (const auto& buffer : buffers) this->add(type, buffer); return *this; }
+
+        /// Add an array of resources
+        template<std::size_t N>
+        DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::array<Image, N>& images) {
+            for (const auto& image : images) this->add(type, image); return *this; }
+        template<std::size_t N>
+        DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::array<Sampler, N>& samplers) {
+            for (const auto& sampler : samplers) this->add(type, sampler); return *this; }
+        template<std::size_t N>
+        DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::array<Buffer, N>& buffers) {
             for (const auto& buffer : buffers) this->add(type, buffer); return *this; }
 
         /// Finish building the descriptor set update.

@@ -4,9 +4,9 @@
 using namespace Vulkan::Core;
 
 DescriptorSet::DescriptorSet(const Device& device,
-        DescriptorPool pool, const ShaderModule& shaderModule) {
+        const DescriptorPool& pool, const ShaderModule& shaderModule) {
     // create descriptor set
-    VkDescriptorSetLayout layout = shaderModule.getDescriptorSetLayout();
+    VkDescriptorSetLayout layout = shaderModule.getLayout();
     const VkDescriptorSetAllocateInfo desc{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
         .descriptorPool = pool.handle(),
@@ -21,7 +21,7 @@ DescriptorSet::DescriptorSet(const Device& device,
     /// store set in shared ptr
     this->descriptorSet = std::shared_ptr<VkDescriptorSet>(
         new VkDescriptorSet(descriptorSetHandle),
-        [dev = device.handle(), pool = std::move(pool)](VkDescriptorSet* setHandle) {
+        [dev = device.handle(), pool = pool](VkDescriptorSet* setHandle) {
             vkFreeDescriptorSets(dev, pool.handle(), 1, setHandle);
         }
     );

@@ -16,6 +16,8 @@ namespace Vulkan::Core {
     ///
     class Buffer {
     public:
+        Buffer() noexcept = default;
+
         ///
         /// Create the buffer.
         ///
@@ -48,7 +50,7 @@ namespace Vulkan::Core {
         std::shared_ptr<VkBuffer> buffer;
         std::shared_ptr<VkDeviceMemory> memory;
 
-        size_t size;
+        size_t size{};
     };
 
 }

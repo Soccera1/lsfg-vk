@@ -41,7 +41,7 @@ void CommandBuffer::begin() {
     *this->state = CommandBufferState::Recording;
 }
 
-void CommandBuffer::dispatch(uint32_t x, uint32_t y, uint32_t z) {
+void CommandBuffer::dispatch(uint32_t x, uint32_t y, uint32_t z) const {
     if (*this->state != CommandBufferState::Recording)
         throw std::logic_error("Command buffer is not in Recording state");
 

@@ -5,7 +5,7 @@ using namespace Vulkan::Core;
 
 Pipeline::Pipeline(const Device& device, const ShaderModule& shader) {
     // create pipeline layout
-    VkDescriptorSetLayout shaderLayout = shader.getDescriptorSetLayout();
+    VkDescriptorSetLayout shaderLayout = shader.getLayout();
     const VkPipelineLayoutCreateInfo layoutDesc{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .setLayoutCount = 1,

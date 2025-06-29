@@ -18,6 +18,8 @@ namespace Vulkan::Core {
     ///
     class Pipeline {
     public:
+        Pipeline() noexcept = default;
+
         ///
         /// Create a compute pipeline.
         ///
