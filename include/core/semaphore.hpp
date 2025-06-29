@@ -48,7 +48,7 @@ namespace Vulkan::Core {
         /// @throws std::logic_error if the semaphore is not a timeline semaphore.
         /// @throws ls::vulkan_error if waiting fails.
         ///
-        bool wait(uint64_t value, uint64_t timeout = UINT64_MAX);
+        [[nodiscard]] bool wait(uint64_t value, uint64_t timeout = UINT64_MAX) const;
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->semaphore; }

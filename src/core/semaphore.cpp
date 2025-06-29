@@ -47,7 +47,7 @@ void Semaphore::signal(uint64_t value) const {
         throw ls::vulkan_error(res, "Unable to signal semaphore");
 }
 
-bool Semaphore::wait(uint64_t value, uint64_t timeout) {
+bool Semaphore::wait(uint64_t value, uint64_t timeout) const {
     if (!this->isValid() || !this->isTimeline)
         throw std::logic_error("Invalid timeline semaphore");
 

@@ -36,7 +36,7 @@ void Fence::reset() const {
         throw ls::vulkan_error(res, "Unable to reset fence");
 }
 
-bool Fence::wait(uint64_t timeout) {
+bool Fence::wait(uint64_t timeout) const {
     if (!this->isValid())
         throw std::logic_error("Invalid fence");
 
