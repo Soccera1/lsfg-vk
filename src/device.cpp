@@ -7,7 +7,7 @@
 using namespace Vulkan;
 
 const std::vector<const char*> requiredExtensions = {
-    "VK_EXT_host_image_copy"
+    "VK_KHR_external_memory_fd"
 };
 
 Device::Device(const Instance& instance) {
@@ -53,13 +53,8 @@ Device::Device(const Instance& instance) {
 
     // create logical device
     const float queuePriority{1.0F}; // highest priority
-    VkPhysicalDeviceHostImageCopyFeaturesEXT hostImageCopyFeatures{
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_IMAGE_COPY_FEATURES_EXT,
-        .hostImageCopy = VK_TRUE
-    };
     VkPhysicalDeviceVulkan13Features features13{
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
-        .pNext = &hostImageCopyFeatures,
         .synchronization2 = VK_TRUE
     };
     const VkPhysicalDeviceVulkan12Features features12{

@@ -33,6 +33,21 @@ namespace Vulkan::Core {
             construct(device, reinterpret_cast<const void*>(&data), usage);
         }
 
+        ///
+        /// Create the buffer.
+        ///
+        /// @param device Vulkan device
+        /// @param data Initial data for the buffer
+        /// @param size Size of the buffer in bytes
+        /// @param usage Usage flags for the buffer
+        ///
+        /// @throws ls::vulkan_error if object creation fails.
+        ///
+        Buffer(const Device& device, const void* data, size_t size, VkBufferUsageFlags usage)
+                : size(size) {
+            construct(device, data, usage);
+        }
+
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->buffer; }
         /// Get the size of the buffer.

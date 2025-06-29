@@ -1,4 +1,6 @@
 #include "utils/upload.hpp"
+#include "core/buffer.hpp"
+#include "core/commandbuffer.hpp"
 #include "utils/exceptions.hpp"
 
 #include <fstream>
@@ -6,34 +8,14 @@
 #include <vulkan/vulkan_core.h>
 
 using namespace Upload;
+using namespace Vulkan;
 
-void Upload::upload(const Vulkan::Device& device,
-        Vulkan::Core::Image& image, const std::string& path) {
-    auto vkTransitionImageLayoutEXT = reinterpret_cast<PFN_vkTransitionImageLayoutEXT>(
-        vkGetDeviceProcAddr(device.handle(), "vkTransitionImageLayoutEXT"));
-    auto vkCopyMemoryToImageEXT = reinterpret_cast<PFN_vkCopyMemoryToImageEXT>(
-        vkGetDeviceProcAddr(device.handle(), "vkCopyMemoryToImageEXT"));
-
-    const VkHostImageLayoutTransitionInfoEXT transitionInfo{
-        .sType = VK_STRUCTURE_TYPE_HOST_IMAGE_LAYOUT_TRANSITION_INFO_EXT,
-        .image = image.handle(),
-        .oldLayout = image.getLayout(),
-        .newLayout = VK_IMAGE_LAYOUT_GENERAL,
-        .subresourceRange = {
-            .aspectMask = image.getAspectFlags(),
-            .levelCount = 1,
-            .layerCount = 1
-        }
-    };
-    image.setLayout(VK_IMAGE_LAYOUT_GENERAL);
-    auto res = vkTransitionImageLayoutEXT(device.handle(), 1, &transitionInfo);
-    if (res != VK_SUCCESS)
-        throw ls::vulkan_error(res, "Failed to transition image layout for upload");
-
-    // read shader bytecode
+void Upload::upload(const Device& device, const Core::CommandPool& commandPool,
+        Core::Image& image, const std::string& path) {
+    // read iamge bytecode
     std::ifstream file(path, std::ios::ate | std::ios::binary);
     if (!file)
-        throw std::system_error(errno, std::generic_category(), "Failed to open shader file: " + path);
+        throw std::system_error(errno, std::generic_category(), "Failed to open image: " + path);
 
     std::streamsize size = file.tellg();
     size -= 124 - 4;
@@ -41,34 +23,60 @@ void Upload::upload(const Vulkan::Device& device,
 
     file.seekg(0, std::ios::beg);
     if (!file.read(reinterpret_cast<char*>(code.data()), size))
-        throw std::system_error(errno, std::generic_category(), "Failed to read shader file: " + path);
+        throw std::system_error(errno, std::generic_category(), "Failed to read image: " + path);
 
     file.close();
 
-    // copy data to image
+    // copy data to buffer
+    const Vulkan::Core::Buffer stagingBuffer(
+        device, code.data(), static_cast<uint32_t>(code.size()),
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT
+    );
+
+    // perform the upload
+    Core::CommandBuffer commandBuffer(device, commandPool);
+    commandBuffer.begin();
+
+    const VkImageMemoryBarrier barrier{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+        .srcAccessMask = VK_ACCESS_NONE,
+        .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+        .oldLayout = image.getLayout(),
+        .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        .image = image.handle(),
+        .subresourceRange = {
+            .aspectMask = image.getAspectFlags(),
+            .levelCount = 1,
+            .layerCount = 1
+        }
+    };
+    image.setLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    vkCmdPipelineBarrier(
+        commandBuffer.handle(),
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+        0, 0, nullptr, 0, nullptr, 1, &barrier
+    );
+
     auto extent = image.getExtent();
-    const VkMemoryToImageCopyEXT copyInfo{
-        .sType = VK_STRUCTURE_TYPE_MEMORY_TO_IMAGE_COPY_EXT,
-        .pHostPointer = code.data(),
+    const VkBufferImageCopy region{
+        .bufferImageHeight = 0,
         .imageSubresource = {
             .aspectMask = image.getAspectFlags(),
             .layerCount = 1
         },
-        .imageExtent = {
-            .width = extent.width,
-            .height = extent.height,
-            .depth = 1
-        },
+        .imageExtent = { extent.width, extent.height, 1 }
     };
+    vkCmdCopyBufferToImage(
+        commandBuffer.handle(),
+        stagingBuffer.handle(), image.handle(),
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region
+    );
 
-    const VkCopyMemoryToImageInfoEXT operationInfo{
-        .sType = VK_STRUCTURE_TYPE_COPY_MEMORY_TO_IMAGE_INFO_EXT,
-        .dstImage = image.handle(),
-        .dstImageLayout = image.getLayout(),
-        .regionCount = 1,
-        .pRegions = &copyInfo,
-    };
-    res = vkCopyMemoryToImageEXT(device.handle(), &operationInfo);
-    if (res != VK_SUCCESS)
-        throw ls::vulkan_error(res, "Failed to copy memory to image");
+    commandBuffer.end();
+
+    Core::Fence fence(device);
+    commandBuffer.submit(device.getComputeQueue(), fence);
+
+    if (!fence.wait(device))
+        throw ls::vulkan_error(VK_TIMEOUT, "Upload operation timed out");
 }
