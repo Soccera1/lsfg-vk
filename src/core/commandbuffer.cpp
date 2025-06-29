@@ -16,7 +16,7 @@ CommandBuffer::CommandBuffer(const Device& device, const CommandPool& pool) {
     };
     VkCommandBuffer commandBufferHandle{};
     auto res = vkAllocateCommandBuffers(device.handle(), &desc, &commandBufferHandle);
-    if (res != VK_SUCCESS || commandBuffer == VK_NULL_HANDLE)
+    if (res != VK_SUCCESS || commandBufferHandle == VK_NULL_HANDLE)
         throw ls::vulkan_error(res, "Unable to allocate command buffer");
 
     // store command buffer in shared ptr

@@ -3,9 +3,9 @@
 
 #include "device.hpp"
 
-#include <utility>
 #include <vulkan/vulkan_core.h>
 
+#include <utility>
 #include <string>
 #include <vector>
 #include <memory>

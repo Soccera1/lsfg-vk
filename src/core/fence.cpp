@@ -9,7 +9,7 @@ Fence::Fence(const Device& device) {
 
     // create fence
     const VkFenceCreateInfo desc = {
-        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO
     };
     VkFence fenceHandle{};
     auto res = vkCreateFence(device.handle(), &desc, nullptr, &fenceHandle);
