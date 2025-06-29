@@ -1,0 +1,117 @@
+#include "core/image.hpp"
+#include "utils/exceptions.hpp"
+
+#include <optional>
+
+using namespace Vulkan::Core;
+
+Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
+        VkImageUsageFlags usage, VkImageAspectFlags aspectFlags)
+        : extent(extent), format(format) {
+    if (!device)
+        throw std::invalid_argument("Invalid Vulkan device");
+
+    // create image
+    const VkImageCreateInfo desc{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = format,
+        .extent = {
+            .width = extent.width,
+            .height = extent.height,
+            .depth = 1
+        },
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .usage = usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE
+    };
+    VkImage imageHandle{};
+    auto res = vkCreateImage(device.handle(), &desc, nullptr, &imageHandle);
+    if (res != VK_SUCCESS || imageHandle == VK_NULL_HANDLE)
+        throw ls::vulkan_error(res, "Failed to create Vulkan image");
+
+    // find memory type
+    VkPhysicalDeviceMemoryProperties memProps;
+    vkGetPhysicalDeviceMemoryProperties(device.getPhysicalDevice(), &memProps);
+
+    VkMemoryRequirements memReqs;
+    vkGetImageMemoryRequirements(device.handle(), imageHandle, &memReqs);
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
+    std::optional<uint32_t> memType{};
+    for (uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
+        if ((memReqs.memoryTypeBits & (1 << i)) && // NOLINTBEGIN
+            (memProps.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+            memType.emplace(i);
+            break;
+        } // NOLINTEND
+    }
+    if (!memType.has_value())
+        throw ls::vulkan_error(VK_ERROR_UNKNOWN, "Unable to find memory type for image");
+#pragma clang diagnostic pop
+
+    // allocate and bind memory
+    const VkMemoryAllocateInfo allocInfo{
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memReqs.size,
+        .memoryTypeIndex = memType.value()
+    };
+    VkDeviceMemory memoryHandle{};
+    res = vkAllocateMemory(device.handle(), &allocInfo, nullptr, &memoryHandle);
+    if (res != VK_SUCCESS || memoryHandle == VK_NULL_HANDLE)
+        throw ls::vulkan_error(res, "Failed to allocate memory for Vulkan image");
+
+    res = vkBindImageMemory(device.handle(), imageHandle, memoryHandle, 0);
+    if (res != VK_SUCCESS)
+        throw ls::vulkan_error(res, "Failed to bind memory to Vulkan image");
+
+    // store image and memory in shared ptr
+    this->image = std::shared_ptr<VkImage>(
+        new VkImage(imageHandle),
+        [dev = device.handle()](VkImage* img) {
+            vkDestroyImage(dev, *img, nullptr);
+        }
+    );
+    this->memory = std::shared_ptr<VkDeviceMemory>(
+        new VkDeviceMemory(memoryHandle),
+        [dev = device.handle()](VkDeviceMemory* mem) {
+            vkFreeMemory(dev, *mem, nullptr);
+        }
+    );
+
+    // create image view
+    const VkImageViewCreateInfo viewDesc{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image = *this->image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = format,
+        .components = {
+            .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+            .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+            .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+            .a = VK_COMPONENT_SWIZZLE_IDENTITY
+        },
+        .subresourceRange = {
+            .aspectMask = aspectFlags,
+            .levelCount = 1,
+            .layerCount = 1
+        }
+    };
+
+    VkImageView viewHandle{};
+    res = vkCreateImageView(device.handle(), &viewDesc, nullptr, &viewHandle);
+    if (res != VK_SUCCESS || viewHandle == VK_NULL_HANDLE)
+        throw ls::vulkan_error(res, "Failed to create image view");
+
+    // store image view in shared ptr
+    this->view = std::shared_ptr<VkImageView>(
+        new VkImageView(viewHandle),
+        [dev = device.handle()](VkImageView* imgView) {
+            vkDestroyImageView(dev, *imgView, nullptr);
+        }
+    );
+
+}
