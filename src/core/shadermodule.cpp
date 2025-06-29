@@ -6,7 +6,8 @@
 
 using namespace Vulkan::Core;
 
-ShaderModule::ShaderModule(const Device& device, const std::string& path) {
+ShaderModule::ShaderModule(const Device& device, const std::string& path,
+        std::vector<VkDescriptorType> descriptorTypes) {
     if (!device)
         throw std::invalid_argument("Invalid Vulkan device");
 
@@ -41,6 +42,34 @@ ShaderModule::ShaderModule(const Device& device, const std::string& path) {
         new VkShaderModule(shaderModuleHandle),
         [dev = device.handle()](VkShaderModule* shaderModuleHandle) {
             vkDestroyShaderModule(dev, *shaderModuleHandle, nullptr);
+        }
+    );
+
+    // create descriptor set layout
+    std::vector<VkDescriptorSetLayoutBinding> layoutBindings(descriptorTypes.size());
+    for (size_t i = 0; i < descriptorTypes.size(); ++i)
+        layoutBindings.at(i) = {
+            .binding = static_cast<uint32_t>(i),
+            .descriptorType = descriptorTypes.at(i),
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
+        };
+
+    const VkDescriptorSetLayoutCreateInfo layoutDesc{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = static_cast<uint32_t>(layoutBindings.size()),
+        .pBindings = layoutBindings.data()
+    };
+    VkDescriptorSetLayout descriptorSetLayout{};
+    res = vkCreateDescriptorSetLayout(device.handle(), &layoutDesc, nullptr, &descriptorSetLayout);
+    if (res != VK_SUCCESS || !descriptorSetLayout)
+        throw ls::vulkan_error(res, "Failed to create descriptor set layout");
+
+    // store layout in shared ptr
+    this->descriptorSetLayout = std::shared_ptr<VkDescriptorSetLayout>(
+        new VkDescriptorSetLayout(descriptorSetLayout),
+        [dev = device.handle()](VkDescriptorSetLayout* layout) {
+            vkDestroyDescriptorSetLayout(dev, *layout, nullptr);
         }
     );
 }

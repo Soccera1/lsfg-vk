@@ -4,6 +4,7 @@
 #include "device.hpp"
 
 #include <string>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 #include <memory>
@@ -22,15 +23,19 @@ namespace Vulkan::Core {
         ///
         /// @param device Vulkan device
         /// @param path Path to the shader file.
+        /// @param descriptorTypes Descriptor types used in the shader.
         ///
         /// @throws std::invalid_argument if the device is invalid.
         /// @throws std::system_error if the shader file cannot be opened or read.
         /// @throws ls::vulkan_error if object creation fails.
         ///
-        ShaderModule(const Device& device, const std::string& path);
+        ShaderModule(const Device& device, const std::string& path,
+            std::vector<VkDescriptorType> descriptorTypes);
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->shaderModule; }
+        /// Get the descriptor set layout.
+        [[nodiscard]] auto getDescriptorSetLayout() const { return *this->descriptorSetLayout; }
 
         /// Check whether the object is valid.
         [[nodiscard]] bool isValid() const { return static_cast<bool>(this->shaderModule); }
@@ -45,6 +50,7 @@ namespace Vulkan::Core {
         ~ShaderModule() = default;
     private:
         std::shared_ptr<VkShaderModule> shaderModule;
+        std::shared_ptr<VkDescriptorSetLayout> descriptorSetLayout;
     };
 
 }
