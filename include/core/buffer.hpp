@@ -5,7 +5,6 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include <vector>
 #include <memory>
 
 namespace Vulkan::Core {
@@ -21,14 +20,16 @@ namespace Vulkan::Core {
         /// Create the buffer.
         ///
         /// @param device Vulkan device
-        /// @param size Size of the buffer in bytes.
-        /// @param data Initial data for the buffer.
+        /// @param data Initial data for the buffer, also specifies the size of the buffer.
         /// @param usage Usage flags for the buffer
         ///
         /// @throws ls::vulkan_error if object creation fails.
         ///
-        Buffer(const Device& device, size_t size, std::vector<uint8_t> data,
-            VkBufferUsageFlags usage);
+        template<typename T>
+        Buffer(const Device& device, const T& data, VkBufferUsageFlags usage)
+                : size(sizeof(T)) {
+            construct(device, reinterpret_cast<const void*>(&data), usage);
+        }
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->buffer; }
@@ -42,6 +43,8 @@ namespace Vulkan::Core {
         Buffer& operator=(Buffer&&) noexcept = default;
         ~Buffer() = default;
     private:
+        void construct(const Device& device, const void* data, VkBufferUsageFlags usage);
+
         std::shared_ptr<VkBuffer> buffer;
         std::shared_ptr<VkDeviceMemory> memory;
 

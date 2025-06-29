@@ -62,11 +62,7 @@ int main() {
         VK_IMAGE_ASPECT_COLOR_BIT
     ));
 
-    const auto* dataBuffer = reinterpret_cast<const uint8_t*>(&data);
-    std::vector<uint8_t> dataVec(sizeof(DataBuffer));
-    std::copy_n(dataBuffer, sizeof(DataBuffer), dataVec.data());
-    const Core::Buffer buffer(device, dataVec.size(), dataVec,
-        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+    const Core::Buffer buffer(device, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
     std::vector<Core::Image> outputImages;
     outputImages.reserve(7);
