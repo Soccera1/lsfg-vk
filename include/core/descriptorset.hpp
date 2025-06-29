@@ -31,7 +31,6 @@ namespace Vulkan::Core {
         /// @param pool Descriptor pool to allocate from
         /// @param shaderModule Shader module to use for the descriptor set
         ///
-        /// @throws std::invalid_argument if the device, pool or shader module is invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
         DescriptorSet(const Device& device,
@@ -45,8 +44,6 @@ namespace Vulkan::Core {
         /// @param device Vulkan device
         /// @param resources Resources to update the descriptor set with
         ///
-        /// @throws std::invalid_argument if the device or resources are invalid.
-        ///
         void update(const Device& device,
             const std::vector<std::vector<ResourcePair>>& resources) const;
 
@@ -56,17 +53,10 @@ namespace Vulkan::Core {
         /// @param commandBuffer Command buffer to bind the descriptor set to.
         /// @param pipeline Pipeline to bind the descriptor set to.
         ///
-        /// @throws std::invalid_argument if the command buffer or pipeline is invalid.
-        ///
         void bind(const CommandBuffer& commandBuffer, const Pipeline& pipeline) const;
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->descriptorSet; }
-
-        /// Check whether the object is valid.
-        [[nodiscard]] bool isValid() const { return static_cast<bool>(this->descriptorSet); }
-        /// if (obj) operator. Checks if the object is valid.
-        explicit operator bool() const { return this->isValid(); }
 
         /// Trivially copyable, moveable and destructible
         DescriptorSet(const DescriptorSet&) noexcept = default;

@@ -7,9 +7,6 @@
 using namespace Vulkan;
 
 Device::Device(const Instance& instance) {
-    if (!instance)
-        throw std::invalid_argument("Invalid Vulkan instance");
-
     // get all physical devices
     uint32_t deviceCount{};
     auto res = vkEnumeratePhysicalDevices(instance.handle(), &deviceCount, nullptr);

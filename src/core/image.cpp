@@ -8,9 +8,6 @@ using namespace Vulkan::Core;
 Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
         VkImageUsageFlags usage, VkImageAspectFlags aspectFlags)
         : extent(extent), format(format) {
-    if (!device)
-        throw std::invalid_argument("Invalid Vulkan device");
-
     // create image
     const VkImageCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -68,24 +65,10 @@ Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
     if (res != VK_SUCCESS)
         throw ls::vulkan_error(res, "Failed to bind memory to Vulkan image");
 
-    // store image and memory in shared ptr
-    this->image = std::shared_ptr<VkImage>(
-        new VkImage(imageHandle),
-        [dev = device.handle()](VkImage* img) {
-            vkDestroyImage(dev, *img, nullptr);
-        }
-    );
-    this->memory = std::shared_ptr<VkDeviceMemory>(
-        new VkDeviceMemory(memoryHandle),
-        [dev = device.handle()](VkDeviceMemory* mem) {
-            vkFreeMemory(dev, *mem, nullptr);
-        }
-    );
-
     // create image view
     const VkImageViewCreateInfo viewDesc{
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-        .image = *this->image,
+        .image = imageHandle,
         .viewType = VK_IMAGE_VIEW_TYPE_2D,
         .format = format,
         .components = {
@@ -106,7 +89,19 @@ Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
     if (res != VK_SUCCESS || viewHandle == VK_NULL_HANDLE)
         throw ls::vulkan_error(res, "Failed to create image view");
 
-    // store image view in shared ptr
+    // store objects in shared ptr
+    this->image = std::shared_ptr<VkImage>(
+        new VkImage(imageHandle),
+        [dev = device.handle()](VkImage* img) {
+            vkDestroyImage(dev, *img, nullptr);
+        }
+    );
+    this->memory = std::shared_ptr<VkDeviceMemory>(
+        new VkDeviceMemory(memoryHandle),
+        [dev = device.handle()](VkDeviceMemory* mem) {
+            vkFreeMemory(dev, *mem, nullptr);
+        }
+    );
     this->view = std::shared_ptr<VkImageView>(
         new VkImageView(viewHandle),
         [dev = device.handle()](VkImageView* imgView) {

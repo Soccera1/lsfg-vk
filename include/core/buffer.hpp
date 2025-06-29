@@ -25,7 +25,6 @@ namespace Vulkan::Core {
         /// @param data Initial data for the buffer.
         /// @param usage Usage flags for the buffer
         ///
-        /// @throws std::invalid_argument if the device or buffer size is invalid
         /// @throws ls::vulkan_error if object creation fails.
         ///
         Buffer(const Device& device, size_t size, std::vector<uint8_t> data,
@@ -35,11 +34,6 @@ namespace Vulkan::Core {
         [[nodiscard]] auto handle() const { return *this->buffer; }
         /// Get the size of the buffer.
         [[nodiscard]] size_t getSize() const { return this->size; }
-
-        /// Check whether the object is valid.
-        [[nodiscard]] bool isValid() const { return static_cast<bool>(this->buffer); }
-        /// if (obj) operator. Checks if the object is valid.
-        explicit operator bool() const { return this->isValid(); }
 
         /// Trivially copyable, moveable and destructible
         Buffer(const Buffer&) noexcept = default;

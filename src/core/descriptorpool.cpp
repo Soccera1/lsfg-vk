@@ -6,9 +6,6 @@
 using namespace Vulkan::Core;
 
 DescriptorPool::DescriptorPool(const Device& device) {
-    if (!device)
-        throw std::invalid_argument("Invalid Vulkan device");
-
     // create descriptor pool
     const std::array<VkDescriptorPoolSize, 4> pools{{ // arbitrary limits
         { .type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = 4096 },
@@ -18,7 +15,7 @@ DescriptorPool::DescriptorPool(const Device& device) {
     }};
     const VkDescriptorPoolCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = 16384, // arbitrary limit
+        .maxSets = 16384,
         .poolSizeCount = static_cast<uint32_t>(pools.size()),
         .pPoolSizes = pools.data()
     };
@@ -27,7 +24,7 @@ DescriptorPool::DescriptorPool(const Device& device) {
     if (res != VK_SUCCESS || poolHandle == VK_NULL_HANDLE)
         throw ls::vulkan_error(res, "Unable to create descriptor pool");
 
-    /// store pool in shared ptr
+    // store pool in shared ptr
     this->descriptorPool = std::shared_ptr<VkDescriptorPool>(
         new VkDescriptorPool(poolHandle),
         [dev = device.handle()](VkDescriptorPool* poolHandle) {

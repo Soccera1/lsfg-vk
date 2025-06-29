@@ -4,11 +4,8 @@
 using namespace Vulkan::Core;
 
 Fence::Fence(const Device& device) {
-    if (!device)
-        throw std::invalid_argument("Invalid Vulkan device");
-
-    // create fence
-    const VkFenceCreateInfo desc = {
+     // create fence
+    const VkFenceCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO
     };
     VkFence fenceHandle{};
@@ -17,7 +14,6 @@ Fence::Fence(const Device& device) {
         throw ls::vulkan_error(res, "Unable to create fence");
 
     // store fence in shared ptr
-    this->device = device.handle();
     this->fence = std::shared_ptr<VkFence>(
         new VkFence(fenceHandle),
         [dev = device.handle()](VkFence* fenceHandle) {
@@ -26,16 +22,16 @@ Fence::Fence(const Device& device) {
     );
 }
 
-void Fence::reset() const {
+void Fence::reset(const Device& device) const {
     VkFence fenceHandle = this->handle();
-    auto res = vkResetFences(this->device, 1, &fenceHandle);
+    auto res = vkResetFences(device.handle(), 1, &fenceHandle);
     if (res != VK_SUCCESS)
         throw ls::vulkan_error(res, "Unable to reset fence");
 }
 
-bool Fence::wait(uint64_t timeout) const {
+bool Fence::wait(const Device& device, uint64_t timeout) const {
     VkFence fenceHandle = this->handle();
-    auto res = vkWaitForFences(this->device, 1, &fenceHandle, VK_TRUE, timeout);
+    auto res = vkWaitForFences(device.handle(), 1, &fenceHandle, VK_TRUE, timeout);
     if (res != VK_SUCCESS && res != VK_TIMEOUT)
         throw ls::vulkan_error(res, "Unable to wait for fence");
 

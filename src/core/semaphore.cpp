@@ -4,16 +4,13 @@
 using namespace Vulkan::Core;
 
 Semaphore::Semaphore(const Device& device, std::optional<uint32_t> initial) {
-    if (!device)
-        throw std::invalid_argument("Invalid Vulkan device");
-
     // create semaphore
     const VkSemaphoreTypeCreateInfo typeInfo{
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
         .semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE,
         .initialValue = initial.value_or(0)
     };
-    const VkSemaphoreCreateInfo desc = {
+    const VkSemaphoreCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
         .pNext = initial.has_value() ? &typeInfo : nullptr,
     };
@@ -24,7 +21,6 @@ Semaphore::Semaphore(const Device& device, std::optional<uint32_t> initial) {
 
     // store semaphore in shared ptr
     this->isTimeline = initial.has_value();
-    this->device = device.handle();
     this->semaphore = std::shared_ptr<VkSemaphore>(
         new VkSemaphore(semaphoreHandle),
         [dev = device.handle()](VkSemaphore* semaphoreHandle) {
@@ -33,7 +29,7 @@ Semaphore::Semaphore(const Device& device, std::optional<uint32_t> initial) {
     );
 }
 
-void Semaphore::signal(uint64_t value) const {
+void Semaphore::signal(const Device& device, uint64_t value) const {
     if (!this->isTimeline)
         throw std::logic_error("Invalid timeline semaphore");
 
@@ -42,12 +38,12 @@ void Semaphore::signal(uint64_t value) const {
         .semaphore = this->handle(),
         .value = value
     };
-    auto res = vkSignalSemaphore(this->device, &signalInfo);
+    auto res = vkSignalSemaphore(device.handle(), &signalInfo);
     if (res != VK_SUCCESS)
         throw ls::vulkan_error(res, "Unable to signal semaphore");
 }
 
-bool Semaphore::wait(uint64_t value, uint64_t timeout) const {
+bool Semaphore::wait(const Device& device, uint64_t value, uint64_t timeout) const {
     if (!this->isTimeline)
         throw std::logic_error("Invalid timeline semaphore");
 
@@ -58,7 +54,7 @@ bool Semaphore::wait(uint64_t value, uint64_t timeout) const {
         .pSemaphores = &semaphore,
         .pValues = &value
     };
-    auto res = vkWaitSemaphores(this->device, &waitInfo, timeout);
+    auto res = vkWaitSemaphores(device.handle(), &waitInfo, timeout);
     if (res != VK_SUCCESS && res != VK_TIMEOUT)
         throw ls::vulkan_error(res, "Unable to wait for semaphore");
 

@@ -21,7 +21,6 @@ namespace Vulkan {
         ///
         /// @param instance Vulkan instance
         ///
-        /// @throws std::invalid_argument if the instance is invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
         Device(const Vulkan::Instance& instance);
@@ -34,11 +33,6 @@ namespace Vulkan {
         [[nodiscard]] uint32_t getComputeFamilyIdx() const { return this->computeFamilyIdx; }
         /// Get the compute queue.
         [[nodiscard]] VkQueue getComputeQueue() const { return this->computeQueue; }
-
-        /// Check whether the object is valid.
-        [[nodiscard]] bool isValid() const { return static_cast<bool>(this->device); }
-        /// if (obj) operator. Checks if the object is valid.
-        explicit operator bool() const { return this->isValid(); }
 
         // Trivially copyable, moveable and destructible
         Device(const Device&) noexcept = default;

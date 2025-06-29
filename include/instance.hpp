@@ -24,11 +24,6 @@ namespace Vulkan {
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return this->instance ? *this->instance : VK_NULL_HANDLE; }
 
-        /// Check whether the object is valid.
-        [[nodiscard]] bool isValid() const { return this->handle() != VK_NULL_HANDLE; }
-        /// if (obj) operator. Checks if the object is valid.
-        explicit operator bool() const { return this->isValid(); }
-
         /// Trivially copyable, moveable and destructible
         Instance(const Instance&) noexcept = default;
         Instance& operator=(const Instance&) noexcept = default;

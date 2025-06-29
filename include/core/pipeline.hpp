@@ -24,7 +24,6 @@ namespace Vulkan::Core {
         /// @param device Vulkan device
         /// @param shader Shader module to use for the pipeline.
         ///
-        /// @throws std::invalid_argument if the device or shader module is invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
         Pipeline(const Device& device, const ShaderModule& shader);
@@ -34,19 +33,12 @@ namespace Vulkan::Core {
         ///
         /// @param commandBuffer Command buffer to bind the pipeline to.
         ///
-        /// @throws std::invalid_argument if the command buffer is invalid.
-        ///
         void bind(const CommandBuffer& commandBuffer) const;
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->pipeline; }
         /// Get the pipeline layout.
         [[nodiscard]] auto getLayout() const { return *this->layout; }
-
-        /// Check whether the object is valid.
-        [[nodiscard]] bool isValid() const { return static_cast<bool>(this->pipeline); }
-        /// if (obj) operator. Checks if the object is valid.
-        explicit operator bool() const { return this->isValid(); }
 
         /// Trivially copyable, moveable and destructible
         Pipeline(const Pipeline&) noexcept = default;

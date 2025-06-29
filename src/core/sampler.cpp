@@ -4,9 +4,6 @@
 using namespace Vulkan::Core;
 
 Sampler::Sampler(const Device& device, VkSamplerAddressMode mode) {
-    if (!device)
-        throw std::invalid_argument("Invalid Vulkan device");
-
     // create sampler
     const VkSamplerCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
@@ -23,7 +20,7 @@ Sampler::Sampler(const Device& device, VkSamplerAddressMode mode) {
     if (res != VK_SUCCESS || samplerHandle == VK_NULL_HANDLE)
         throw ls::vulkan_error(res, "Unable to create sampler");
 
-    // store the sampler in a shared pointer
+    // store sampler in shared ptr
     this->sampler = std::shared_ptr<VkSampler>(
         new VkSampler(samplerHandle),
         [dev = device.handle()](VkSampler* samplerHandle) {

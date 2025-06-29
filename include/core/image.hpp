@@ -25,7 +25,6 @@ namespace Vulkan::Core {
         /// @param usage Usage flags for the image
         /// @param aspectFlags Aspect flags for the image view
         ///
-        /// @throws std::invalid_argument if the device is invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
         Image(const Device& device, VkExtent2D extent, VkFormat format,
@@ -39,11 +38,6 @@ namespace Vulkan::Core {
         [[nodiscard]] VkExtent2D getExtent() const { return this->extent; }
         /// Get the format of the image.
         [[nodiscard]] VkFormat getFormat() const { return this->format; }
-
-        /// Check whether the object is valid.
-        [[nodiscard]] bool isValid() const { return static_cast<bool>(this->image); }
-        /// if (obj) operator. Checks if the object is valid.
-        explicit operator bool() const { return this->isValid(); }
 
         /// Trivially copyable, moveable and destructible
         Image(const Image&) noexcept = default;

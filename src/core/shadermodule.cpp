@@ -7,9 +7,6 @@ using namespace Vulkan::Core;
 
 ShaderModule::ShaderModule(const Device& device, const std::string& path,
         const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes) {
-    if (!device)
-        throw std::invalid_argument("Invalid Vulkan device");
-
     // read shader bytecode
     std::ifstream file(path, std::ios::ate | std::ios::binary);
     if (!file)
@@ -36,14 +33,6 @@ ShaderModule::ShaderModule(const Device& device, const std::string& path,
     if (res != VK_SUCCESS || !shaderModuleHandle)
         throw ls::vulkan_error(res, "Failed to create shader module");
 
-    // store shader module in shared ptr
-    this->shaderModule = std::shared_ptr<VkShaderModule>(
-        new VkShaderModule(shaderModuleHandle),
-        [dev = device.handle()](VkShaderModule* shaderModuleHandle) {
-            vkDestroyShaderModule(dev, *shaderModuleHandle, nullptr);
-        }
-    );
-
     // create descriptor set layout
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
     size_t bindIdx = 0;
@@ -66,7 +55,13 @@ ShaderModule::ShaderModule(const Device& device, const std::string& path,
     if (res != VK_SUCCESS || !descriptorSetLayout)
         throw ls::vulkan_error(res, "Failed to create descriptor set layout");
 
-    // store layout in shared ptr
+    // store module and layout in shared ptr
+    this->shaderModule = std::shared_ptr<VkShaderModule>(
+        new VkShaderModule(shaderModuleHandle),
+        [dev = device.handle()](VkShaderModule* shaderModuleHandle) {
+            vkDestroyShaderModule(dev, *shaderModuleHandle, nullptr);
+        }
+    );
     this->descriptorSetLayout = std::shared_ptr<VkDescriptorSetLayout>(
         new VkDescriptorSetLayout(descriptorSetLayout),
         [dev = device.handle()](VkDescriptorSetLayout* layout) {

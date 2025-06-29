@@ -145,7 +145,7 @@ int main() {
     commandBuffer.end();
 
     commandBuffer.submit(device.getComputeQueue(), fence);
-    assert(fence.wait() && "Synchronization fence timed out");
+    assert(fence.wait(device) && "Synchronization fence timed out");
 
     std::cerr << "Application finished" << '\n';
     return 0;

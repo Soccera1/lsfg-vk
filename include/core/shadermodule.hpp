@@ -26,7 +26,6 @@ namespace Vulkan::Core {
         /// @param path Path to the shader file.
         /// @param descriptorTypes Descriptor types used in the shader.
         ///
-        /// @throws std::invalid_argument if the device is invalid.
         /// @throws std::system_error if the shader file cannot be opened or read.
         /// @throws ls::vulkan_error if object creation fails.
         ///
@@ -37,11 +36,6 @@ namespace Vulkan::Core {
         [[nodiscard]] auto handle() const { return *this->shaderModule; }
         /// Get the descriptor set layout.
         [[nodiscard]] auto getDescriptorSetLayout() const { return *this->descriptorSetLayout; }
-
-        /// Check whether the object is valid.
-        [[nodiscard]] bool isValid() const { return static_cast<bool>(this->shaderModule); }
-        /// if (obj) operator. Checks if the object is valid.
-        explicit operator bool() const { return this->isValid(); }
 
         /// Trivially copyable, moveable and destructible
         ShaderModule(const ShaderModule&) noexcept = default;

@@ -22,18 +22,12 @@ namespace Vulkan::Core {
         /// @param device Vulkan device
         /// @param mode Address mode for the sampler.
         ///
-        /// @throws std::invalid_argument if the device is invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
         Sampler(const Device& device, VkSamplerAddressMode mode);
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->sampler; }
-
-        /// Check whether the object is valid.
-        [[nodiscard]] bool isValid() const { return static_cast<bool>(this->sampler); }
-        /// if (obj) operator. Checks if the object is valid.
-        explicit operator bool() const { return this->isValid(); }
 
         /// Trivially copyable, moveable and destructible
         Sampler(const Sampler&) noexcept = default;

@@ -8,11 +8,6 @@ using namespace Vulkan::Core;
 
 Buffer::Buffer(const Device& device, size_t size, std::vector<uint8_t> data,
         VkBufferUsageFlags usage) : size(size) {
-    if (!device)
-        throw std::invalid_argument("Invalid Vulkan device");
-    if (size < data.size())
-        throw std::invalid_argument("Invalid buffer size");
-
     // create buffer
     const VkBufferCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -62,6 +57,14 @@ Buffer::Buffer(const Device& device, size_t size, std::vector<uint8_t> data,
     if (res != VK_SUCCESS)
         throw ls::vulkan_error(res, "Failed to bind memory to Vulkan buffer");
 
+    // upload data to buffer
+    uint8_t* buf{};
+    res = vkMapMemory(device.handle(), memoryHandle, 0, size, 0, reinterpret_cast<void**>(&buf));
+    if (res != VK_SUCCESS || buf == nullptr)
+        throw ls::vulkan_error(res, "Failed to map memory for Vulkan buffer");
+    std::copy_n(data.data(), std::min(size, data.size()), buf);
+    vkUnmapMemory(device.handle(), memoryHandle);
+
     // store buffer and memory in shared ptr
     this->buffer = std::shared_ptr<VkBuffer>(
         new VkBuffer(bufferHandle),
@@ -75,12 +78,4 @@ Buffer::Buffer(const Device& device, size_t size, std::vector<uint8_t> data,
             vkFreeMemory(dev, *mem, nullptr);
         }
     );
-
-    // upload data to buffer
-    uint8_t* buf{};
-    res = vkMapMemory(device.handle(), memoryHandle, 0, size, 0, reinterpret_cast<void**>(&buf));
-    if (res != VK_SUCCESS || buf == nullptr)
-        throw ls::vulkan_error(res, "Failed to map memory for Vulkan buffer");
-    std::copy_n(data.data(), size, buf);
-    vkUnmapMemory(device.handle(), memoryHandle);
 }

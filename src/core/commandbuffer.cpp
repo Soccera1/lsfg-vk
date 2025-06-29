@@ -4,11 +4,8 @@
 using namespace Vulkan::Core;
 
 CommandBuffer::CommandBuffer(const Device& device, const CommandPool& pool) {
-    if (!device || !pool)
-        throw std::invalid_argument("Invalid Vulkan device or command pool");
-
     // create command buffer
-    const VkCommandBufferAllocateInfo desc = {
+    const VkCommandBufferAllocateInfo desc{
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         .commandPool = pool.handle(),
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
@@ -67,14 +64,12 @@ void CommandBuffer::submit(VkQueue queue, std::optional<Fence> fence,
         std::optional<std::vector<uint64_t>> waitSemaphoreValues,
         const std::vector<Semaphore>& signalSemaphores,
         std::optional<std::vector<uint64_t>> signalSemaphoreValues) {
-    if (!queue)
-        throw std::invalid_argument("Invalid Vulkan queue");
     if (*this->state != CommandBufferState::Full)
         throw std::logic_error("Command buffer is not in Full state");
 
     const std::vector<VkPipelineStageFlags> waitStages(waitSemaphores.size(),
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-    VkTimelineSemaphoreSubmitInfo timelineInfo = {
+    VkTimelineSemaphoreSubmitInfo timelineInfo{
         .sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO,
     };
     if (waitSemaphoreValues.has_value()) {
@@ -88,20 +83,14 @@ void CommandBuffer::submit(VkQueue queue, std::optional<Fence> fence,
         timelineInfo.pSignalSemaphoreValues = signalSemaphoreValues->data();
     }
 
-    std::vector<VkSemaphore> waitSemaphoresHandles;
-    for (const auto& semaphore : waitSemaphores) {
-        if (!semaphore)
-            throw std::invalid_argument("Invalid Vulkan semaphore in waitSemaphores");
+    std::vector<VkSemaphore> waitSemaphoresHandles(waitSemaphores.size());
+    for (const auto& semaphore : waitSemaphores)
         waitSemaphoresHandles.push_back(semaphore.handle());
-    }
-    std::vector<VkSemaphore> signalSemaphoresHandles;
-    for (const auto& semaphore : signalSemaphores) {
-        if (!semaphore)
-            throw std::invalid_argument("Invalid Vulkan semaphore in signalSemaphores");
+    std::vector<VkSemaphore> signalSemaphoresHandles(signalSemaphores.size());
+    for (const auto& semaphore : signalSemaphores)
         signalSemaphoresHandles.push_back(semaphore.handle());
-    }
 
-    const VkSubmitInfo submitInfo = {
+    const VkSubmitInfo submitInfo{
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
         .pNext = (waitSemaphoreValues.has_value() || signalSemaphoreValues.has_value())
             ? &timelineInfo : nullptr,

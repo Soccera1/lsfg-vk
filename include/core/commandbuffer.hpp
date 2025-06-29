@@ -41,7 +41,6 @@ namespace Vulkan::Core {
         /// @param device Vulkan device
         /// @param pool Vulkan command pool
         ///
-        /// @throws std::invalid_argument if the device or pool are invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
         CommandBuffer(const Device& device, const CommandPool& pool);
@@ -83,7 +82,6 @@ namespace Vulkan::Core {
         /// @param signalSemaphores Semaphores to signal after executing the command buffer
         /// @param signalSemaphoreValues Values for the semaphores to signal
         ///
-        /// @throws std::invalid_argument if the queue is null.
         /// @throws std::logic_error if the command buffer is not in Full state.
         /// @throws ls::vulkan_error if submission fails.
         ///
@@ -97,11 +95,6 @@ namespace Vulkan::Core {
         [[nodiscard]] CommandBufferState getState() const { return *this->state; }
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->commandBuffer; }
-
-        /// Check whether the object is valid.
-        [[nodiscard]] bool isValid() const { return static_cast<bool>(this->commandBuffer); }
-        /// if (obj) operator. Checks if the object is valid.
-        explicit operator bool() const { return this->isValid(); }
 
         /// Trivially copyable, moveable and destructible
         CommandBuffer(const CommandBuffer&) noexcept = default;

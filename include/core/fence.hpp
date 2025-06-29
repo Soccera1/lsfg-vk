@@ -21,7 +21,6 @@ namespace Vulkan::Core {
         ///
         /// @param device Vulkan device
         ///
-        /// @throws std::invalid_argument if the device is invalid.
         /// @throws ls::vulkan_error if object creation fails.
         ///
         Fence(const Device& device);
@@ -29,27 +28,25 @@ namespace Vulkan::Core {
         ///
         /// Reset the fence to an unsignaled state.
         ///
+        /// @param device Vulkan device
+        ///
         /// @throws ls::vulkan_error if resetting fails.
         ///
-        void reset() const;
+        void reset(const Device& device) const;
 
         ///
         /// Wait for the fence
         ///
+        /// @param device Vulkan device
         /// @param timeout The timeout in nanoseconds, or UINT64_MAX for no timeout.
         /// @returns true if the fence signaled, false if it timed out.
         ///
         /// @throws ls::vulkan_error if waiting fails.
         ///
-        [[nodiscard]] bool wait(uint64_t timeout = UINT64_MAX) const;
+        [[nodiscard]] bool wait(const Device& device, uint64_t timeout = UINT64_MAX) const;
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->fence; }
-
-        /// Check whether the object is valid.
-        [[nodiscard]] bool isValid() const { return static_cast<bool>(this->fence); }
-        /// if (obj) operator. Checks if the object is valid.
-        explicit operator bool() const { return this->isValid(); }
 
         // Trivially copyable, moveable and destructible
         Fence(const Fence&) noexcept = default;
@@ -59,7 +56,6 @@ namespace Vulkan::Core {
         ~Fence() = default;
     private:
         std::shared_ptr<VkFence> fence;
-        VkDevice device{};
     };
 
 }
