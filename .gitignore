@@ -6,3 +6,6 @@
 /.clangd
 /.cache
 /.ccls
+
+# private shaders
+/shaders

@@ -1,6 +1,5 @@
 #include "core/fence.hpp"
 #include "utils/exceptions.hpp"
-#include <vulkan/vulkan_core.h>
 
 using namespace Vulkan::Core;
 
@@ -29,7 +28,7 @@ Fence::Fence(const Device& device) {
 
 void Fence::reset() const {
     if (!this->isValid())
-        throw std::runtime_error("Invalid fence");
+        throw std::logic_error("Invalid fence");
 
     VkFence fenceHandle = this->handle();
     auto res = vkResetFences(this->device, 1, &fenceHandle);
@@ -39,7 +38,7 @@ void Fence::reset() const {
 
 bool Fence::wait(uint64_t timeout) {
     if (!this->isValid())
-        throw std::runtime_error("Invalid fence");
+        throw std::logic_error("Invalid fence");
 
     VkFence fenceHandle = this->handle();
     auto res = vkWaitForFences(this->device, 1, &fenceHandle, VK_TRUE, timeout);

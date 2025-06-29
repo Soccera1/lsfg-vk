@@ -52,6 +52,11 @@ Device::Device(const Instance& instance) {
 
     // create logical device
     const float queuePriority{1.0F}; // highest priority
+    const VkPhysicalDeviceVulkan12Features features{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+        .timelineSemaphore = VK_TRUE,
+        .vulkanMemoryModel = VK_TRUE,
+    };
     const VkDeviceQueueCreateInfo computeQueueDesc{
         .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
         .queueFamilyIndex = *computeFamilyIdx,
@@ -60,6 +65,7 @@ Device::Device(const Instance& instance) {
     };
     const VkDeviceCreateInfo deviceCreateInfo{
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .pNext = &features,
         .queueCreateInfoCount = 1,
         .pQueueCreateInfos = &computeQueueDesc
     };

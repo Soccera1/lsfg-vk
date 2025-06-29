@@ -35,7 +35,7 @@ Semaphore::Semaphore(const Device& device, std::optional<uint32_t> initial) {
 
 void Semaphore::signal(uint64_t value) const {
     if (!this->isValid() || !this->isTimeline)
-        throw std::runtime_error("Invalid timeline semaphore");
+        throw std::logic_error("Invalid timeline semaphore");
 
     const VkSemaphoreSignalInfo signalInfo{
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO,
@@ -49,7 +49,7 @@ void Semaphore::signal(uint64_t value) const {
 
 bool Semaphore::wait(uint64_t value, uint64_t timeout) {
     if (!this->isValid() || !this->isTimeline)
-        throw std::runtime_error("Invalid timeline semaphore");
+        throw std::logic_error("Invalid timeline semaphore");
 
     VkSemaphore semaphore = this->handle();
     const VkSemaphoreWaitInfo waitInfo{

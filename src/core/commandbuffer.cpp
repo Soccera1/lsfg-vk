@@ -1,5 +1,4 @@
 #include "core/commandbuffer.hpp"
-#include "core/semaphore.hpp"
 #include "utils/exceptions.hpp"
 
 using namespace Vulkan::Core;

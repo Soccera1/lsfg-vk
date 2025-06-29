@@ -29,7 +29,7 @@ ShaderModule::ShaderModule(const Device& device, const std::string& path,
     const uint8_t* data_ptr = code.data();
     const VkShaderModuleCreateInfo createInfo{
         .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-        .codeSize = code.size() * sizeof(uint32_t),
+        .codeSize = code.size(),
         .pCode = reinterpret_cast<const uint32_t*>(data_ptr)
     };
     VkShaderModule shaderModuleHandle{};

@@ -21,7 +21,7 @@ Instance::Instance() {
         .applicationVersion = VK_MAKE_VERSION(0, 0, 1),
         .pEngineName = "lsfg-vk-base",
         .engineVersion = VK_MAKE_VERSION(0, 0, 1),
-        .apiVersion = VK_API_VERSION_1_4
+        .apiVersion = VK_API_VERSION_1_3
     };
     const VkInstanceCreateInfo createInfo{
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
