@@ -1,12 +1,16 @@
 #ifndef DESCRIPTORSET_HPP
 #define DESCRIPTORSET_HPP
 
+#include "core/buffer.hpp"
 #include "core/commandbuffer.hpp"
 #include "core/descriptorpool.hpp"
+#include "core/image.hpp"
 #include "core/pipeline.hpp"
+#include "core/sampler.hpp"
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
+#include <variant>
 #include <vulkan/vulkan_core.h>
 
 #include <memory>
@@ -33,13 +37,26 @@ namespace Vulkan::Core {
         DescriptorSet(const Device& device,
             DescriptorPool pool, const ShaderModule& shaderModule);
 
+        using ResourcePair = std::pair<VkDescriptorType, std::variant<Image, Sampler, Buffer>>;
+
+        ///
+        /// Update the descriptor set with resources.
+        ///
+        /// @param device Vulkan device
+        /// @param resources Resources to update the descriptor set with
+        ///
+        /// @throws std::invalid_argument if the device or resources are invalid.
+        ///
+        void update(const Device& device,
+            const std::vector<std::vector<ResourcePair>>& resources) const;
+
         ///
         /// Bind a descriptor set to a command buffer.
         ///
         /// @param commandBuffer Command buffer to bind the descriptor set to.
         /// @param pipeline Pipeline to bind the descriptor set to.
         ///
-        /// @throws std::invalid_argument if the command buffer is invalid.
+        /// @throws std::invalid_argument if the command buffer or pipeline is invalid.
         ///
         void bind(const CommandBuffer& commandBuffer, const Pipeline& pipeline) const;
 

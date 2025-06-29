@@ -30,6 +30,66 @@ DescriptorSet::DescriptorSet(const Device& device,
     );
 }
 
+void DescriptorSet::update(const Device& device,
+        const std::vector<std::vector<ResourcePair>>& resources) const {
+    if (!device)
+        throw std::invalid_argument("Invalid Vulkan device");
+
+    std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+    uint32_t bindingIndex = 0;
+    for (const auto& list : resources) {
+        for (const auto& [type, resource] : list) {
+            VkWriteDescriptorSet writeDesc{
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = this->handle(),
+                .dstBinding = bindingIndex++,
+                .descriptorCount = 1,
+                .descriptorType = type,
+            };
+
+            if (std::holds_alternative<Image>(resource)) {
+                const auto& image = std::get<Image>(resource);
+                if (!image)
+                    throw std::invalid_argument("Invalid image resource");
+
+                const VkDescriptorImageInfo imageInfo{
+                    .imageView = image.getView(),
+                    .imageLayout = VK_IMAGE_LAYOUT_GENERAL
+                };
+                writeDesc.pImageInfo = &imageInfo;
+            } else if (std::holds_alternative<Sampler>(resource)) {
+                const auto& sampler = std::get<Sampler>(resource);
+                if (!sampler)
+                    throw std::invalid_argument("Invalid sampler resource");
+
+                const VkDescriptorImageInfo imageInfo{
+                    .sampler = sampler.handle()
+                };
+                writeDesc.pImageInfo = &imageInfo;
+            } else if (std::holds_alternative<Buffer>(resource)) {
+                const auto& buffer = std::get<Buffer>(resource);
+                if (!buffer)
+                    throw std::invalid_argument("Invalid buffer resource");
+
+                const VkDescriptorBufferInfo bufferInfo{
+                    .buffer = buffer.handle(),
+                    .range = buffer.getSize()
+                };
+                writeDesc.pBufferInfo = &bufferInfo;
+            } else {
+                throw std::invalid_argument("Unsupported resource type");
+            }
+
+            writeDescriptorSets.push_back(writeDesc);
+        }
+    }
+
+    vkUpdateDescriptorSets(device.handle(),
+        static_cast<uint32_t>(writeDescriptorSets.size()),
+        writeDescriptorSets.data(),
+        0, nullptr);
+}
+
 void DescriptorSet::bind(const CommandBuffer& commandBuffer, const Pipeline& pipeline) const {
     if (!commandBuffer)
         throw std::invalid_argument("Invalid command buffer");
