@@ -3,6 +3,7 @@
 
 #include "device.hpp"
 
+#include <utility>
 #include <vulkan/vulkan_core.h>
 
 #include <string>
@@ -30,7 +31,7 @@ namespace Vulkan::Core {
         /// @throws ls::vulkan_error if object creation fails.
         ///
         ShaderModule(const Device& device, const std::string& path,
-            std::vector<VkDescriptorType> descriptorTypes);
+            const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes);
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->shaderModule; }

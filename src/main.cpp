@@ -11,19 +11,10 @@ int main() {
     const Vulkan::Device device(instance);
 
     const Vulkan::Core::ShaderModule computeShader(device, "shaders/downsample.spv",
-        {
-            VK_DESCRIPTOR_TYPE_SAMPLER,
-            VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-        }
-    );
+        { { 1, VK_DESCRIPTOR_TYPE_SAMPLER},
+          { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE},
+          { 7, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE},
+          { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER} });
     const Vulkan::Core::Pipeline computePipeline(device, computeShader);
 
     std::cerr << "Application finished" << '\n';

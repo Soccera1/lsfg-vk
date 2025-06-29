@@ -7,7 +7,7 @@
 using namespace Vulkan::Core;
 
 ShaderModule::ShaderModule(const Device& device, const std::string& path,
-        std::vector<VkDescriptorType> descriptorTypes) {
+        const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes) {
     if (!device)
         throw std::invalid_argument("Invalid Vulkan device");
 
@@ -46,14 +46,16 @@ ShaderModule::ShaderModule(const Device& device, const std::string& path,
     );
 
     // create descriptor set layout
-    std::vector<VkDescriptorSetLayoutBinding> layoutBindings(descriptorTypes.size());
-    for (size_t i = 0; i < descriptorTypes.size(); ++i)
-        layoutBindings.at(i) = {
-            .binding = static_cast<uint32_t>(i),
-            .descriptorType = descriptorTypes.at(i),
-            .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
-        };
+    std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+    size_t bindIdx = 0;
+    for (const auto &[count, type] : descriptorTypes)
+        for (size_t i = 0; i < count; i++, bindIdx++)
+            layoutBindings.emplace_back(VkDescriptorSetLayoutBinding {
+                .binding = static_cast<uint32_t>(bindIdx),
+                .descriptorType = type,
+                .descriptorCount = 1,
+                .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
+            });
 
     const VkDescriptorSetLayoutCreateInfo layoutDesc{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
