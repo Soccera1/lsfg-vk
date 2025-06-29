@@ -12,7 +12,6 @@
 #include "instance.hpp"
 #include "utils/memorybarriers.hpp"
 
-#include <algorithm>
 #include <array>
 #include <cassert>
 #include <iostream>
@@ -75,23 +74,12 @@ int main() {
 
     // load descriptor set
     const Core::DescriptorSet descriptorSet(device, descriptorPool, computeShader);
-    descriptorSet.update(
-        device,
-        {
-            {{ VK_DESCRIPTOR_TYPE_SAMPLER, sampler }},
-            {{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, inputImages[0] }},
-            {
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outputImages[0] },
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outputImages[1] },
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outputImages[2] },
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outputImages[3] },
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outputImages[4] },
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outputImages[5] },
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outputImages[6] }
-            },
-            {{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, buffer }}
-        }
-    );
+    descriptorSet.update(device)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLER, sampler)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, inputImages)
+        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outputImages)
+        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, buffer)
+        .build();
 
     // start pass
     Core::Fence fence(device);
