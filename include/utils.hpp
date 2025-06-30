@@ -22,8 +22,8 @@ namespace Vulkan::Utils {
     ///
     void insertBarrier(
         const Vulkan::Core::CommandBuffer& buffer,
-        std::vector<Vulkan::Core::Image> r2wImages,
-        std::vector<Vulkan::Core::Image> w2rImages);
+        std::vector<Vulkan::Core::Image> w2rImages,
+        std::vector<Vulkan::Core::Image> r2wImages);
 
     ///
     /// Upload a DDS file to a Vulkan image.

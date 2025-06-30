@@ -8,8 +8,8 @@ using namespace Vulkan;
 
 void Utils::insertBarrier(
         const Core::CommandBuffer& buffer,
-        std::vector<Core::Image> r2wImages,
-        std::vector<Core::Image> w2rImages) {
+        std::vector<Core::Image> w2rImages,
+        std::vector<Core::Image> r2wImages) {
     std::vector<VkImageMemoryBarrier2> barriers(r2wImages.size() + w2rImages.size());
 
     size_t index = 0;
@@ -60,16 +60,16 @@ void Utils::insertBarrier(
 void Utils::uploadImage(const Device& device, const Core::CommandPool& commandPool,
         Core::Image& image, const std::string& path) {
     // read image bytecode
-    std::ifstream file(path, std::ios::ate | std::ios::binary);
-    if (!file)
+    std::ifstream file(path.data(), std::ios::binary | std::ios::ate);
+    if (!file.is_open())
         throw std::system_error(errno, std::generic_category(), "Failed to open image: " + path);
 
     std::streamsize size = file.tellg();
-    size -= 124 - 4; // dds header and magic bytes
-    std::vector<uint8_t> code(static_cast<size_t>(size));
+    size -= 124 + 4; // dds header and magic bytes
+    std::vector<char> code(static_cast<size_t>(size));
 
-    file.seekg(0, std::ios::beg);
-    if (!file.read(reinterpret_cast<char*>(code.data()), size))
+    file.seekg(124 + 4, std::ios::beg);
+    if (!file.read(code.data(), size))
         throw std::system_error(errno, std::generic_category(), "Failed to read image: " + path);
 
     file.close();

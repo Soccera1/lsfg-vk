@@ -13,7 +13,7 @@ Sampler::Sampler(const Device& device, VkSamplerAddressMode mode) {
         .addressModeU = mode,
         .addressModeV = mode,
         .addressModeW = mode,
-        .maxLod = VK_LOD_CLAMP_NONE
+        .maxLod = 15.99609F
     };
     VkSampler samplerHandle{};
     auto res = vkCreateSampler(device.handle(), &desc, nullptr, &samplerHandle);

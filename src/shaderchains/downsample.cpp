@@ -20,7 +20,6 @@ Downsample::Downsample(const Device& device, const Core::DescriptorPool& pool,
     auto extent = inImage.getExtent();
 
     // create output images
-    this->outImages.resize(7);
     for (size_t i = 0; i < 7; i++)
         this->outImages.at(i) = Core::Image(device,
             { extent.width >> i, extent.height >> i },
@@ -44,8 +43,8 @@ void Downsample::Dispatch(const Core::CommandBuffer& buf) {
 
     Utils::insertBarrier(
         buf,
-        this->outImages,
-        { this->inImage }
+        { this->inImage },
+        this->outImages
     );
 
     this->pipeline.bind(buf);

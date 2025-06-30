@@ -5,6 +5,7 @@
 #include "core/image.hpp"
 #include "device.hpp"
 #include "instance.hpp"
+#include "shaderchains/alpha.hpp"
 #include "shaderchains/downsample.hpp"
 #include "utils.hpp"
 
@@ -13,7 +14,7 @@
 #include <renderdoc_app.h>
 #include <dlfcn.h>
 #include <unistd.h>
-#include <vulkan/vulkan_core.h>
+#include <vector>
 
 using namespace Vulkan;
 
@@ -52,6 +53,11 @@ int main() {
     // create the shaderchains
     Shaderchains::Downsample downsample(device, descriptorPool, inputImage);
 
+    std::vector<Shaderchains::Alpha> alphas;
+    alphas.reserve(7);
+    for (size_t i = 0; i < 7; ++i)
+        alphas.emplace_back(device, descriptorPool, downsample.getOutImages().at(i));
+
     // start the rendering pipeline
     if (rdoc)
         rdoc->StartFrameCapture(nullptr, nullptr);
@@ -60,6 +66,8 @@ int main() {
     commandBuffer.begin();
 
     downsample.Dispatch(commandBuffer);
+    for (size_t i = 0; i < 7; i++)
+        alphas.at(6 - i).Dispatch(commandBuffer);
 
     // finish the rendering pipeline
     commandBuffer.end();

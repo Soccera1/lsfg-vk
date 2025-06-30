@@ -57,7 +57,7 @@ namespace Vulkan::Shaderchains {
 
         Core::Image inImage;
 
-        std::vector<Core::Image> outImages;
+        std::vector<Core::Image> outImages{7};
     };
 
 }
