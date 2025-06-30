@@ -47,7 +47,6 @@ int main() {
     const Device device(instance);
     const Core::DescriptorPool descriptorPool(device);
     const Core::CommandPool commandPool(device);
-    const Core::Fence fence(device);
 
     Globals::initializeGlobals(device);
 
@@ -162,42 +161,49 @@ int main() {
         deltas.at(2).getOutImage()
     );
 
-    // start the rendering pipeline
-    if (rdoc)
-        rdoc->StartFrameCapture(nullptr, nullptr);
+    for (int i = 0; i < 1000; i++) {
+        const Core::Fence fence(device);
 
-    Core::CommandBuffer commandBuffer(device, commandPool);
-    commandBuffer.begin();
+        // start the rendering pipeline
+        if (rdoc)
+            rdoc->StartFrameCapture(nullptr, nullptr);
 
-    downsample.Dispatch(commandBuffer);
-    for (size_t i = 0; i < 7; i++)
-        alphas.at(6 - i).Dispatch(commandBuffer);
-    beta.Dispatch(commandBuffer);
-    for (size_t i = 0; i < 4; i++)
-        gammas.at(i).Dispatch(commandBuffer);
-    for (size_t i = 0; i < 3; i++) {
-        magics.at(i).Dispatch(commandBuffer);
-        deltas.at(i).Dispatch(commandBuffer);
-        epsilons.at(i).Dispatch(commandBuffer);
-        zetas.at(i).Dispatch(commandBuffer);
-        if (i < 2)
-            extracts.at(i).Dispatch(commandBuffer);
+        Core::CommandBuffer commandBuffer(device, commandPool);
+        commandBuffer.begin();
+
+        downsample.Dispatch(commandBuffer);
+        for (size_t i = 0; i < 7; i++)
+            alphas.at(6 - i).Dispatch(commandBuffer);
+        beta.Dispatch(commandBuffer);
+        for (size_t i = 0; i < 4; i++)
+            gammas.at(i).Dispatch(commandBuffer);
+        for (size_t i = 0; i < 3; i++) {
+            magics.at(i).Dispatch(commandBuffer);
+            deltas.at(i).Dispatch(commandBuffer);
+            epsilons.at(i).Dispatch(commandBuffer);
+            zetas.at(i).Dispatch(commandBuffer);
+            if (i < 2)
+                extracts.at(i).Dispatch(commandBuffer);
+        }
+        merge.Dispatch(commandBuffer);
+
+        // finish the rendering pipeline
+        commandBuffer.end();
+
+        commandBuffer.submit(device.getComputeQueue(), fence);
+        if (!fence.wait(device)) {
+            Globals::uninitializeGlobals();
+
+            std::cerr << "Application failed due to timeout" << '\n';
+            return 1;
+        }
+
+        if (rdoc)
+            rdoc->EndFrameCapture(nullptr, nullptr);
+
+        // sleep 8 ms
+        usleep(8000);
     }
-    merge.Dispatch(commandBuffer);
-
-    // finish the rendering pipeline
-    commandBuffer.end();
-
-    commandBuffer.submit(device.getComputeQueue(), fence);
-    if (!fence.wait(device)) {
-        Globals::uninitializeGlobals();
-
-        std::cerr << "Application failed due to timeout" << '\n';
-        return 1;
-    }
-
-    if (rdoc)
-        rdoc->EndFrameCapture(nullptr, nullptr);
 
     usleep(1000 * 100); // give renderdoc time to capture
 

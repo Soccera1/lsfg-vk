@@ -58,7 +58,8 @@ Gamma::Gamma(const Device& device, const Core::DescriptorPool& pool,
 
     this->optImg1 = optImg1.value_or(Core::Image(device, extent,
         VK_FORMAT_R8G8B8A8_UNORM,
-        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
+        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT
+        | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT));
 
     for (size_t i = 0; i < 4; i++) {
