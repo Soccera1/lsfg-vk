@@ -9,7 +9,6 @@
 #include "core/pipeline.hpp"
 #include "core/shadermodule.hpp"
 #include "device.hpp"
-#include <vulkan/vulkan_core.h>
 
 namespace Vulkan::Shaderchains {
 

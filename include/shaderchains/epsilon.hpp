@@ -10,6 +10,8 @@
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
+#include <array>
+
 namespace Vulkan::Shaderchains {
 
     ///
@@ -32,9 +34,9 @@ namespace Vulkan::Shaderchains {
         /// @throws ls::vulkan_error if resource creation fails.
         ///
         Epsilon(const Device& device, const Core::DescriptorPool& pool,
-            const std::vector<Core::Image>& inImgs1,
-            const Core::Image& inImg2,
-            const std::optional<Core::Image>& optImg);
+            std::array<Core::Image, 3> inImgs1,
+            Core::Image inImg2,
+            std::optional<Core::Image> optImg);
 
         ///
         /// Dispatch the shaderchain.
@@ -55,17 +57,17 @@ namespace Vulkan::Shaderchains {
         Epsilon& operator=(Epsilon&&) noexcept = default;
         ~Epsilon() = default;
     private:
-        std::vector<Core::ShaderModule> shaderModules{4};
-        std::vector<Core::Pipeline> pipelines{4};
-        std::vector<Core::DescriptorSet> descriptorSets{4};
+        std::array<Core::ShaderModule, 4> shaderModules;
+        std::array<Core::Pipeline, 4> pipelines;
+        std::array<Core::DescriptorSet, 4> descriptorSets;
         Core::Buffer buffer;
 
-        std::vector<Core::Image> inImgs1{3};
+        std::array<Core::Image, 3> inImgs1;
         Core::Image inImg2;
         std::optional<Core::Image> optImg;
 
-        std::vector<Core::Image> tempImgs1{4};
-        std::vector<Core::Image> tempImgs2{4};
+        std::array<Core::Image, 4> tempImgs1;
+        std::array<Core::Image, 4> tempImgs2;
 
         Core::Image outImg;
     };

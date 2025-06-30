@@ -87,6 +87,19 @@ DescriptorSetUpdateBuilder& DescriptorSetUpdateBuilder::add(VkDescriptorType typ
     return *this;
 }
 
+DescriptorSetUpdateBuilder& DescriptorSetUpdateBuilder::add(VkDescriptorType type) {
+    this->entries.push_back({
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .dstSet = this->descriptorSet->handle(),
+        .dstBinding = static_cast<uint32_t>(this->entries.size()),
+        .descriptorCount = 0,
+        .descriptorType = type,
+        .pImageInfo = nullptr,
+        .pBufferInfo = nullptr
+    });
+    return *this;
+}
+
 void DescriptorSetUpdateBuilder::build() const {
     if (this->entries.empty()) return;
 

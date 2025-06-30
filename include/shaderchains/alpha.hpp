@@ -9,6 +9,8 @@
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
+#include <array>
+
 namespace Vulkan::Shaderchains {
 
     ///
@@ -28,7 +30,7 @@ namespace Vulkan::Shaderchains {
         /// @throws ls::vulkan_error if resource creation fails.
         ///
         Alpha(const Device& device, const Core::DescriptorPool& pool,
-            const Core::Image& inImg);
+            Core::Image inImg);
 
         ///
         /// Dispatch the shaderchain.
@@ -49,17 +51,17 @@ namespace Vulkan::Shaderchains {
         Alpha& operator=(Alpha&&) noexcept = default;
         ~Alpha() = default;
     private:
-        std::vector<Core::ShaderModule> shaderModules{4};
-        std::vector<Core::Pipeline> pipelines{4};
-        std::vector<Core::DescriptorSet> descriptorSets{4};
+        std::array<Core::ShaderModule, 4> shaderModules;
+        std::array<Core::Pipeline, 4> pipelines;
+        std::array<Core::DescriptorSet, 4> descriptorSets;
 
         Core::Image inImg;
 
-        std::vector<Core::Image> tempImgs1{2}; // half-size
-        std::vector<Core::Image> tempImgs2{2}; // half-size
-        std::vector<Core::Image> tempImgs3{4}; // quarter-size
+        std::array<Core::Image, 2> tempImgs1; // half-size
+        std::array<Core::Image, 2> tempImgs2; // half-size
+        std::array<Core::Image, 4> tempImgs3; // quarter-size
 
-        std::vector<Core::Image> outImgs{4}; // quarter-size
+        std::array<Core::Image, 4> outImgs; // quarter-size
     };
 
 }

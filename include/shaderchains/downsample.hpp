@@ -10,6 +10,8 @@
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
+#include <array>
+
 namespace Vulkan::Shaderchains {
 
     ///
@@ -29,7 +31,7 @@ namespace Vulkan::Shaderchains {
         /// @throws ls::vulkan_error if resource creation fails.
         ///
         Downsample(const Device& device, const Core::DescriptorPool& pool,
-            const Core::Image& inImg);
+            Core::Image inImg);
 
         ///
         /// Dispatch the shaderchain.
@@ -57,7 +59,7 @@ namespace Vulkan::Shaderchains {
 
         Core::Image inImg;
 
-        std::vector<Core::Image> outImgs{7};
+        std::array<Core::Image, 7> outImgs;
     };
 
 }

@@ -10,6 +10,8 @@
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
+#include <array>
+
 namespace Vulkan::Shaderchains {
 
     ///
@@ -37,11 +39,11 @@ namespace Vulkan::Shaderchains {
         /// @throws ls::vulkan_error if resource creation fails.
         ///
         Gamma(const Device& device, const Core::DescriptorPool& pool,
-            const std::vector<Core::Image>& temporalImgs,
-            const std::vector<Core::Image>& inImgs1,
-            const Core::Image& inImg2,
-            const std::optional<Core::Image>& optImg1,
-            const std::optional<Core::Image>& optImg2,
+            std::array<Core::Image, 4> temporalImgs,
+            std::array<Core::Image, 4> inImgs1,
+            Core::Image inImg2,
+            std::optional<Core::Image> optImg1,
+            std::optional<Core::Image> optImg2,
             VkExtent2D outExtent);
 
         ///
@@ -65,19 +67,19 @@ namespace Vulkan::Shaderchains {
         Gamma& operator=(Gamma&&) noexcept = default;
         ~Gamma() = default;
     private:
-        std::vector<Core::ShaderModule> shaderModules{6};
-        std::vector<Core::Pipeline> pipelines{6};
-        std::vector<Core::DescriptorSet> descriptorSets{6};
+        std::array<Core::ShaderModule, 6> shaderModules;
+        std::array<Core::Pipeline, 6> pipelines;
+        std::array<Core::DescriptorSet, 6> descriptorSets;
         Core::Buffer buffer;
 
-        std::vector<Core::Image> temporalImgs{4};
-        std::vector<Core::Image> inImgs1{4};
+        std::array<Core::Image, 4> temporalImgs;
+        std::array<Core::Image, 4> inImgs1;
         Core::Image inImg2;
         Core::Image optImg1; // specified or created black
         std::optional<Core::Image> optImg2;
 
-        std::vector<Core::Image> tempImgs1{4};
-        std::vector<Core::Image> tempImgs2{4};
+        std::array<Core::Image, 4> tempImgs1;
+        std::array<Core::Image, 4> tempImgs2;
         Core::Image whiteImg;
 
         Core::Image outImg1;

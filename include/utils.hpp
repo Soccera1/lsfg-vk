@@ -4,6 +4,7 @@
 #include "core/commandbuffer.hpp"
 #include "core/image.hpp"
 #include "core/sampler.hpp"
+#include "device.hpp"
 
 #include <stdexcept>
 #include <string>
@@ -14,16 +15,47 @@ namespace Vulkan::Utils {
     ///
     /// Insert memory barriers for images in a command buffer.
     ///
-    /// @param buffer Command buffer to insert barriers into
-    /// @param r2wImages Images that are being read and will be written to
-    /// @param w2rImages Images that are being written to and will be read from
-    ///
     /// @throws std::logic_error if the command buffer is not in Recording state
     ///
-    void insertBarrier(
-        const Vulkan::Core::CommandBuffer& buffer,
-        std::vector<Vulkan::Core::Image> w2rImages,
-        std::vector<Vulkan::Core::Image> r2wImages);
+    class BarrierBuilder {
+    public:
+        /// Create a barrier builder.
+        BarrierBuilder(const Core::CommandBuffer& buffer)
+                : commandBuffer(&buffer) {
+            this->barriers.reserve(16); // this is performance critical
+        }
+
+        // Add a resource to the barrier builder.
+        BarrierBuilder& addR2W(Core::Image& image);
+        BarrierBuilder& addW2R(Core::Image& image);
+
+        // Add an optional resource to the barrier builder.
+        BarrierBuilder& addR2W(std::optional<Core::Image>& image) {
+            if (image.has_value()) this->addR2W(*image); return *this; }
+        BarrierBuilder& addW2R(std::optional<Core::Image>& image) {
+            if (image.has_value()) this->addW2R(*image); return *this; }
+
+        /// Add a list of resources to the barrier builder.
+        BarrierBuilder& addR2W(std::vector<Core::Image>& images) {
+            for (auto& image : images) this->addR2W(image); return *this; }
+        BarrierBuilder& addW2R(std::vector<Core::Image>& images) {
+            for (auto& image : images) this->addW2R(image); return *this; }
+
+        /// Add an array of resources to the barrier builder.
+        template<std::size_t N>
+        BarrierBuilder& addR2W(std::array<Core::Image, N>& images) {
+            for (auto& image : images) this->addR2W(image); return *this; }
+        template<std::size_t N>
+        BarrierBuilder& addW2R(std::array<Core::Image, N>& images) {
+            for (auto& image : images) this->addW2R(image); return *this; }
+
+        /// Finish building the barrier
+        void build() const;
+    private:
+        const Core::CommandBuffer* commandBuffer;
+
+        std::vector<VkImageMemoryBarrier2> barriers;
+    };
 
     ///
     /// Upload a DDS file to a Vulkan image.
@@ -36,9 +68,19 @@ namespace Vulkan::Utils {
     /// @throws std::system_error If the file cannot be opened or read.
     /// @throws ls:vulkan_error If the Vulkan image cannot be created or updated.
     ///
-    void uploadImage(const Vulkan::Device& device,
-        const Vulkan::Core::CommandPool& commandPool,
-        Vulkan::Core::Image& image, const std::string& path);
+    void uploadImage(const Device& device,
+        const Core::CommandPool& commandPool,
+        Core::Image& image, const std::string& path);
+
+    ///
+    /// Clear a texture to white during setup.
+    ///
+    /// @param device The Vulkan device.
+    /// @param image The image to clear.
+    ///
+    /// @throws ls::vulkan_error If the Vulkan image cannot be cleared.
+    ///
+    void clearWhiteImage(const Device& device, Core::Image& image);
 
 }
 

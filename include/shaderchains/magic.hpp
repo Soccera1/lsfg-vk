@@ -10,6 +10,8 @@
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
+#include <array>
+
 namespace Vulkan::Shaderchains {
 
     ///
@@ -34,11 +36,11 @@ namespace Vulkan::Shaderchains {
         /// @throws ls::vulkan_error if resource creation fails.
         ///
         Magic(const Device& device, const Core::DescriptorPool& pool,
-            const std::vector<Core::Image>& temporalImgs,
-            const std::vector<Core::Image>& inImgs1,
+            std::array<Core::Image, 4>& temporalImgs,
+            std::array<Core::Image, 4>& inImgs1,
             Core::Image inImg2,
             Core::Image inImg3,
-            const std::optional<Core::Image>& optImg);
+            std::optional<Core::Image> optImg);
 
         ///
         /// Dispatch the shaderchain.
@@ -68,15 +70,15 @@ namespace Vulkan::Shaderchains {
         Core::DescriptorSet descriptorSet;
         Core::Buffer buffer;
 
-        std::vector<Core::Image> temporalImgs{4};
-        std::vector<Core::Image> inImgs1{4};
+        std::array<Core::Image, 4> temporalImgs;
+        std::array<Core::Image, 4> inImgs1;
         Core::Image inImg2;
         Core::Image inImg3;
         std::optional<Core::Image> optImg;
 
-        std::vector<Core::Image> outImgs1{3};
-        std::vector<Core::Image> outImgs2{3};
-        std::vector<Core::Image> outImgs3{3};
+        std::array<Core::Image, 3> outImgs1;
+        std::array<Core::Image, 3> outImgs2;
+        std::array<Core::Image, 3> outImgs3;
     };
 
 }

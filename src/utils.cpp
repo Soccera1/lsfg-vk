@@ -3,58 +3,60 @@
 
 #include <format>
 #include <fstream>
+#include <vulkan/vulkan_core.h>
 
 using namespace Vulkan;
+using namespace Vulkan::Utils;
 
-void Utils::insertBarrier(
-        const Core::CommandBuffer& buffer,
-        std::vector<Core::Image> w2rImages,
-        std::vector<Core::Image> r2wImages) {
-    std::vector<VkImageMemoryBarrier2> barriers(r2wImages.size() + w2rImages.size());
+BarrierBuilder& BarrierBuilder::addR2W(Core::Image& image) {
+    this->barriers.emplace_back(VkImageMemoryBarrier2 {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+        .srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+        .srcAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+        .dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT,
+        .oldLayout = image.getLayout(),
+        .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+        .image = image.handle(),
+        .subresourceRange = {
+            .aspectMask = image.getAspectFlags(),
+            .levelCount = 1,
+            .layerCount = 1
+        }
+    });
+    image.setLayout(VK_IMAGE_LAYOUT_GENERAL);
 
-    size_t index = 0;
-    for (auto& image : r2wImages) {
-        barriers[index++] = {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-            .srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
-            .srcAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
-            .dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT,
-            .oldLayout = image.getLayout(),
-            .newLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .image = image.handle(),
-            .subresourceRange = {
-                .aspectMask = image.getAspectFlags(),
-                .levelCount = 1,
-                .layerCount = 1
-            }
-        };
-        image.setLayout(VK_IMAGE_LAYOUT_GENERAL);
-    }
-    for (auto& image : w2rImages) {
-        barriers[index++] = {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-            .srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
-            .srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
-            .dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
-            .oldLayout = image.getLayout(),
-            .newLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .image = image.handle(),
-            .subresourceRange = {
-                .aspectMask = image.getAspectFlags(),
-                .levelCount = 1,
-                .layerCount = 1
-            }
-        };
-        image.setLayout(VK_IMAGE_LAYOUT_GENERAL);
-    }
+    return *this;
+}
+
+BarrierBuilder& BarrierBuilder::addW2R(Core::Image& image) {
+    this->barriers.emplace_back(VkImageMemoryBarrier2 {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+        .srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+        .srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+        .dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
+        .oldLayout = image.getLayout(),
+        .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+        .image = image.handle(),
+        .subresourceRange = {
+            .aspectMask = image.getAspectFlags(),
+            .levelCount = 1,
+            .layerCount = 1
+        }
+    });
+    image.setLayout(VK_IMAGE_LAYOUT_GENERAL);
+
+    return *this;
+}
+
+void BarrierBuilder::build() const {
     const VkDependencyInfo dependencyInfo = {
         .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-        .imageMemoryBarrierCount = static_cast<uint32_t>(barriers.size()),
-        .pImageMemoryBarriers = barriers.data()
+        .imageMemoryBarrierCount = static_cast<uint32_t>(this->barriers.size()),
+        .pImageMemoryBarriers = this->barriers.data()
     };
-    vkCmdPipelineBarrier2(buffer.handle(), &dependencyInfo);
+    vkCmdPipelineBarrier2(this->commandBuffer->handle(), &dependencyInfo);
 }
 
 void Utils::uploadImage(const Device& device, const Core::CommandPool& commandPool,
@@ -127,6 +129,51 @@ void Utils::uploadImage(const Device& device, const Core::CommandPool& commandPo
     // wait for the upload to complete
     if (!fence.wait(device))
         throw ls::vulkan_error(VK_TIMEOUT, "Upload operation timed out");
+}
+
+void Utils::clearWhiteImage(const Device& device, Core::Image& image) {
+    Core::Fence fence(device);
+    const Core::CommandPool cmdPool(device);
+    Core::CommandBuffer cmdBuf(device, cmdPool);
+    cmdBuf.begin();
+
+    const VkImageMemoryBarrier2 barrier{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+        .dstStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+        .dstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+        .oldLayout = image.getLayout(),
+        .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        .image = image.handle(),
+        .subresourceRange = {
+            .aspectMask = image.getAspectFlags(),
+            .levelCount = 1,
+            .layerCount = 1
+        }
+    };
+    const VkDependencyInfo dependencyInfo = {
+        .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+        .imageMemoryBarrierCount = 1,
+        .pImageMemoryBarriers = &barrier
+    };
+    image.setLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    vkCmdPipelineBarrier2(cmdBuf.handle(), &dependencyInfo);
+
+    const VkClearColorValue clearColor = {{ 1.0F, 1.0F, 1.0F, 1.0F }};
+    const VkImageSubresourceRange subresourceRange = {
+        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .levelCount = 1,
+        .layerCount = 1
+    };
+    vkCmdClearColorImage(cmdBuf.handle(),
+        image.handle(), image.getLayout(),
+        &clearColor,
+        1, &subresourceRange);
+
+    cmdBuf.end();
+
+    cmdBuf.submit(device.getComputeQueue(), fence);
+    if (!fence.wait(device))
+        throw ls::vulkan_error(VK_TIMEOUT, "Failed to wait for clearing fence.");
 }
 
 Core::Sampler Globals::samplerClampBorder;

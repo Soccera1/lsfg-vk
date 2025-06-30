@@ -77,6 +77,7 @@ namespace Vulkan::Core {
         DescriptorSetUpdateBuilder& add(VkDescriptorType type, const Image& image);
         DescriptorSetUpdateBuilder& add(VkDescriptorType type, const Sampler& sampler);
         DescriptorSetUpdateBuilder& add(VkDescriptorType type, const Buffer& buffer);
+        DescriptorSetUpdateBuilder& add(VkDescriptorType type); // empty entry
 
         /// Add a list of resources to the descriptor set update.
         DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::vector<Image>& images) {
@@ -96,6 +97,14 @@ namespace Vulkan::Core {
         template<std::size_t N>
         DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::array<Buffer, N>& buffers) {
             for (const auto& buffer : buffers) this->add(type, buffer); return *this; }
+
+        /// Add an optional resource to the descriptor set update.
+        DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::optional<Image>& image) {
+            if (image.has_value()) this->add(type, *image); return *this; }
+        DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::optional<Sampler>& sampler) {
+            if (sampler.has_value()) this->add(type, *sampler); return *this; }
+        DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::optional<Buffer>& buffer) {
+            if (buffer.has_value()) this->add(type, *buffer); return *this; }
 
         /// Finish building the descriptor set update.
         void build() const;
