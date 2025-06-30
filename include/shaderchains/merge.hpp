@@ -34,11 +34,11 @@ namespace Vulkan::Shaderchains {
         /// @throws ls::vulkan_error if resource creation fails.
         ///
         Merge(const Device& device, const Core::DescriptorPool& pool,
-            const Core::Image& inImg1,
-            const Core::Image& inImg2,
-            const Core::Image& inImg3,
-            const Core::Image& inImg4,
-            const Core::Image& inImg5);
+            Core::Image inImg1,
+            Core::Image inImg2,
+            Core::Image inImg3,
+            Core::Image inImg4,
+            Core::Image inImg5);
 
         ///
         /// Dispatch the shaderchain.

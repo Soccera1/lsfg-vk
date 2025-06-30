@@ -33,8 +33,8 @@ namespace Vulkan::Shaderchains {
         /// @throws ls::vulkan_error if resource creation fails.
         ///
         Extract(const Device& device, const Core::DescriptorPool& pool,
-            const Core::Image& inImg1,
-            const Core::Image& inImg2,
+            Core::Image inImg1,
+            Core::Image inImg2,
             VkExtent2D outExtent);
 
         ///
