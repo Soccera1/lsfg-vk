@@ -14,7 +14,7 @@ namespace Vulkan::Shaderchains {
     ///
     /// Shader chain alpha.
     ///
-    /// Takes an 8-bit R texture creates four quarter-sized 8-bit RGBA textures.
+    /// Takes an 8-bit R image creates four quarter-sized 8-bit RGBA images.
     ///
     class Alpha {
     public:
@@ -23,12 +23,12 @@ namespace Vulkan::Shaderchains {
         ///
         /// @param device The Vulkan device to create the resources on.
         /// @param pool The descriptor pool to allocate in.
-        /// @param inImage The input texture to process
+        /// @param inImg The input image to process
         ///
         /// @throws ls::vulkan_error if resource creation fails.
         ///
         Alpha(const Device& device, const Core::DescriptorPool& pool,
-            const Core::Image& inImage);
+            const Core::Image& inImg);
 
         ///
         /// Dispatch the shaderchain.
@@ -40,7 +40,7 @@ namespace Vulkan::Shaderchains {
         void Dispatch(const Core::CommandBuffer& buf);
 
         /// Get the output images.
-        [[nodiscard]] const auto& getOutImages() const { return this->outImages; }
+        [[nodiscard]] const auto& getOutImages() const { return this->outImgs; }
 
         /// Trivially copyable, moveable and destructible
         Alpha(const Alpha&) noexcept = default;
@@ -53,13 +53,13 @@ namespace Vulkan::Shaderchains {
         std::vector<Core::Pipeline> pipelines{4};
         std::vector<Core::DescriptorSet> descriptorSets{4};
 
-        Core::Image inImage;
+        Core::Image inImg;
 
-        std::vector<Core::Image> tempTex1{2}; // half-size
-        std::vector<Core::Image> tempTex2{2}; // half-size
-        std::vector<Core::Image> tempTex3{4}; // quarter-size
+        std::vector<Core::Image> tempImgs1{2}; // half-size
+        std::vector<Core::Image> tempImgs2{2}; // half-size
+        std::vector<Core::Image> tempImgs3{4}; // quarter-size
 
-        std::vector<Core::Image> outImages{4}; // quarter-size
+        std::vector<Core::Image> outImgs{4}; // quarter-size
     };
 
 }

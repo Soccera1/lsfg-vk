@@ -15,7 +15,7 @@ namespace Vulkan::Shaderchains {
     ///
     /// Downsample shader.
     ///
-    /// Takes an 8-bit RGBA texture and downsamples it into 7x 8-bit R textures.
+    /// Takes an 8-bit RGBA image and downsamples it into 7x 8-bit R images.
     ///
     class Downsample {
     public:
@@ -24,12 +24,12 @@ namespace Vulkan::Shaderchains {
         ///
         /// @param device The Vulkan device to create the resources on.
         /// @param pool The descriptor pool to allocate in.
-        /// @param inImage The input image to downsample.
+        /// @param inImg The input image to downsample.
         ///
         /// @throws ls::vulkan_error if resource creation fails.
         ///
         Downsample(const Device& device, const Core::DescriptorPool& pool,
-            const Core::Image& inImage);
+            const Core::Image& inImg);
 
         ///
         /// Dispatch the shaderchain.
@@ -41,7 +41,7 @@ namespace Vulkan::Shaderchains {
         void Dispatch(const Core::CommandBuffer& buf);
 
         /// Get the output images.
-        [[nodiscard]] const auto& getOutImages() const { return this->outImages; }
+        [[nodiscard]] const auto& getOutImages() const { return this->outImgs; }
 
         /// Trivially copyable, moveable and destructible
         Downsample(const Downsample&) noexcept = default;
@@ -55,9 +55,9 @@ namespace Vulkan::Shaderchains {
         Core::DescriptorSet descriptorSet;
         Core::Buffer buffer;
 
-        Core::Image inImage;
+        Core::Image inImg;
 
-        std::vector<Core::Image> outImages{7};
+        std::vector<Core::Image> outImgs{7};
     };
 
 }
