@@ -1,5 +1,5 @@
 #include "core/descriptorpool.hpp"
-#include "utils/exceptions.hpp"
+#include "utils.hpp"
 
 #include <array>
 

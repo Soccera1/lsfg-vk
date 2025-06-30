@@ -1,5 +1,5 @@
 #include "core/image.hpp"
-#include "utils/exceptions.hpp"
+#include "utils.hpp"
 
 #include <optional>
 

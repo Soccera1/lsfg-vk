@@ -6,8 +6,7 @@
 #include "device.hpp"
 #include "instance.hpp"
 #include "shaderchains/downsample.hpp"
-#include "utils/global.hpp"
-#include "utils/upload.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 
@@ -48,7 +47,7 @@ int main() {
         VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT
     );
-    Upload::upload(device, commandPool, inputImage, "rsc/images/source.dds");
+    Utils::uploadImage(device, commandPool, inputImage, "rsc/images/source.dds");
 
     // create the shaderchains
     Shaderchains::Downsample downsample(device, descriptorPool, inputImage);

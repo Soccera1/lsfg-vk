@@ -1,6 +1,5 @@
 #include "shaderchains/downsample.hpp"
-#include "utils/global.hpp"
-#include "utils/barriers.hpp"
+#include "utils.hpp"
 
 using namespace Vulkan::Shaderchains;
 
@@ -43,7 +42,7 @@ void Downsample::Dispatch(const Core::CommandBuffer& buf) {
     const uint32_t threadsX = (extent.width + 63) >> 6;
     const uint32_t threadsY = (extent.height + 63) >> 6;
 
-    Barriers::insertBarrier(
+    Utils::insertBarrier(
         buf,
         this->outImages,
         { this->inImage }

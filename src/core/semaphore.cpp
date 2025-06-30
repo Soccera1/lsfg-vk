@@ -1,5 +1,5 @@
 #include "core/semaphore.hpp"
-#include "utils/exceptions.hpp"
+#include "utils.hpp"
 
 using namespace Vulkan::Core;
 

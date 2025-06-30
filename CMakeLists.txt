@@ -19,7 +19,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 file(GLOB SOURCES
     "src/core/*.cpp"
     "src/shaderchains/*.cpp"
-    "src/utils/*.cpp"
     "src/*.cpp"
 )
 

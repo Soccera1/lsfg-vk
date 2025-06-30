@@ -1,5 +1,5 @@
 #include "device.hpp"
-#include "utils/exceptions.hpp"
+#include "utils.hpp"
 
 #include <optional>
 #include <vector>

@@ -1,5 +1,5 @@
 #include "instance.hpp"
-#include "utils/exceptions.hpp"
+#include "utils.hpp"
 
 #include <vector>
 
