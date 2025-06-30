@@ -1,28 +1,36 @@
-#include "shaderchains/alpha.hpp"
+#include "shaderchains/zeta.hpp"
 #include "utils.hpp"
 
 using namespace Vulkan::Shaderchains;
 
-Alpha::Alpha(const Device& device, const Core::DescriptorPool& pool,
-        Core::Image inImg)
-        : inImg(std::move(inImg)) {
+Zeta::Zeta(const Device& device, const Core::DescriptorPool& pool,
+        std::array<Core::Image, 3> inImgs1,
+        Core::Image inImg2,
+        Core::Image inImg3)
+        : inImgs1(std::move(inImgs1)),
+          inImg2(std::move(inImg2)),
+          inImg3(std::move(inImg3)) {
     this->shaderModules = {{
-        Core::ShaderModule(device, "rsc/shaders/alpha/0.spv",
+        Core::ShaderModule(device, "rsc/shaders/zeta/0.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/alpha/1.spv",
-            { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/alpha/2.spv",
-            { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/alpha/3.spv",
+              { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+        Core::ShaderModule(device, "rsc/shaders/zeta/1.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
+              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+        Core::ShaderModule(device, "rsc/shaders/zeta/2.spv",
+            { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
+              { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+        Core::ShaderModule(device, "rsc/shaders/zeta/3.spv",
+            { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
+              { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } })
     }};
     for (size_t i = 0; i < 4; i++) {
         this->pipelines.at(i) = Core::Pipeline(device,
@@ -30,75 +38,66 @@ Alpha::Alpha(const Device& device, const Core::DescriptorPool& pool,
         this->descriptorSets.at(i) = Core::DescriptorSet(device, pool,
             this->shaderModules.at(i));
     }
+    this->buffer = Core::Buffer(device, Globals::fgBuffer, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
-    const auto extent = this->inImg.getExtent();
+    const auto extent = this->inImgs1.at(0).getExtent();
 
-    const VkExtent2D halfExtent = {
-        .width = (extent.width + 1) >> 1,
-        .height = (extent.height + 1) >> 1
-    };
-    for (size_t i = 0; i < 2; i++) {
+    for (size_t i = 0; i < 4; i++) {
         this->tempImgs1.at(i) = Core::Image(device,
-            halfExtent,
+            extent,
             VK_FORMAT_R8G8B8A8_UNORM,
             VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT);
         this->tempImgs2.at(i) = Core::Image(device,
-            halfExtent,
+            extent,
             VK_FORMAT_R8G8B8A8_UNORM,
             VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
-    const VkExtent2D quarterExtent = {
-        .width = (extent.width + 3) >> 2,
-        .height = (extent.height + 3) >> 2
-    };
-    for (size_t i = 0; i < 4; i++) {
-        this->tempImgs3.at(i) = Core::Image(device,
-            quarterExtent,
-            VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT);
-        this->outImgs.at(i) = Core::Image(device,
-            quarterExtent,
-            VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT);
-    }
+    this->outImg = Core::Image(device,
+        extent,
+        VK_FORMAT_R16G16B16A16_UNORM,
+        VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT);
 
     this->descriptorSets.at(0).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImgs1)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1)
+        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(1).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
+        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(2).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
-        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs3)
+        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1)
+        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(3).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs3)
-        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg3)
+        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg)
+        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
 }
 
-void Alpha::Dispatch(const Core::CommandBuffer& buf) {
-    const auto halfExtent = this->tempImgs1.at(0).getExtent();
-    const auto quarterExtent = this->tempImgs3.at(0).getExtent();
+void Zeta::Dispatch(const Core::CommandBuffer& buf) {
+    const auto extent = this->tempImgs1.at(0).getExtent();
 
     // first pass
-    uint32_t threadsX = (halfExtent.width + 7) >> 3;
-    uint32_t threadsY = (halfExtent.height + 7) >> 3;
+    const uint32_t threadsX = (extent.width + 7) >> 3;
+    const uint32_t threadsY = (extent.height + 7) >> 3;
 
     Utils::BarrierBuilder(buf)
-        .addW2R(this->inImg)
+        .addW2R(this->inImgs1)
         .addR2W(this->tempImgs1)
         .build();
 
@@ -117,12 +116,9 @@ void Alpha::Dispatch(const Core::CommandBuffer& buf) {
     buf.dispatch(threadsX, threadsY, 1);
 
     // third pass
-    threadsX = (quarterExtent.width + 7) >> 3;
-    threadsY = (quarterExtent.height + 7) >> 3;
-
     Utils::BarrierBuilder(buf)
         .addW2R(this->tempImgs2)
-        .addR2W(this->tempImgs3)
+        .addR2W(this->tempImgs1)
         .build();
 
     this->pipelines.at(2).bind(buf);
@@ -131,8 +127,10 @@ void Alpha::Dispatch(const Core::CommandBuffer& buf) {
 
     // fourth pass
     Utils::BarrierBuilder(buf)
-        .addW2R(this->tempImgs3)
-        .addR2W(this->outImgs)
+        .addW2R(this->tempImgs1)
+        .addW2R(this->inImg2)
+        .addW2R(this->inImg3)
+        .addR2W(this->outImg)
         .build();
 
     this->pipelines.at(3).bind(buf);

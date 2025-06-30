@@ -36,8 +36,8 @@ namespace Vulkan::Shaderchains {
         /// @throws ls::vulkan_error if resource creation fails.
         ///
         Magic(const Device& device, const Core::DescriptorPool& pool,
-            std::array<Core::Image, 4>& temporalImgs,
-            std::array<Core::Image, 4>& inImgs1,
+            std::array<Core::Image, 4> temporalImgs,
+            std::array<Core::Image, 4> inImgs1,
             Core::Image inImg2,
             Core::Image inImg3,
             std::optional<Core::Image> optImg);
@@ -76,7 +76,7 @@ namespace Vulkan::Shaderchains {
         Core::Image inImg3;
         std::optional<Core::Image> optImg;
 
-        std::array<Core::Image, 3> outImgs1;
+        std::array<Core::Image, 2> outImgs1;
         std::array<Core::Image, 3> outImgs2;
         std::array<Core::Image, 3> outImgs3;
     };

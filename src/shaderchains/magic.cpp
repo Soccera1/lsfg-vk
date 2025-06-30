@@ -4,8 +4,8 @@
 using namespace Vulkan::Shaderchains;
 
 Magic::Magic(const Device& device, const Core::DescriptorPool& pool,
-        std::array<Core::Image, 4>& temporalImgs,
-        std::array<Core::Image, 4>& inImgs1,
+        std::array<Core::Image, 4> temporalImgs,
+        std::array<Core::Image, 4> inImgs1,
         Core::Image inImg2,
         Core::Image inImg3,
         std::optional<Core::Image> optImg)
@@ -22,10 +22,10 @@ Magic::Magic(const Device& device, const Core::DescriptorPool& pool,
     this->descriptorSet = Core::DescriptorSet(device, pool, this->shaderModule);
 
     Globals::FgBuffer data = Globals::fgBuffer;
-    data.firstIterS = !optImg.has_value();
+    data.firstIterS = !this->optImg.has_value();
     this->buffer = Core::Buffer(device, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
-    auto extent = temporalImgs.at(0).getExtent();
+    auto extent = this->temporalImgs.at(0).getExtent();
 
     for (size_t i = 0; i < 2; i++)
         this->outImgs1.at(i) = Core::Image(device,

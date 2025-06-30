@@ -60,7 +60,7 @@ namespace Vulkan::Shaderchains {
         std::array<Core::DescriptorSet, 4> descriptorSets;
         Core::Buffer buffer;
 
-        std::array<Core::Image, 2> inImg;
+        std::array<Core::Image, 2> inImgs;
         std::optional<Core::Image> optImg;
 
         std::array<Core::Image, 2> tempImgs1;

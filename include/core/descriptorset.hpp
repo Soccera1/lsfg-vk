@@ -100,11 +100,11 @@ namespace Vulkan::Core {
 
         /// Add an optional resource to the descriptor set update.
         DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::optional<Image>& image) {
-            if (image.has_value()) this->add(type, *image); return *this; }
+            if (image.has_value()) this->add(type, *image); else this->add(type); return *this; }
         DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::optional<Sampler>& sampler) {
-            if (sampler.has_value()) this->add(type, *sampler); return *this; }
+            if (sampler.has_value()) this->add(type, *sampler); else this->add(type); return *this; }
         DescriptorSetUpdateBuilder& add(VkDescriptorType type, const std::optional<Buffer>& buffer) {
-            if (buffer.has_value()) this->add(type, *buffer); return *this; }
+            if (buffer.has_value()) this->add(type, *buffer); else this->add(type); return *this; }
 
         /// Finish building the descriptor set update.
         void build() const;
