@@ -12,20 +12,17 @@ Delta::Delta(const Device& device, const Core::DescriptorPool& pool,
         Core::ShaderModule(device, "rsc/shaders/delta/0.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         Core::ShaderModule(device, "rsc/shaders/delta/1.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         Core::ShaderModule(device, "rsc/shaders/delta/2.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         Core::ShaderModule(device, "rsc/shaders/delta/3.spv",
-            { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
+            { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } })
@@ -58,7 +55,7 @@ Delta::Delta(const Device& device, const Core::DescriptorPool& pool,
 
     this->outImg = Core::Image(device,
         extent,
-        VK_FORMAT_R16G16B16A16_UNORM,
+        VK_FORMAT_R16G16B16A16_SFLOAT,
         VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT);
 
@@ -66,25 +63,23 @@ Delta::Delta(const Device& device, const Core::DescriptorPool& pool,
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImgs)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(1).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(2).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(3).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg)
-        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
+        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg)
         .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
 }

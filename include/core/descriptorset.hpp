@@ -107,7 +107,7 @@ namespace Vulkan::Core {
             if (buffer.has_value()) this->add(type, *buffer); else this->add(type); return *this; }
 
         /// Finish building the descriptor set update.
-        void build() const;
+        void build();
     private:
         const DescriptorSet* descriptorSet;
         const Device* device;

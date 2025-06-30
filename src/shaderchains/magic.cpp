@@ -14,7 +14,7 @@ Magic::Magic(const Device& device, const Core::DescriptorPool& pool,
           inImg2(std::move(inImg2)), inImg3(std::move(inImg3)),
           optImg(std::move(optImg)) {
     this->shaderModule = Core::ShaderModule(device, "rsc/shaders/magic.spv",
-        { { 1,       VK_DESCRIPTOR_TYPE_SAMPLER },
+        { { 2,       VK_DESCRIPTOR_TYPE_SAMPLER },
           { 4+4+2+1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
           { 3+3+2,   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
           { 1,       VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } });
@@ -48,6 +48,7 @@ Magic::Magic(const Device& device, const Core::DescriptorPool& pool,
 
     this->descriptorSet.update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->temporalImgs)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImgs1)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)

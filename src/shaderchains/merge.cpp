@@ -16,7 +16,7 @@ Merge::Merge(const Device& device, const Core::DescriptorPool& pool,
           inImg4(std::move(inImg4)),
           inImg5(std::move(inImg5)) {
     this->shaderModule = Core::ShaderModule(device, "rsc/shaders/merge.spv",
-        { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
+        { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
           { 5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
           { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
           { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } });
@@ -34,6 +34,7 @@ Merge::Merge(const Device& device, const Core::DescriptorPool& pool,
 
     this->descriptorSet.update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg1)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg3)

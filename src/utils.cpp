@@ -131,7 +131,7 @@ void Utils::uploadImage(const Device& device, const Core::CommandPool& commandPo
         throw ls::vulkan_error(VK_TIMEOUT, "Upload operation timed out");
 }
 
-void Utils::clearWhiteImage(const Device& device, Core::Image& image) {
+void Utils::clearImage(const Device& device, Core::Image& image, bool white) {
     Core::Fence fence(device);
     const Core::CommandPool cmdPool(device);
     Core::CommandBuffer cmdBuf(device, cmdPool);
@@ -158,7 +158,8 @@ void Utils::clearWhiteImage(const Device& device, Core::Image& image) {
     image.setLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     vkCmdPipelineBarrier2(cmdBuf.handle(), &dependencyInfo);
 
-    const VkClearColorValue clearColor = {{ 1.0F, 1.0F, 1.0F, 1.0F }};
+    const float clearValue = white ? 1.0F : 0.0F;
+    const VkClearColorValue clearColor = {{ clearValue, clearValue, clearValue, clearValue }};
     const VkImageSubresourceRange subresourceRange = {
         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
         .levelCount = 1,
@@ -204,6 +205,6 @@ void Globals::uninitializeGlobals() noexcept {
 }
 
 ls::vulkan_error::vulkan_error(VkResult result, const std::string& message)
-    : std::runtime_error(std::format("{} (error {})", message, static_cast<uint32_t>(result))), result(result) {}
+    : std::runtime_error(std::format("{} (error {})", message, static_cast<int32_t>(result))), result(result) {}
 
 ls::vulkan_error::~vulkan_error() noexcept = default;

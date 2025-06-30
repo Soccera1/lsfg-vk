@@ -77,10 +77,11 @@ namespace Vulkan::Utils {
     ///
     /// @param device The Vulkan device.
     /// @param image The image to clear.
+    /// @param white If true, the image will be cleared to white, otherwise to black.
     ///
     /// @throws ls::vulkan_error If the Vulkan image cannot be cleared.
     ///
-    void clearWhiteImage(const Device& device, Core::Image& image);
+    void clearImage(const Device& device, Core::Image& image, bool white = false);
 
 }
 

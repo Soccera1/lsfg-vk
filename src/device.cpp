@@ -3,11 +3,13 @@
 
 #include <optional>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 using namespace Vulkan;
 
 const std::vector<const char*> requiredExtensions = {
-    "VK_KHR_external_memory_fd"
+    "VK_KHR_external_memory_fd",
+    "VK_EXT_robustness2",
 };
 
 Device::Device(const Instance& instance) {
@@ -53,8 +55,13 @@ Device::Device(const Instance& instance) {
 
     // create logical device
     const float queuePriority{1.0F}; // highest priority
+    VkPhysicalDeviceRobustness2FeaturesEXT robustness2{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT,
+        .nullDescriptor = VK_TRUE,
+    };
     VkPhysicalDeviceVulkan13Features features13{
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+        .pNext = &robustness2,
         .synchronization2 = VK_TRUE
     };
     const VkPhysicalDeviceVulkan12Features features12{

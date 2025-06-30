@@ -7,7 +7,7 @@ Gamma::Gamma(const Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 4> temporalImgs,
         std::array<Core::Image, 4> inImgs1,
         Core::Image inImg2,
-        std::optional<Core::Image>& optImg1,
+        std::optional<Core::Image> optImg1, // NOLINT
         std::optional<Core::Image> optImg2,
         VkExtent2D outExtent)
         : temporalImgs(std::move(temporalImgs)),
@@ -16,34 +16,31 @@ Gamma::Gamma(const Device& device, const Core::DescriptorPool& pool,
           optImg2(std::move(optImg2)) {
     this->shaderModules = {{
         Core::ShaderModule(device, "rsc/shaders/gamma/0.spv",
-            { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 8+4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
+            { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
+              { 10, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
         Core::ShaderModule(device, "rsc/shaders/gamma/1.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         Core::ShaderModule(device, "rsc/shaders/gamma/2.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         Core::ShaderModule(device, "rsc/shaders/gamma/3.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         Core::ShaderModule(device, "rsc/shaders/gamma/4.spv",
-            { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 6, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
+            { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
+              { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
         Core::ShaderModule(device, "rsc/shaders/gamma/5.spv",
-            { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
+            { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 6, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } })
     }};
     for (size_t i = 0; i < 6; i++) {
@@ -78,12 +75,13 @@ Gamma::Gamma(const Device& device, const Core::DescriptorPool& pool,
     }
     this->whiteImg = Core::Image(device, outExtent,
         VK_FORMAT_R8G8B8A8_UNORM,
-        VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+        | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT);
 
     this->outImg1 = Core::Image(device,
         extent,
-        VK_FORMAT_R16G16B16A16_UNORM,
+        VK_FORMAT_R16G16B16A16_SFLOAT,
         VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT);
     this->outImg2 = Core::Image(device,
@@ -94,6 +92,7 @@ Gamma::Gamma(const Device& device, const Core::DescriptorPool& pool,
 
     this->descriptorSets.at(0).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->temporalImgs)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImgs1)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg1)
@@ -109,22 +108,20 @@ Gamma::Gamma(const Device& device, const Core::DescriptorPool& pool,
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(1))
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(2))
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(2).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(3).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(4).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg2)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
@@ -133,14 +130,17 @@ Gamma::Gamma(const Device& device, const Core::DescriptorPool& pool,
         .build();
     this->descriptorSets.at(5).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->whiteImg)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->outImg1)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg2)
         .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
 
-    // clear white image
-    Utils::clearWhiteImage(device, this->whiteImg);
+    // clear white image and optImg1 if needed
+    Utils::clearImage(device, this->whiteImg, true);
+    if (!optImg1.has_value())
+        Utils::clearImage(device, this->optImg1);
 }
 
 void Gamma::Dispatch(const Core::CommandBuffer& buf) {
@@ -197,9 +197,6 @@ void Gamma::Dispatch(const Core::CommandBuffer& buf) {
     buf.dispatch(threadsX, threadsY, 1);
 
     // fifth pass
-    threadsX = (extent.width + 31) >> 5;
-    threadsY = (extent.height + 31) >> 5;
-
     Utils::BarrierBuilder(buf)
         .addW2R(this->tempImgs2)
         .addW2R(this->optImg2)

@@ -1,5 +1,6 @@
 #include "core/descriptorset.hpp"
 #include "utils.hpp"
+#include <algorithm>
 
 using namespace Vulkan::Core;
 
@@ -92,17 +93,16 @@ DescriptorSetUpdateBuilder& DescriptorSetUpdateBuilder::add(VkDescriptorType typ
         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
         .dstSet = this->descriptorSet->handle(),
         .dstBinding = static_cast<uint32_t>(this->entries.size()),
-        .descriptorCount = 0,
+        .descriptorCount = 1,
         .descriptorType = type,
-        .pImageInfo = nullptr,
+        .pImageInfo = new VkDescriptorImageInfo {
+        },
         .pBufferInfo = nullptr
     });
     return *this;
 }
 
-void DescriptorSetUpdateBuilder::build() const {
-    if (this->entries.empty()) return;
-
+void DescriptorSetUpdateBuilder::build() {
     vkUpdateDescriptorSets(this->device->handle(),
         static_cast<uint32_t>(this->entries.size()),
         this->entries.data(), 0, nullptr);

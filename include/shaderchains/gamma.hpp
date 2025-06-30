@@ -42,7 +42,7 @@ namespace Vulkan::Shaderchains {
             std::array<Core::Image, 4> temporalImgs,
             std::array<Core::Image, 4> inImgs1,
             Core::Image inImg2,
-            std::optional<Core::Image>& optImg1,
+            std::optional<Core::Image> optImg1,
             std::optional<Core::Image> optImg2,
             VkExtent2D outExtent);
 

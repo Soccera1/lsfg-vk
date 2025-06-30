@@ -10,7 +10,7 @@ Extract::Extract(const Device& device, const Core::DescriptorPool& pool,
         : inImg1(std::move(inImg1)),
           inImg2(std::move(inImg2)) {
     this->shaderModule = Core::ShaderModule(device, "rsc/shaders/extract.spv",
-        { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
+        { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
           { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
           { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
           { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } });
@@ -21,7 +21,8 @@ Extract::Extract(const Device& device, const Core::DescriptorPool& pool,
     this->whiteImg = Core::Image(device,
         outExtent,
         VK_FORMAT_R8G8B8A8_UNORM,
-        VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+        | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT);
     this->outImg = Core::Image(device,
         outExtent,
@@ -31,6 +32,7 @@ Extract::Extract(const Device& device, const Core::DescriptorPool& pool,
 
     this->descriptorSet.update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->whiteImg)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg1)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
@@ -39,7 +41,7 @@ Extract::Extract(const Device& device, const Core::DescriptorPool& pool,
         .build();
 
     // clear white image
-    Utils::clearWhiteImage(device, this->whiteImg);
+    Utils::clearImage(device, this->whiteImg, true);
 }
 
 void Extract::Dispatch(const Core::CommandBuffer& buf) {

@@ -12,23 +12,19 @@ Beta::Beta(const Device& device, const Core::DescriptorPool& pool,
         Core::ShaderModule(device, "rsc/shaders/beta/0.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 8+4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         Core::ShaderModule(device, "rsc/shaders/beta/1.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         Core::ShaderModule(device, "rsc/shaders/beta/2.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         Core::ShaderModule(device, "rsc/shaders/beta/3.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         Core::ShaderModule(device, "rsc/shaders/beta/4.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
@@ -71,25 +67,21 @@ Beta::Beta(const Device& device, const Core::DescriptorPool& pool,
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->temporalImgs)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImgs)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(1).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(2).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(3).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
         .build();
     this->descriptorSets.at(4).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
