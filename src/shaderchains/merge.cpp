@@ -20,7 +20,8 @@ Merge::Merge(const Device& device, const Core::DescriptorPool& pool,
           { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
           { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } });
     this->pipeline = Core::Pipeline(device, this->shaderModule);
-    this->descriptorSet = Core::DescriptorSet(device, pool, this->shaderModule);
+    for (size_t i = 0; i < 2; i++)
+        this->descriptorSets.at(i) = Core::DescriptorSet(device, pool, this->shaderModule);
     this->buffer = Core::Buffer(device, Globals::fgBuffer, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
     auto extent = this->inImg1.getExtent();
@@ -31,20 +32,22 @@ Merge::Merge(const Device& device, const Core::DescriptorPool& pool,
         VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT);
 
-    this->descriptorSet.update(device)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg1)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg3)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg4)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg5)
-        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
-        .build();
+    for (size_t fc = 0; fc < 2; fc++) {
+        this->descriptorSets.at(fc).update(device)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, (fc % 2 == 0) ? this->inImg1 : this->inImg2)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, (fc % 2 == 0) ? this->inImg2 : this->inImg1)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg3)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg4)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg5)
+            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg)
+            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
+            .build();
+    }
 }
 
-void Merge::Dispatch(const Core::CommandBuffer& buf) {
+void Merge::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
     auto extent = this->inImg1.getExtent();
 
     // first pass
@@ -61,6 +64,6 @@ void Merge::Dispatch(const Core::CommandBuffer& buf) {
         .build();
 
     this->pipeline.bind(buf);
-    this->descriptorSet.bind(buf, this->pipeline);
+    this->descriptorSets.at(fc).bind(buf, this->pipeline);
     buf.dispatch(threadsX, threadsY, 1);
 }

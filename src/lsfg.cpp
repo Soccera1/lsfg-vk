@@ -9,8 +9,8 @@ Generator::Generator(const Context& context) {
     // TODO: temporal frames
 
     // create shader chains
-    // this->downsampleChain = Shaderchains::Downsample(context.device, context.descPool,
-    //     this->fullFrame0, this->fullFrame1);
+    this->downsampleChain = Shaderchains::Downsample(context.device, context.descPool,
+        this->inImg_0, this->inImg_1);
     // for (size_t i = 0; i < 7; i++)
     //     this->alphaChains.at(i) = Shaderchains::Alpha(context.device, context.descPool,
     //         this->downsampleChain.getOutImages().at(i), i == 0);
@@ -65,20 +65,20 @@ Generator::Generator(const Context& context) {
     //         );
     //     }
     // }
-    // this->mergeChain = Shaderchains::Merge(context.device, context.descPool,
-    //     this->fullFrame0,
-    //     this->fullFrame1,
-    //     this->zetaChains.at(2).getOutImage(),
-    //     this->epsilonChains.at(2).getOutImage(),
-    //     this->deltaChains.at(2).getOutImage()
-    // );
+    this->mergeChain = Shaderchains::Merge(context.device, context.descPool,
+        this->inImg_0,
+        this->inImg_1,
+        this->zetaChains.at(2).getOutImage(),
+        this->epsilonChains.at(2).getOutImage(),
+        this->deltaChains.at(2).getOutImage()
+    );
 }
 
 void Generator::present(const Context& context) {
     Core::CommandBuffer cmdBuffer(context.device, context.cmdPool);
     cmdBuffer.begin();
 
-    // this->downsampleChain.Dispatch(cmdBuffer, fc);
+    this->downsampleChain.Dispatch(cmdBuffer, fc);
     // for (size_t i = 0; i < 7; i++)
     //     this->alphaChains.at(6 - i).Dispatch(cmdBuffer, fc);
     // this->betaChain.Dispatch(cmdBuffer, fc);
@@ -92,7 +92,7 @@ void Generator::present(const Context& context) {
     //     if (i < 2)
     //         this->extractChains.at(i).Dispatch(cmdBuffer);
     // }
-    // this->mergeChain.Dispatch(cmdBuffer, fc);
+    this->mergeChain.Dispatch(cmdBuffer, fc);
 
     cmdBuffer.end();
 

@@ -10,6 +10,8 @@
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
+#include <array>
+
 namespace LSFG::Shaderchains {
 
     ///
@@ -27,8 +29,8 @@ namespace LSFG::Shaderchains {
         ///
         /// @param device The Vulkan device to create the resources on.
         /// @param pool The descriptor pool to use for descriptor sets.
-        /// @param inImg1 The first frame texture
-        /// @param inImg2 The second frame texture
+        /// @param inImg1 The prev full image when fc % 2 == 0
+        /// @param inImg2 The next full image when fc % 2 == 0
         /// @param inImg3 The first related input texture
         /// @param inImg4 The second related input texture
         /// @param inImg5 The third related input texture
@@ -46,10 +48,11 @@ namespace LSFG::Shaderchains {
         /// Dispatch the shaderchain.
         ///
         /// @param buf The command buffer to use for dispatching.
+        /// @param fc The frame count, used to select the input images.
         ///
         /// @throws std::logic_error if the command buffer is not recording.
         ///
-        void Dispatch(const Core::CommandBuffer& buf);
+        void Dispatch(const Core::CommandBuffer& buf, uint64_t fc);
 
         /// Get the output image
         [[nodiscard]] const auto& getOutImage() const { return this->outImg; }
@@ -63,7 +66,7 @@ namespace LSFG::Shaderchains {
     private:
         Core::ShaderModule shaderModule;
         Core::Pipeline pipeline;
-        Core::DescriptorSet descriptorSet;
+        std::array<Core::DescriptorSet, 2> descriptorSets; // one for each input combination
         Core::Buffer buffer;
 
         Core::Image inImg1;

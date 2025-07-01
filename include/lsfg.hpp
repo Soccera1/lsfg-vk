@@ -84,7 +84,7 @@ namespace LSFG {
         Generator& operator=(Generator&&) = default;
         ~Generator() = default;
     private:
-        Core::Image fullFrame0, fullFrame1; // next/prev for fc % 2 == 0
+        Core::Image inImg_0, inImg_1; // inImg_0 is next (inImg_1 prev) when fc % 2 == 0
         uint64_t fc{0};
 
         Shaderchains::Downsample downsampleChain; // FIXME: get rid of default constructors (+ core)

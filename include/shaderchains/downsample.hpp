@@ -28,21 +28,23 @@ namespace LSFG::Shaderchains {
         ///
         /// @param device The Vulkan device to create the resources on.
         /// @param pool The descriptor pool to allocate in.
-        /// @param inImg The input image to downsample.
+        /// @param inImg_0 The next full image to downsample (when fc % 2 == 0)
+        /// @param inImg_1 The next full image to downsample (when fc % 2 == 1)
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Downsample(const Device& device, const Core::DescriptorPool& pool,
-            Core::Image inImg);
+            Core::Image inImg_0, Core::Image inImg_1);
 
         ///
         /// Dispatch the shaderchain.
         ///
         /// @param buf The command buffer to use for dispatching.
+        /// @param fc The frame count, used to select the input image.
         ///
         /// @throws std::logic_error if the command buffer is not recording.
         ///
-        void Dispatch(const Core::CommandBuffer& buf);
+        void Dispatch(const Core::CommandBuffer& buf, uint64_t fc);
 
         /// Get the output images.
         [[nodiscard]] const auto& getOutImages() const { return this->outImgs; }
@@ -56,10 +58,10 @@ namespace LSFG::Shaderchains {
     private:
         Core::ShaderModule shaderModule;
         Core::Pipeline pipeline;
-        Core::DescriptorSet descriptorSet;
+        std::array<Core::DescriptorSet, 2> descriptorSets; // one for each input image
         Core::Buffer buffer;
 
-        Core::Image inImg;
+        Core::Image inImg_0, inImg_1;
 
         std::array<Core::Image, 7> outImgs;
     };
