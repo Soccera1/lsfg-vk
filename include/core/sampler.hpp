@@ -1,7 +1,7 @@
 #ifndef SAMPLER_HPP
 #define SAMPLER_HPP
 
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -26,7 +26,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        Sampler(const Device& device, VkSamplerAddressMode mode);
+        Sampler(const Core::Device& device, VkSamplerAddressMode mode);
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->sampler; }

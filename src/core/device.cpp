@@ -1,10 +1,10 @@
-#include "device.hpp"
+#include "core/device.hpp"
 #include "lsfg.hpp"
 
 #include <optional>
 #include <vector>
 
-using namespace LSFG;
+using namespace LSFG::Core;
 
 const std::vector<const char*> requiredExtensions = {
     "VK_KHR_external_memory_fd",

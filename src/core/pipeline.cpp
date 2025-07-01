@@ -3,7 +3,7 @@
 
 using namespace LSFG::Core;
 
-Pipeline::Pipeline(const Device& device, const ShaderModule& shader) {
+Pipeline::Pipeline(const Core::Device& device, const ShaderModule& shader) {
     // create pipeline layout
     VkDescriptorSetLayout shaderLayout = shader.getLayout();
     const VkPipelineLayoutCreateInfo layoutDesc{

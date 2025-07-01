@@ -3,7 +3,7 @@
 
 using namespace LSFG::Shaderchains;
 
-Extract::Extract(const Device& device, const Core::DescriptorPool& pool,
+Extract::Extract(const Core::Device& device, const Core::DescriptorPool& pool,
         Core::Image inImg1,
         Core::Image inImg2,
         VkExtent2D outExtent)

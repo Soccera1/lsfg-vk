@@ -1,7 +1,7 @@
 #ifndef COMMANDPOOL_HPP
 #define COMMANDPOOL_HPP
 
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -25,7 +25,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        CommandPool(const Device& device);
+        CommandPool(const Core::Device& device);
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->commandPool; }

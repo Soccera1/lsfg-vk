@@ -3,7 +3,7 @@
 
 using namespace LSFG::Shaderchains;
 
-Merge::Merge(const Device& device, const Core::DescriptorPool& pool,
+Merge::Merge(const Core::Device& device, const Core::DescriptorPool& pool,
         Core::Image inImg1,
         Core::Image inImg2,
         Core::Image inImg3,

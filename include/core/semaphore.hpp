@@ -1,7 +1,7 @@
 #ifndef SEMAPHORE_HPP
 #define SEMAPHORE_HPP
 
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -27,7 +27,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        Semaphore(const Device& device, std::optional<uint32_t> initial = std::nullopt);
+        Semaphore(const Core::Device& device, std::optional<uint32_t> initial = std::nullopt);
 
         ///
         /// Signal the semaphore to a specific value.
@@ -38,7 +38,7 @@ namespace LSFG::Core {
         /// @throws std::logic_error if the semaphore is not a timeline semaphore.
         /// @throws LSFG::vulkan_error if signaling fails.
         ///
-        void signal(const Device& device, uint64_t value) const;
+        void signal(const Core::Device& device, uint64_t value) const;
 
         ///
         /// Wait for the semaphore to reach a specific value.
@@ -51,7 +51,7 @@ namespace LSFG::Core {
         /// @throws std::logic_error if the semaphore is not a timeline semaphore.
         /// @throws LSFG::vulkan_error if waiting fails.
         ///
-        [[nodiscard]] bool wait(const Device& device, uint64_t value, uint64_t timeout = UINT64_MAX) const;
+        [[nodiscard]] bool wait(const Core::Device& device, uint64_t value, uint64_t timeout = UINT64_MAX) const;
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->semaphore; }

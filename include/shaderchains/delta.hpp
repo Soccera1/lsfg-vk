@@ -8,7 +8,7 @@
 #include "core/image.hpp"
 #include "core/pipeline.hpp"
 #include "core/shadermodule.hpp"
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <array>
 
@@ -34,7 +34,7 @@ namespace LSFG::Shaderchains {
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Delta(const Device& device, const Core::DescriptorPool& pool,
+        Delta(const Core::Device& device, const Core::DescriptorPool& pool,
             std::array<Core::Image, 2> inImgs,
             std::optional<Core::Image> optImg);
 

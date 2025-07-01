@@ -3,7 +3,7 @@
 
 using namespace LSFG::Core;
 
-CommandPool::CommandPool(const Device& device) {
+CommandPool::CommandPool(const Core::Device& device) {
     // create command pool
     const VkCommandPoolCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,

@@ -3,7 +3,7 @@
 
 using namespace LSFG::Shaderchains;
 
-Downsample::Downsample(const Device& device, const Core::DescriptorPool& pool,
+Downsample::Downsample(const Core::Device& device, const Core::DescriptorPool& pool,
         Core::Image inImg_0, Core::Image inImg_1)
         : inImg_0(std::move(inImg_0)),
           inImg_1(std::move(inImg_1)) {

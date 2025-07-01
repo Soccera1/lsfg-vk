@@ -1,9 +1,9 @@
-#include "instance.hpp"
+#include "core/instance.hpp"
 #include "lsfg.hpp"
 
 #include <vector>
 
-using namespace LSFG;
+using namespace LSFG::Core;
 
 const std::vector<const char*> requiredExtensions = {
 

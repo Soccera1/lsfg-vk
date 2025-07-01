@@ -1,14 +1,14 @@
 #ifndef DEVICE_HPP
 #define DEVICE_HPP
 
-#include "instance.hpp"
+#include "core/instance.hpp"
 
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
 #include <memory>
 
-namespace LSFG {
+namespace LSFG::Core {
 
     ///
     /// C++ wrapper class for a Vulkan device.
@@ -36,8 +36,8 @@ namespace LSFG {
         [[nodiscard]] VkQueue getComputeQueue() const { return this->computeQueue; }
 
         // Trivially copyable, moveable and destructible
-        Device(const Device&) noexcept = default;
-        Device& operator=(const Device&) noexcept = default;
+        Device(const Core::Device&) noexcept = default;
+        Device& operator=(const Core::Device&) noexcept = default;
         Device(Device&&) noexcept = default;
         Device& operator=(Device&&) noexcept = default;
         ~Device() = default;

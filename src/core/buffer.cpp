@@ -6,7 +6,7 @@
 
 using namespace LSFG::Core;
 
-void Buffer::construct(const Device& device, const void* data, VkBufferUsageFlags usage) {
+void Buffer::construct(const Core::Device& device, const void* data, VkBufferUsageFlags usage) {
     // create buffer
     const VkBufferCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,

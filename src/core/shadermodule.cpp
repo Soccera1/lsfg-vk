@@ -5,7 +5,7 @@
 
 using namespace LSFG::Core;
 
-ShaderModule::ShaderModule(const Device& device, const std::string& path,
+ShaderModule::ShaderModule(const Core::Device& device, const std::string& path,
         const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes) {
     // read shader bytecode
     std::ifstream file(path, std::ios::ate | std::ios::binary);

@@ -8,7 +8,7 @@
 #include "core/image.hpp"
 #include "core/pipeline.hpp"
 #include "core/shadermodule.hpp"
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <array>
 
@@ -33,7 +33,7 @@ namespace LSFG::Shaderchains {
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Downsample(const Device& device, const Core::DescriptorPool& pool,
+        Downsample(const Core::Device& device, const Core::DescriptorPool& pool,
             Core::Image inImg_0, Core::Image inImg_1);
 
         ///

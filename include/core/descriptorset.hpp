@@ -8,7 +8,7 @@
 #include "core/pipeline.hpp"
 #include "core/sampler.hpp"
 #include "core/shadermodule.hpp"
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -36,7 +36,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        DescriptorSet(const Device& device,
+        DescriptorSet(const Core::Device& device,
             const DescriptorPool& pool, const ShaderModule& shaderModule);
 
         ///
@@ -44,7 +44,7 @@ namespace LSFG::Core {
         ///
         /// @param device Vulkan device
         ///
-        [[nodiscard]] DescriptorSetUpdateBuilder update(const Device& device) const;
+        [[nodiscard]] DescriptorSetUpdateBuilder update(const Core::Device& device) const;
 
         ///
         /// Bind a descriptor set to a command buffer.
@@ -110,9 +110,9 @@ namespace LSFG::Core {
         void build();
     private:
         const DescriptorSet* descriptorSet;
-        const Device* device;
+        const Core::Device* device;
 
-        DescriptorSetUpdateBuilder(const DescriptorSet& descriptorSet, const Device& device)
+        DescriptorSetUpdateBuilder(const DescriptorSet& descriptorSet, const Core::Device& device)
                 : descriptorSet(&descriptorSet), device(&device) {}
 
         std::vector<VkWriteDescriptorSet> entries;

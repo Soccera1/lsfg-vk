@@ -3,7 +3,7 @@
 
 using namespace LSFG::Shaderchains;
 
-Beta::Beta(const Device& device, const Core::DescriptorPool& pool,
+Beta::Beta(const Core::Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 4> inImgs_0,
         std::array<Core::Image, 4> inImgs_1,
         std::array<Core::Image, 4> inImgs_2)

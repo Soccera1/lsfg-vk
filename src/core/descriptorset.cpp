@@ -3,7 +3,7 @@
 
 using namespace LSFG::Core;
 
-DescriptorSet::DescriptorSet(const Device& device,
+DescriptorSet::DescriptorSet(const Core::Device& device,
         const DescriptorPool& pool, const ShaderModule& shaderModule) {
     // create descriptor set
     VkDescriptorSetLayout layout = shaderModule.getLayout();
@@ -27,7 +27,7 @@ DescriptorSet::DescriptorSet(const Device& device,
     );
 }
 
-DescriptorSetUpdateBuilder DescriptorSet::update(const Device& device) const {
+DescriptorSetUpdateBuilder DescriptorSet::update(const Core::Device& device) const {
     return { *this, device };
 }
 

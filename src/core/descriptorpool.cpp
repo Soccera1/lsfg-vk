@@ -5,7 +5,7 @@
 
 using namespace LSFG::Core;
 
-DescriptorPool::DescriptorPool(const Device& device) {
+DescriptorPool::DescriptorPool(const Core::Device& device) {
     // create descriptor pool
     const std::array<VkDescriptorPoolSize, 4> pools{{ // arbitrary limits
         { .type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = 4096 },

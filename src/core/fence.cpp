@@ -3,7 +3,7 @@
 
 using namespace LSFG::Core;
 
-Fence::Fence(const Device& device) {
+Fence::Fence(const Core::Device& device) {
      // create fence
     const VkFenceCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO
@@ -22,14 +22,14 @@ Fence::Fence(const Device& device) {
     );
 }
 
-void Fence::reset(const Device& device) const {
+void Fence::reset(const Core::Device& device) const {
     VkFence fenceHandle = this->handle();
     auto res = vkResetFences(device.handle(), 1, &fenceHandle);
     if (res != VK_SUCCESS)
         throw LSFG::vulkan_error(res, "Unable to reset fence");
 }
 
-bool Fence::wait(const Device& device, uint64_t timeout) const {
+bool Fence::wait(const Core::Device& device, uint64_t timeout) const {
     VkFence fenceHandle = this->handle();
     auto res = vkWaitForFences(device.handle(), 1, &fenceHandle, VK_TRUE, timeout);
     if (res != VK_SUCCESS && res != VK_TIMEOUT)

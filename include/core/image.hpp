@@ -1,7 +1,7 @@
 #ifndef IMAGE_HPP
 #define IMAGE_HPP
 
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -29,7 +29,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        Image(const Device& device, VkExtent2D extent, VkFormat format,
+        Image(const Core::Device& device, VkExtent2D extent, VkFormat format,
             VkImageUsageFlags usage, VkImageAspectFlags aspectFlags);
 
         /// Get the Vulkan handle.

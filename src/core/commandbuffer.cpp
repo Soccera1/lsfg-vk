@@ -3,7 +3,7 @@
 
 using namespace LSFG::Core;
 
-CommandBuffer::CommandBuffer(const Device& device, const CommandPool& pool) {
+CommandBuffer::CommandBuffer(const Core::Device& device, const CommandPool& pool) {
     // create command buffer
     const VkCommandBufferAllocateInfo desc{
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,

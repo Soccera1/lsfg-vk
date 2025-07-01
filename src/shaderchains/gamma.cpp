@@ -3,7 +3,7 @@
 
 using namespace LSFG::Shaderchains;
 
-Gamma::Gamma(const Device& device, const Core::DescriptorPool& pool,
+Gamma::Gamma(const Core::Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 4> inImgs1_0,
         std::array<Core::Image, 4> inImgs1_1,
         std::array<Core::Image, 4> inImgs1_2,

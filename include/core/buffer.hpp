@@ -1,7 +1,7 @@
 #ifndef BUFFER_HPP
 #define BUFFER_HPP
 
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -28,7 +28,7 @@ namespace LSFG::Core {
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
         template<typename T>
-        Buffer(const Device& device, const T& data, VkBufferUsageFlags usage)
+        Buffer(const Core::Device& device, const T& data, VkBufferUsageFlags usage)
                 : size(sizeof(T)) {
             construct(device, reinterpret_cast<const void*>(&data), usage);
         }
@@ -43,7 +43,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        Buffer(const Device& device, const void* data, size_t size, VkBufferUsageFlags usage)
+        Buffer(const Core::Device& device, const void* data, size_t size, VkBufferUsageFlags usage)
                 : size(size) {
             construct(device, data, usage);
         }
@@ -60,7 +60,7 @@ namespace LSFG::Core {
         Buffer& operator=(Buffer&&) noexcept = default;
         ~Buffer() = default;
     private:
-        void construct(const Device& device, const void* data, VkBufferUsageFlags usage);
+        void construct(const Core::Device& device, const void* data, VkBufferUsageFlags usage);
 
         std::shared_ptr<VkBuffer> buffer;
         std::shared_ptr<VkDeviceMemory> memory;

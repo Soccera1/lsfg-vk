@@ -3,7 +3,7 @@
 
 using namespace LSFG::Shaderchains;
 
-Delta::Delta(const Device& device, const Core::DescriptorPool& pool,
+Delta::Delta(const Core::Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 2> inImgs,
         std::optional<Core::Image> optImg)
         : inImgs(std::move(inImgs)),

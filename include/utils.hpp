@@ -4,9 +4,8 @@
 #include "core/commandbuffer.hpp"
 #include "core/image.hpp"
 #include "core/sampler.hpp"
-#include "device.hpp"
+#include "core/device.hpp"
 
-#include <stdexcept>
 #include <string>
 #include <array>
 
@@ -68,7 +67,7 @@ namespace LSFG::Utils {
     /// @throws std::system_error If the file cannot be opened or read.
     /// @throws ls:vulkan_error If the Vulkan image cannot be created or updated.
     ///
-    void uploadImage(const Device& device,
+    void uploadImage(const Core::Device& device,
         const Core::CommandPool& commandPool,
         Core::Image& image, const std::string& path);
 
@@ -81,7 +80,7 @@ namespace LSFG::Utils {
     ///
     /// @throws LSFG::vulkan_error If the Vulkan image cannot be cleared.
     ///
-    void clearImage(const Device& device, Core::Image& image, bool white = false);
+    void clearImage(const Core::Device& device, Core::Image& image, bool white = false);
 
 }
 
@@ -111,7 +110,7 @@ namespace LSFG::Globals {
     static_assert(sizeof(FgBuffer) == 48, "FgBuffer must be 48 bytes in size.");
 
     /// Initialize global resources.
-    void initializeGlobals(const Device& device);
+    void initializeGlobals(const Core::Device& device);
 
     /// Uninitialize global resources.
     void uninitializeGlobals() noexcept;

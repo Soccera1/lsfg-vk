@@ -3,7 +3,7 @@
 
 using namespace LSFG::Core;
 
-Sampler::Sampler(const Device& device, VkSamplerAddressMode mode) {
+Sampler::Sampler(const Core::Device& device, VkSamplerAddressMode mode) {
     // create sampler
     const VkSamplerCreateInfo desc{
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,

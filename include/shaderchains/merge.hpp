@@ -8,7 +8,7 @@
 #include "core/image.hpp"
 #include "core/pipeline.hpp"
 #include "core/shadermodule.hpp"
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <array>
 
@@ -37,7 +37,7 @@ namespace LSFG::Shaderchains {
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Merge(const Device& device, const Core::DescriptorPool& pool,
+        Merge(const Core::Device& device, const Core::DescriptorPool& pool,
             Core::Image inImg1,
             Core::Image inImg2,
             Core::Image inImg3,

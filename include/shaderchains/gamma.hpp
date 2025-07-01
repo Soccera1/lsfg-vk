@@ -8,7 +8,7 @@
 #include "core/image.hpp"
 #include "core/pipeline.hpp"
 #include "core/shadermodule.hpp"
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <array>
 
@@ -41,7 +41,7 @@ namespace LSFG::Shaderchains {
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Gamma(const Device& device, const Core::DescriptorPool& pool,
+        Gamma(const Core::Device& device, const Core::DescriptorPool& pool,
             std::array<Core::Image, 4> inImgs1_0,
             std::array<Core::Image, 4> inImgs1_1,
             std::array<Core::Image, 4> inImgs1_2,

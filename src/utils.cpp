@@ -58,7 +58,7 @@ void BarrierBuilder::build() const {
     vkCmdPipelineBarrier2(this->commandBuffer->handle(), &dependencyInfo);
 }
 
-void Utils::uploadImage(const Device& device, const Core::CommandPool& commandPool,
+void Utils::uploadImage(const Core::Device& device, const Core::CommandPool& commandPool,
         Core::Image& image, const std::string& path) {
     // read image bytecode
     std::ifstream file(path.data(), std::ios::binary | std::ios::ate);
@@ -130,7 +130,7 @@ void Utils::uploadImage(const Device& device, const Core::CommandPool& commandPo
         throw LSFG::vulkan_error(VK_TIMEOUT, "Upload operation timed out");
 }
 
-void Utils::clearImage(const Device& device, Core::Image& image, bool white) {
+void Utils::clearImage(const Core::Device& device, Core::Image& image, bool white) {
     Core::Fence fence(device);
     const Core::CommandPool cmdPool(device);
     Core::CommandBuffer cmdBuf(device, cmdPool);
@@ -180,7 +180,7 @@ Core::Sampler Globals::samplerClampBorder;
 Core::Sampler Globals::samplerClampEdge;
 Globals::FgBuffer Globals::fgBuffer;
 
-void Globals::initializeGlobals(const Device& device) {
+void Globals::initializeGlobals(const Core::Device& device) {
     // initialize global samplers
     samplerClampBorder = Core::Sampler(device, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER);
     samplerClampEdge =   Core::Sampler(device, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);

@@ -1,7 +1,7 @@
 #ifndef SHADERMODULE_HPP
 #define SHADERMODULE_HPP
 
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -31,7 +31,7 @@ namespace LSFG::Core {
         /// @throws std::system_error if the shader file cannot be opened or read.
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        ShaderModule(const Device& device, const std::string& path,
+        ShaderModule(const Core::Device& device, const std::string& path,
             const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes);
 
         /// Get the Vulkan handle.

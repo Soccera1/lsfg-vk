@@ -3,7 +3,7 @@
 
 using namespace LSFG::Core;
 
-Semaphore::Semaphore(const Device& device, std::optional<uint32_t> initial) {
+Semaphore::Semaphore(const Core::Device& device, std::optional<uint32_t> initial) {
     // create semaphore
     const VkSemaphoreTypeCreateInfo typeInfo{
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
@@ -29,7 +29,7 @@ Semaphore::Semaphore(const Device& device, std::optional<uint32_t> initial) {
     );
 }
 
-void Semaphore::signal(const Device& device, uint64_t value) const {
+void Semaphore::signal(const Core::Device& device, uint64_t value) const {
     if (!this->isTimeline)
         throw std::logic_error("Invalid timeline semaphore");
 
@@ -43,7 +43,7 @@ void Semaphore::signal(const Device& device, uint64_t value) const {
         throw LSFG::vulkan_error(res, "Unable to signal semaphore");
 }
 
-bool Semaphore::wait(const Device& device, uint64_t value, uint64_t timeout) const {
+bool Semaphore::wait(const Core::Device& device, uint64_t value, uint64_t timeout) const {
     if (!this->isTimeline)
         throw std::logic_error("Invalid timeline semaphore");
 

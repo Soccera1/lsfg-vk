@@ -3,7 +3,7 @@
 
 using namespace LSFG::Shaderchains;
 
-Zeta::Zeta(const Device& device, const Core::DescriptorPool& pool,
+Zeta::Zeta(const Core::Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 3> inImgs1,
         Core::Image inImg2,
         Core::Image inImg3)

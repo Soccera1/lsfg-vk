@@ -3,7 +3,7 @@
 
 #include "core/commandbuffer.hpp"
 #include "core/shadermodule.hpp"
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -28,7 +28,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        Pipeline(const Device& device, const ShaderModule& shader);
+        Pipeline(const Core::Device& device, const ShaderModule& shader);
 
         ///
         /// Bind the pipeline to a command buffer.

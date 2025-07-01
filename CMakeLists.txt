@@ -22,10 +22,11 @@ file(GLOB SOURCES
     "src/*.cpp"
 )
 
-add_executable(lsfg-vk-base ${SOURCES})
+add_library(lsfg-vk-base SHARED ${SOURCES})
 
 target_include_directories(lsfg-vk-base
-    PUBLIC include)
+    PRIVATE include
+    PUBLIC public)
 target_link_libraries(lsfg-vk-base
     PUBLIC vulkan)
 target_compile_options(lsfg-vk-base PRIVATE

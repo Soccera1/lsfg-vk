@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace LSFG {
+namespace LSFG::Core {
 
     ///
     /// C++ wrapper class for a Vulkan instance.

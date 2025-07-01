@@ -3,7 +3,7 @@
 
 using namespace LSFG::Shaderchains;
 
-Alpha::Alpha(const Device& device, const Core::DescriptorPool& pool,
+Alpha::Alpha(const Core::Device& device, const Core::DescriptorPool& pool,
         Core::Image inImg)
         : inImg(std::move(inImg)) {
     this->shaderModules = {{

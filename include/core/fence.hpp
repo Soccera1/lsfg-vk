@@ -1,7 +1,7 @@
 #ifndef FENCE_HPP
 #define FENCE_HPP
 
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -25,7 +25,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        Fence(const Device& device);
+        Fence(const Core::Device& device);
 
         ///
         /// Reset the fence to an unsignaled state.
@@ -34,7 +34,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if resetting fails.
         ///
-        void reset(const Device& device) const;
+        void reset(const Core::Device& device) const;
 
         ///
         /// Wait for the fence
@@ -45,7 +45,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if waiting fails.
         ///
-        [[nodiscard]] bool wait(const Device& device, uint64_t timeout = UINT64_MAX) const;
+        [[nodiscard]] bool wait(const Core::Device& device, uint64_t timeout = UINT64_MAX) const;
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->fence; }

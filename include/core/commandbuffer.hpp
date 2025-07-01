@@ -4,7 +4,7 @@
 #include "core/commandpool.hpp"
 #include "core/fence.hpp"
 #include "core/semaphore.hpp"
-#include "device.hpp"
+#include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -45,7 +45,7 @@ namespace LSFG::Core {
         ///
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        CommandBuffer(const Device& device, const CommandPool& pool);
+        CommandBuffer(const Core::Device& device, const CommandPool& pool);
 
         ///
         /// Begin recording commands in the command buffer.
