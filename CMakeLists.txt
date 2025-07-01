@@ -19,6 +19,7 @@ project(lsfg-vk
 add_subdirectory(lsfg-vk-gen)
 
 file(GLOB SOURCES
+    "src/loader/*.cpp"
     "src/*.cpp"
 )
 

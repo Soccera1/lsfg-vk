@@ -1,3 +1,4 @@
+#include "loader/dl.hpp"
 #include "log.hpp"
 
 extern "C" void __attribute__((constructor)) init();
@@ -5,6 +6,9 @@ extern "C" [[noreturn]] void __attribute__((destructor)) deinit();
 
 void init() {
     Log::info("lsfg-vk: init() called");
+
+    // hook loaders
+    Loader::DL::initialize();
 }
 
 void deinit() {
