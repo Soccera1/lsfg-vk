@@ -1,8 +1,10 @@
 #include "application.hpp"
 #include "log.hpp"
 #include "mini/image.hpp"
+#include "mini/semaphore.hpp"
 
 #include <lsfg.hpp>
+#include <memory>
 #include <vulkan/vulkan_core.h>
 
 Application::Application(VkDevice device, VkPhysicalDevice physicalDevice,
@@ -38,7 +40,13 @@ SwapchainContext::SwapchainContext(const Application& app, VkSwapchainKHR swapch
         VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT, &frame1fd
     );
-    this->lsfgId = LSFG::createContext(extent.width, extent.height, frame0fd, frame1fd);
+    auto id = LSFG::createContext(extent.width, extent.height, frame0fd, frame1fd);
+    this->lsfgId = std::shared_ptr<int32_t>(
+        new int32_t(id),
+        [](const int32_t* id) {
+            LSFG::deleteContext(*id);
+        }
+    );
 }
 
 void Application::presentSwapchain(VkSwapchainKHR handle, VkQueue queue,
@@ -63,14 +71,6 @@ void SwapchainContext::present(const Application& app, VkQueue queue,
     auto res = vkQueuePresentKHR(queue, &presentInfo);
     if (res != VK_SUCCESS) // FIXME: somehow return VK_SUBOPTIMAL_KHR
         throw LSFG::vulkan_error(res, "Failed to present swapchain");
-}
-
-SwapchainContext::~SwapchainContext() {
-    try {
-        LSFG::deleteContext(this->lsfgId);
-    } catch (const std::exception&) {
-        return;
-    }
 }
 
 bool Application::removeSwapchain(VkSwapchainKHR handle) {

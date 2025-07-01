@@ -83,10 +83,12 @@ void CommandBuffer::submit(VkQueue queue, std::optional<Fence> fence,
         timelineInfo.pSignalSemaphoreValues = signalSemaphoreValues->data();
     }
 
-    std::vector<VkSemaphore> waitSemaphoresHandles(waitSemaphores.size());
+    std::vector<VkSemaphore> waitSemaphoresHandles;
+    waitSemaphoresHandles.reserve(waitSemaphores.size());
     for (const auto& semaphore : waitSemaphores)
         waitSemaphoresHandles.push_back(semaphore.handle());
-    std::vector<VkSemaphore> signalSemaphoresHandles(signalSemaphores.size());
+    std::vector<VkSemaphore> signalSemaphoresHandles;
+    signalSemaphoresHandles.reserve(signalSemaphores.size());
     for (const auto& semaphore : signalSemaphores)
         signalSemaphoresHandles.push_back(semaphore.handle());
 

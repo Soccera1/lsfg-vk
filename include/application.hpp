@@ -130,14 +130,12 @@ public:
     /// Get the swapchain images.
     [[nodiscard]] const std::vector<VkImage>& getImages() const { return this->images; }
 
-    // Non-copyable, trivially moveable
+    // Non-copyable, trivially moveable and destructible
     SwapchainContext(const SwapchainContext&) = delete;
     SwapchainContext& operator=(const SwapchainContext&) = delete;
     SwapchainContext(SwapchainContext&&) = default;
     SwapchainContext& operator=(SwapchainContext&&) = default;
-
-    /// Destructor, cleans up resources.
-    ~SwapchainContext();
+    ~SwapchainContext() = default;
 private:
     // (non-owned resources)
     VkSwapchainKHR swapchain;
@@ -147,7 +145,7 @@ private:
 
     // (owned resources)
     Mini::Image frame_0, frame_1;
-    int32_t lsfgId;
+    std::shared_ptr<int32_t> lsfgId;
 };
 
 #endif // APPLICATION_HPP

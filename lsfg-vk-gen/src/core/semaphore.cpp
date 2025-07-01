@@ -45,6 +45,9 @@ Semaphore::Semaphore(const Core::Device& device, int fd) {
         throw LSFG::vulkan_error(res, "Unable to create semaphore");
 
     // import semaphore from fd
+    auto vkImportSemaphoreFdKHR = reinterpret_cast<PFN_vkImportSemaphoreFdKHR>(
+        vkGetDeviceProcAddr(device.handle(), "vkImportSemaphoreFdKHR"));
+
     const VkImportSemaphoreFdInfoKHR importInfo{
         .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR,
         .semaphore = semaphoreHandle,

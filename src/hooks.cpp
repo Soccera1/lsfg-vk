@@ -7,6 +7,7 @@
 #include <lsfg.hpp>
 
 #include <optional>
+#include <vulkan/vulkan_core.h>
 
 using namespace Hooks;
 
@@ -24,7 +25,8 @@ namespace {
 
         const std::vector<const char*> requiredExtensions = {
             VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
-            VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME
+            VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
+            VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME
         };
         for (const auto& ext : requiredExtensions) {
             auto it = std::ranges::find(extensions, ext);
@@ -49,7 +51,9 @@ namespace {
 
         const std::vector<const char*> requiredExtensions = {
             VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
-            VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME
+            VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME,
+            VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
+            VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME
         };
         for (const auto& ext : requiredExtensions) {
             auto it = std::ranges::find(extensions, ext);

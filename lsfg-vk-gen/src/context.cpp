@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <format>
+#include <optional>
 
 using namespace LSFG;
 
@@ -119,8 +120,8 @@ void Context::present(const Core::Device& device, int inSem, int outSem) {
     cmdBuffer.end();
 
     cmdBuffer.submit(device.getComputeQueue(), std::nullopt,
-        { inSemaphore }, {},
-        { outSemaphore }, {});
+        { inSemaphore }, std::nullopt,
+        { outSemaphore }, std::nullopt);
 
     fc++;
 }
