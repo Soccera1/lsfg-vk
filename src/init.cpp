@@ -1,4 +1,5 @@
 #include "loader/dl.hpp"
+#include "loader/vk.hpp"
 #include "log.hpp"
 
 extern "C" void __attribute__((constructor)) init();
@@ -9,6 +10,7 @@ void init() {
 
     // hook loaders
     Loader::DL::initialize();
+    Loader::VK::initialize();
 }
 
 void deinit() {
