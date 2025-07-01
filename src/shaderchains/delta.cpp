@@ -1,7 +1,7 @@
 #include "shaderchains/delta.hpp"
 #include "utils.hpp"
 
-using namespace Vulkan::Shaderchains;
+using namespace LSFG::Shaderchains;
 
 Delta::Delta(const Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 2> inImgs,

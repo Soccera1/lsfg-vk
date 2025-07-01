@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace Vulkan::Core {
+namespace LSFG::Core {
 
     ///
     /// C++ wrapper class for a Vulkan image.
@@ -27,7 +27,7 @@ namespace Vulkan::Core {
         /// @param usage Usage flags for the image
         /// @param aspectFlags Aspect flags for the image view
         ///
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
         Image(const Device& device, VkExtent2D extent, VkFormat format,
             VkImageUsageFlags usage, VkImageAspectFlags aspectFlags);

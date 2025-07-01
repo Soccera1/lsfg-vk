@@ -10,7 +10,7 @@
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
-namespace Vulkan::Shaderchains {
+namespace LSFG::Shaderchains {
 
     ///
     /// Shader chain extract.
@@ -20,6 +20,8 @@ namespace Vulkan::Shaderchains {
     ///
     class Extract {
     public:
+        Extract() = default;
+
         ///
         /// Initialize the shaderchain.
         ///
@@ -29,7 +31,7 @@ namespace Vulkan::Shaderchains {
         /// @param inImg2 The second type image to process.
         /// @param outExtent The extent of the output image.
         ///
-        /// @throws ls::vulkan_error if resource creation fails.
+        /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Extract(const Device& device, const Core::DescriptorPool& pool,
             Core::Image inImg1,

@@ -1,7 +1,7 @@
 #include "shaderchains/epsilon.hpp"
 #include "utils.hpp"
 
-using namespace Vulkan::Shaderchains;
+using namespace LSFG::Shaderchains;
 
 Epsilon::Epsilon(const Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 3> inImgs1,

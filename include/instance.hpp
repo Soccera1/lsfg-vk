@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace Vulkan {
+namespace LSFG {
 
     ///
     /// C++ wrapper class for a Vulkan instance.
@@ -17,7 +17,7 @@ namespace Vulkan {
         ///
         /// Create the instance.
         ///
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
         Instance();
 

@@ -2,12 +2,13 @@
 #define DEVICE_HPP
 
 #include "instance.hpp"
+
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
 #include <memory>
 
-namespace Vulkan {
+namespace LSFG {
 
     ///
     /// C++ wrapper class for a Vulkan device.
@@ -21,9 +22,9 @@ namespace Vulkan {
         ///
         /// @param instance Vulkan instance
         ///
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        Device(const Vulkan::Instance& instance);
+        Device(const Instance& instance);
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->device; }

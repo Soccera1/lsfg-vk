@@ -1,7 +1,7 @@
 #include "core/pipeline.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
-using namespace Vulkan::Core;
+using namespace LSFG::Core;
 
 Pipeline::Pipeline(const Device& device, const ShaderModule& shader) {
     // create pipeline layout
@@ -14,7 +14,7 @@ Pipeline::Pipeline(const Device& device, const ShaderModule& shader) {
     VkPipelineLayout layoutHandle{};
     auto res = vkCreatePipelineLayout(device.handle(), &layoutDesc, nullptr, &layoutHandle);
     if (res != VK_SUCCESS || !layoutHandle)
-        throw ls::vulkan_error(res, "Failed to create pipeline layout");
+        throw LSFG::vulkan_error(res, "Failed to create pipeline layout");
 
     // create pipeline
     const VkPipelineShaderStageCreateInfo shaderStageInfo{
@@ -32,7 +32,7 @@ Pipeline::Pipeline(const Device& device, const ShaderModule& shader) {
     res = vkCreateComputePipelines(device.handle(),
         VK_NULL_HANDLE, 1, &pipelineDesc, nullptr, &pipelineHandle);
     if (res != VK_SUCCESS || !pipelineHandle)
-        throw ls::vulkan_error(res, "Failed to create compute pipeline");
+        throw LSFG::vulkan_error(res, "Failed to create compute pipeline");
 
     // store layout and pipeline in shared ptr
     this->layout = std::shared_ptr<VkPipelineLayout>(

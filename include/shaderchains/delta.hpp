@@ -12,7 +12,7 @@
 
 #include <array>
 
-namespace Vulkan::Shaderchains {
+namespace LSFG::Shaderchains {
 
     ///
     /// Shader chain delta.
@@ -22,6 +22,8 @@ namespace Vulkan::Shaderchains {
     ///
     class Delta {
     public:
+        Delta() = default;
+
         ///
         /// Initialize the shaderchain.
         ///
@@ -30,7 +32,7 @@ namespace Vulkan::Shaderchains {
         /// @param inImgs The input images to process.
         /// @param optImg An optional additional input from the previous pass.
         ///
-        /// @throws ls::vulkan_error if resource creation fails.
+        /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Delta(const Device& device, const Core::DescriptorPool& pool,
             std::array<Core::Image, 2> inImgs,

@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace Vulkan::Core {
+namespace LSFG::Core {
 
     ///
     /// C++ wrapper class for a Vulkan fence.
@@ -23,7 +23,7 @@ namespace Vulkan::Core {
         ///
         /// @param device Vulkan device
         ///
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
         Fence(const Device& device);
 
@@ -32,7 +32,7 @@ namespace Vulkan::Core {
         ///
         /// @param device Vulkan device
         ///
-        /// @throws ls::vulkan_error if resetting fails.
+        /// @throws LSFG::vulkan_error if resetting fails.
         ///
         void reset(const Device& device) const;
 
@@ -43,7 +43,7 @@ namespace Vulkan::Core {
         /// @param timeout The timeout in nanoseconds, or UINT64_MAX for no timeout.
         /// @returns true if the fence signaled, false if it timed out.
         ///
-        /// @throws ls::vulkan_error if waiting fails.
+        /// @throws LSFG::vulkan_error if waiting fails.
         ///
         [[nodiscard]] bool wait(const Device& device, uint64_t timeout = UINT64_MAX) const;
 

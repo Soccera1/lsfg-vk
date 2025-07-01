@@ -1,7 +1,7 @@
 #include "shaderchains/alpha.hpp"
 #include "utils.hpp"
 
-using namespace Vulkan::Shaderchains;
+using namespace LSFG::Shaderchains;
 
 Alpha::Alpha(const Device& device, const Core::DescriptorPool& pool,
         Core::Image inImg)

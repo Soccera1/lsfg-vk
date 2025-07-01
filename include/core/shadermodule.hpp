@@ -10,7 +10,7 @@
 #include <vector>
 #include <memory>
 
-namespace Vulkan::Core {
+namespace LSFG::Core {
 
     ///
     /// C++ wrapper class for a Vulkan shader module.
@@ -29,7 +29,7 @@ namespace Vulkan::Core {
         /// @param descriptorTypes Descriptor types used in the shader.
         ///
         /// @throws std::system_error if the shader file cannot be opened or read.
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
         ShaderModule(const Device& device, const std::string& path,
             const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes);

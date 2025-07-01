@@ -1,11 +1,10 @@
 #include "device.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
 #include <optional>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
-using namespace Vulkan;
+using namespace LSFG;
 
 const std::vector<const char*> requiredExtensions = {
     "VK_KHR_external_memory_fd",
@@ -17,12 +16,12 @@ Device::Device(const Instance& instance) {
     uint32_t deviceCount{};
     auto res = vkEnumeratePhysicalDevices(instance.handle(), &deviceCount, nullptr);
     if (res != VK_SUCCESS || deviceCount == 0)
-        throw ls::vulkan_error(res, "Failed to enumerate physical devices");
+        throw LSFG::vulkan_error(res, "Failed to enumerate physical devices");
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
     res = vkEnumeratePhysicalDevices(instance.handle(), &deviceCount, devices.data());
     if (res != VK_SUCCESS)
-        throw ls::vulkan_error(res, "Failed to get physical devices");
+        throw LSFG::vulkan_error(res, "Failed to get physical devices");
 
     // find first discrete GPU
     std::optional<VkPhysicalDevice> physicalDevice;
@@ -36,7 +35,7 @@ Device::Device(const Instance& instance) {
         }
     }
     if (!physicalDevice)
-        throw ls::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "No discrete GPU found");
+        throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "No discrete GPU found");
 
     // find queue family indices
     uint32_t familyCount{};
@@ -51,7 +50,7 @@ Device::Device(const Instance& instance) {
             computeFamilyIdx = i;
     }
     if (!computeFamilyIdx)
-        throw ls::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "No compute queue family found");
+        throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "No compute queue family found");
 
     // create logical device
     const float queuePriority{1.0F}; // highest priority
@@ -87,7 +86,7 @@ Device::Device(const Instance& instance) {
     VkDevice deviceHandle{};
     res = vkCreateDevice(*physicalDevice, &deviceCreateInfo, nullptr, &deviceHandle);
     if (res != VK_SUCCESS | deviceHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Failed to create logical device");
+        throw LSFG::vulkan_error(res, "Failed to create logical device");
 
     // get compute queue
     VkQueue queueHandle{};

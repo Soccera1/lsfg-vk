@@ -1,7 +1,7 @@
 #include "shaderchains/beta.hpp"
 #include "utils.hpp"
 
-using namespace Vulkan::Shaderchains;
+using namespace LSFG::Shaderchains;
 
 Beta::Beta(const Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 8> temporalImgs,

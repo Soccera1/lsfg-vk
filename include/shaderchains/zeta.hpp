@@ -12,7 +12,7 @@
 
 #include <array>
 
-namespace Vulkan::Shaderchains {
+namespace LSFG::Shaderchains {
 
     ///
     /// Shader chain zeta.
@@ -22,6 +22,8 @@ namespace Vulkan::Shaderchains {
     ///
     class Zeta {
     public:
+        Zeta() = default;
+
         ///
         /// Initialize the shaderchain.
         ///
@@ -31,7 +33,7 @@ namespace Vulkan::Shaderchains {
         /// @param inImg2 The second type image to process.
         /// @param inImg3 The third type image to process.
         ///
-        /// @throws ls::vulkan_error if resource creation fails.
+        /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Zeta(const Device& device, const Core::DescriptorPool& pool,
             std::array<Core::Image, 3> inImgs1,

@@ -1,8 +1,7 @@
 #include "core/descriptorset.hpp"
-#include "utils.hpp"
-#include <algorithm>
+#include "lsfg.hpp"
 
-using namespace Vulkan::Core;
+using namespace LSFG::Core;
 
 DescriptorSet::DescriptorSet(const Device& device,
         const DescriptorPool& pool, const ShaderModule& shaderModule) {
@@ -17,7 +16,7 @@ DescriptorSet::DescriptorSet(const Device& device,
     VkDescriptorSet descriptorSetHandle{};
     auto res = vkAllocateDescriptorSets(device.handle(), &desc, &descriptorSetHandle);
     if (res != VK_SUCCESS || descriptorSetHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Unable to allocate descriptor set");
+        throw LSFG::vulkan_error(res, "Unable to allocate descriptor set");
 
     /// store set in shared ptr
     this->descriptorSet = std::shared_ptr<VkDescriptorSet>(

@@ -14,7 +14,7 @@
 
 #include <memory>
 
-namespace Vulkan::Core {
+namespace LSFG::Core {
 
     class DescriptorSetUpdateBuilder;
 
@@ -34,7 +34,7 @@ namespace Vulkan::Core {
         /// @param pool Descriptor pool to allocate from
         /// @param shaderModule Shader module to use for the descriptor set
         ///
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
         DescriptorSet(const Device& device,
             const DescriptorPool& pool, const ShaderModule& shaderModule);

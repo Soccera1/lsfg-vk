@@ -1,9 +1,9 @@
 #include "core/image.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
 #include <optional>
 
-using namespace Vulkan::Core;
+using namespace LSFG::Core;
 
 Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
         VkImageUsageFlags usage, VkImageAspectFlags aspectFlags)
@@ -27,7 +27,7 @@ Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
     VkImage imageHandle{};
     auto res = vkCreateImage(device.handle(), &desc, nullptr, &imageHandle);
     if (res != VK_SUCCESS || imageHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Failed to create Vulkan image");
+        throw LSFG::vulkan_error(res, "Failed to create Vulkan image");
 
     // find memory type
     VkPhysicalDeviceMemoryProperties memProps;
@@ -47,7 +47,7 @@ Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
         } // NOLINTEND
     }
     if (!memType.has_value())
-        throw ls::vulkan_error(VK_ERROR_UNKNOWN, "Unable to find memory type for image");
+        throw LSFG::vulkan_error(VK_ERROR_UNKNOWN, "Unable to find memory type for image");
 #pragma clang diagnostic pop
 
     // allocate and bind memory
@@ -59,11 +59,11 @@ Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
     VkDeviceMemory memoryHandle{};
     res = vkAllocateMemory(device.handle(), &allocInfo, nullptr, &memoryHandle);
     if (res != VK_SUCCESS || memoryHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Failed to allocate memory for Vulkan image");
+        throw LSFG::vulkan_error(res, "Failed to allocate memory for Vulkan image");
 
     res = vkBindImageMemory(device.handle(), imageHandle, memoryHandle, 0);
     if (res != VK_SUCCESS)
-        throw ls::vulkan_error(res, "Failed to bind memory to Vulkan image");
+        throw LSFG::vulkan_error(res, "Failed to bind memory to Vulkan image");
 
     // create image view
     const VkImageViewCreateInfo viewDesc{
@@ -87,7 +87,7 @@ Image::Image(const Device& device, VkExtent2D extent, VkFormat format,
     VkImageView viewHandle{};
     res = vkCreateImageView(device.handle(), &viewDesc, nullptr, &viewHandle);
     if (res != VK_SUCCESS || viewHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Failed to create image view");
+        throw LSFG::vulkan_error(res, "Failed to create image view");
 
     // store objects in shared ptr
     this->layout = std::make_shared<VkImageLayout>(VK_IMAGE_LAYOUT_UNDEFINED);

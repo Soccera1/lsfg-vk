@@ -11,7 +11,7 @@
 
 #include <array>
 
-namespace Vulkan::Shaderchains {
+namespace LSFG::Shaderchains {
 
     ///
     /// Shader chain alpha.
@@ -20,6 +20,8 @@ namespace Vulkan::Shaderchains {
     ///
     class Alpha {
     public:
+        Alpha() = default;
+
         ///
         /// Initialize the shaderchain.
         ///
@@ -27,7 +29,7 @@ namespace Vulkan::Shaderchains {
         /// @param pool The descriptor pool to allocate in.
         /// @param inImg The input image to process
         ///
-        /// @throws ls::vulkan_error if resource creation fails.
+        /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Alpha(const Device& device, const Core::DescriptorPool& pool,
             Core::Image inImg);

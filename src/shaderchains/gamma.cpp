@@ -1,7 +1,7 @@
 #include "shaderchains/gamma.hpp"
 #include "utils.hpp"
 
-using namespace Vulkan::Shaderchains;
+using namespace LSFG::Shaderchains;
 
 Gamma::Gamma(const Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 4> temporalImgs,

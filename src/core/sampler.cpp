@@ -1,7 +1,7 @@
 #include "core/sampler.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
-using namespace Vulkan::Core;
+using namespace LSFG::Core;
 
 Sampler::Sampler(const Device& device, VkSamplerAddressMode mode) {
     // create sampler
@@ -18,7 +18,7 @@ Sampler::Sampler(const Device& device, VkSamplerAddressMode mode) {
     VkSampler samplerHandle{};
     auto res = vkCreateSampler(device.handle(), &desc, nullptr, &samplerHandle);
     if (res != VK_SUCCESS || samplerHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Unable to create sampler");
+        throw LSFG::vulkan_error(res, "Unable to create sampler");
 
     // store sampler in shared ptr
     this->sampler = std::shared_ptr<VkSampler>(

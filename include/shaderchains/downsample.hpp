@@ -12,7 +12,7 @@
 
 #include <array>
 
-namespace Vulkan::Shaderchains {
+namespace LSFG::Shaderchains {
 
     ///
     /// Downsample shader.
@@ -21,6 +21,8 @@ namespace Vulkan::Shaderchains {
     ///
     class Downsample {
     public:
+        Downsample() = default;
+
         ///
         /// Initialize the shaderchain.
         ///
@@ -28,7 +30,7 @@ namespace Vulkan::Shaderchains {
         /// @param pool The descriptor pool to allocate in.
         /// @param inImg The input image to downsample.
         ///
-        /// @throws ls::vulkan_error if resource creation fails.
+        /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Downsample(const Device& device, const Core::DescriptorPool& pool,
             Core::Image inImg);

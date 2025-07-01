@@ -1,7 +1,7 @@
 #include "core/semaphore.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
-using namespace Vulkan::Core;
+using namespace LSFG::Core;
 
 Semaphore::Semaphore(const Device& device, std::optional<uint32_t> initial) {
     // create semaphore
@@ -17,7 +17,7 @@ Semaphore::Semaphore(const Device& device, std::optional<uint32_t> initial) {
     VkSemaphore semaphoreHandle{};
     auto res = vkCreateSemaphore(device.handle(), &desc, nullptr, &semaphoreHandle);
     if (res != VK_SUCCESS || semaphoreHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Unable to create semaphore");
+        throw LSFG::vulkan_error(res, "Unable to create semaphore");
 
     // store semaphore in shared ptr
     this->isTimeline = initial.has_value();
@@ -40,7 +40,7 @@ void Semaphore::signal(const Device& device, uint64_t value) const {
     };
     auto res = vkSignalSemaphore(device.handle(), &signalInfo);
     if (res != VK_SUCCESS)
-        throw ls::vulkan_error(res, "Unable to signal semaphore");
+        throw LSFG::vulkan_error(res, "Unable to signal semaphore");
 }
 
 bool Semaphore::wait(const Device& device, uint64_t value, uint64_t timeout) const {
@@ -56,7 +56,7 @@ bool Semaphore::wait(const Device& device, uint64_t value, uint64_t timeout) con
     };
     auto res = vkWaitSemaphores(device.handle(), &waitInfo, timeout);
     if (res != VK_SUCCESS && res != VK_TIMEOUT)
-        throw ls::vulkan_error(res, "Unable to wait for semaphore");
+        throw LSFG::vulkan_error(res, "Unable to wait for semaphore");
 
     return res == VK_SUCCESS;
 }

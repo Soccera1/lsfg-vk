@@ -9,7 +9,7 @@
 
 #include <memory>
 
-namespace Vulkan::Core {
+namespace LSFG::Core {
 
     ///
     /// C++ wrapper class for a Vulkan pipeline.
@@ -26,7 +26,7 @@ namespace Vulkan::Core {
         /// @param device Vulkan device
         /// @param shader Shader module to use for the pipeline.
         ///
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
         Pipeline(const Device& device, const ShaderModule& shader);
 

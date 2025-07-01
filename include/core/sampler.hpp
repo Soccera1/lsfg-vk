@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace Vulkan::Core {
+namespace LSFG::Core {
 
     ///
     /// C++ wrapper class for a Vulkan sampler.
@@ -24,7 +24,7 @@ namespace Vulkan::Core {
         /// @param device Vulkan device
         /// @param mode Address mode for the sampler.
         ///
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
         Sampler(const Device& device, VkSamplerAddressMode mode);
 

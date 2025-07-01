@@ -1,7 +1,7 @@
 #include "shaderchains/downsample.hpp"
 #include "utils.hpp"
 
-using namespace Vulkan::Shaderchains;
+using namespace LSFG::Shaderchains;
 
 Downsample::Downsample(const Device& device, const Core::DescriptorPool& pool,
         Core::Image inImg)

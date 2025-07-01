@@ -1,7 +1,7 @@
 #include "shaderchains/extract.hpp"
 #include "utils.hpp"
 
-using namespace Vulkan::Shaderchains;
+using namespace LSFG::Shaderchains;
 
 Extract::Extract(const Device& device, const Core::DescriptorPool& pool,
         Core::Image inImg1,

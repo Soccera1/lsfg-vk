@@ -12,7 +12,7 @@
 #include <vector>
 #include <memory>
 
-namespace Vulkan::Core {
+namespace LSFG::Core {
 
     /// State of the command buffer.
     enum class CommandBufferState {
@@ -43,7 +43,7 @@ namespace Vulkan::Core {
         /// @param device Vulkan device
         /// @param pool Vulkan command pool
         ///
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
         CommandBuffer(const Device& device, const CommandPool& pool);
 
@@ -51,7 +51,7 @@ namespace Vulkan::Core {
         /// Begin recording commands in the command buffer.
         ///
         /// @throws std::logic_error if the command buffer is in Empty state
-        /// @throws ls::vulkan_error if beginning the command buffer fails.
+        /// @throws LSFG::vulkan_error if beginning the command buffer fails.
         ///
         void begin();
 
@@ -70,7 +70,7 @@ namespace Vulkan::Core {
         /// End recording commands in the command buffer.
         ///
         /// @throws std::logic_error if the command buffer is not in Recording state
-        /// @throws ls::vulkan_error if ending the command buffer fails.
+        /// @throws LSFG::vulkan_error if ending the command buffer fails.
         ///
         void end();
 
@@ -85,7 +85,7 @@ namespace Vulkan::Core {
         /// @param signalSemaphoreValues Values for the semaphores to signal
         ///
         /// @throws std::logic_error if the command buffer is not in Full state.
-        /// @throws ls::vulkan_error if submission fails.
+        /// @throws LSFG::vulkan_error if submission fails.
         ///
         void submit(VkQueue queue, std::optional<Fence> fence,
             const std::vector<Semaphore>& waitSemaphores = {},

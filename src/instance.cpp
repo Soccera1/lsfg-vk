@@ -1,9 +1,9 @@
 #include "instance.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
 #include <vector>
 
-using namespace Vulkan;
+using namespace LSFG;
 
 const std::vector<const char*> requiredExtensions = {
 
@@ -34,7 +34,7 @@ Instance::Instance() {
     VkInstance instanceHandle{};
     auto res = vkCreateInstance(&createInfo, nullptr, &instanceHandle);
     if (res != VK_SUCCESS)
-        throw ls::vulkan_error(res, "Failed to create Vulkan instance");
+        throw LSFG::vulkan_error(res, "Failed to create Vulkan instance");
 
     // store in shared ptr
     this->instance = std::shared_ptr<VkInstance>(

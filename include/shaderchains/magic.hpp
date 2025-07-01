@@ -12,7 +12,7 @@
 
 #include <array>
 
-namespace Vulkan::Shaderchains {
+namespace LSFG::Shaderchains {
 
     ///
     /// Shader chain magic.
@@ -22,6 +22,8 @@ namespace Vulkan::Shaderchains {
     ///
     class Magic {
     public:
+        Magic() = default;
+
         ///
         /// Initialize the shaderchain.
         ///
@@ -33,7 +35,7 @@ namespace Vulkan::Shaderchains {
         /// @param inImg3 The third input image to process, next step up the resolution.
         /// @param optImg An optional additional input from the previous pass.
         ///
-        /// @throws ls::vulkan_error if resource creation fails.
+        /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Magic(const Device& device, const Core::DescriptorPool& pool,
             std::array<Core::Image, 4> temporalImgs,

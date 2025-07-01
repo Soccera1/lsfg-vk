@@ -8,7 +8,7 @@
 #include <optional>
 #include <memory>
 
-namespace Vulkan::Core {
+namespace LSFG::Core {
 
     ///
     /// C++ wrapper class for a Vulkan semaphore.
@@ -25,7 +25,7 @@ namespace Vulkan::Core {
         /// @param device Vulkan device
         /// @param initial Optional initial value for creating a timeline semaphore.
         ///
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
         Semaphore(const Device& device, std::optional<uint32_t> initial = std::nullopt);
 
@@ -36,7 +36,7 @@ namespace Vulkan::Core {
         /// @param value The value to signal the semaphore to.
         ///
         /// @throws std::logic_error if the semaphore is not a timeline semaphore.
-        /// @throws ls::vulkan_error if signaling fails.
+        /// @throws LSFG::vulkan_error if signaling fails.
         ///
         void signal(const Device& device, uint64_t value) const;
 
@@ -49,7 +49,7 @@ namespace Vulkan::Core {
         /// @returns true if the semaphore reached the value, false if it timed out.
         ///
         /// @throws std::logic_error if the semaphore is not a timeline semaphore.
-        /// @throws ls::vulkan_error if waiting fails.
+        /// @throws LSFG::vulkan_error if waiting fails.
         ///
         [[nodiscard]] bool wait(const Device& device, uint64_t value, uint64_t timeout = UINT64_MAX) const;
 

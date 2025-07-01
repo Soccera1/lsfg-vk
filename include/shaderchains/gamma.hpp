@@ -12,7 +12,7 @@
 
 #include <array>
 
-namespace Vulkan::Shaderchains {
+namespace LSFG::Shaderchains {
 
     ///
     /// Shader chain gamma.
@@ -24,6 +24,8 @@ namespace Vulkan::Shaderchains {
     ///
     class Gamma {
     public:
+        Gamma() = default;
+
         ///
         /// Initialize the shaderchain.
         ///
@@ -36,7 +38,7 @@ namespace Vulkan::Shaderchains {
         /// @param optImg2 An optional additional input image for processing non-first passes.
         /// @param outExtent The extent of the output image.
         ///
-        /// @throws ls::vulkan_error if resource creation fails.
+        /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Gamma(const Device& device, const Core::DescriptorPool& pool,
             std::array<Core::Image, 4> temporalImgs,

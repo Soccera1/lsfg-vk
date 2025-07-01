@@ -1,7 +1,7 @@
 #include "core/commandpool.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
-using namespace Vulkan::Core;
+using namespace LSFG::Core;
 
 CommandPool::CommandPool(const Device& device) {
     // create command pool
@@ -12,7 +12,7 @@ CommandPool::CommandPool(const Device& device) {
     VkCommandPool commandPoolHandle{};
     auto res = vkCreateCommandPool(device.handle(), &desc, nullptr, &commandPoolHandle);
     if (res != VK_SUCCESS || commandPoolHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Unable to create command pool");
+        throw LSFG::vulkan_error(res, "Unable to create command pool");
 
     // store command pool in shared ptr
     this->commandPool = std::shared_ptr<VkCommandPool>(

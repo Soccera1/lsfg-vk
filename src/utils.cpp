@@ -1,12 +1,11 @@
 #include "utils.hpp"
 #include "core/buffer.hpp"
+#include "lsfg.hpp"
 
-#include <format>
 #include <fstream>
-#include <vulkan/vulkan_core.h>
 
-using namespace Vulkan;
-using namespace Vulkan::Utils;
+using namespace LSFG;
+using namespace LSFG::Utils;
 
 BarrierBuilder& BarrierBuilder::addR2W(Core::Image& image) {
     this->barriers.emplace_back(VkImageMemoryBarrier2 {
@@ -128,7 +127,7 @@ void Utils::uploadImage(const Device& device, const Core::CommandPool& commandPo
 
     // wait for the upload to complete
     if (!fence.wait(device))
-        throw ls::vulkan_error(VK_TIMEOUT, "Upload operation timed out");
+        throw LSFG::vulkan_error(VK_TIMEOUT, "Upload operation timed out");
 }
 
 void Utils::clearImage(const Device& device, Core::Image& image, bool white) {
@@ -174,7 +173,7 @@ void Utils::clearImage(const Device& device, Core::Image& image, bool white) {
 
     cmdBuf.submit(device.getComputeQueue(), fence);
     if (!fence.wait(device))
-        throw ls::vulkan_error(VK_TIMEOUT, "Failed to wait for clearing fence.");
+        throw LSFG::vulkan_error(VK_TIMEOUT, "Failed to wait for clearing fence.");
 }
 
 Core::Sampler Globals::samplerClampBorder;
@@ -203,8 +202,3 @@ void Globals::uninitializeGlobals() noexcept {
     // uninitialize global constant buffer
     fgBuffer = Globals::FgBuffer();
 }
-
-ls::vulkan_error::vulkan_error(VkResult result, const std::string& message)
-    : std::runtime_error(std::format("{} (error {})", message, static_cast<int32_t>(result))), result(result) {}
-
-ls::vulkan_error::~vulkan_error() noexcept = default;

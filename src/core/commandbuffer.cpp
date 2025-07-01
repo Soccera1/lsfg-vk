@@ -1,7 +1,7 @@
 #include "core/commandbuffer.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
-using namespace Vulkan::Core;
+using namespace LSFG::Core;
 
 CommandBuffer::CommandBuffer(const Device& device, const CommandPool& pool) {
     // create command buffer
@@ -14,7 +14,7 @@ CommandBuffer::CommandBuffer(const Device& device, const CommandPool& pool) {
     VkCommandBuffer commandBufferHandle{};
     auto res = vkAllocateCommandBuffers(device.handle(), &desc, &commandBufferHandle);
     if (res != VK_SUCCESS || commandBufferHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Unable to allocate command buffer");
+        throw LSFG::vulkan_error(res, "Unable to allocate command buffer");
 
     // store command buffer in shared ptr
     this->state = std::make_shared<CommandBufferState>(CommandBufferState::Empty);
@@ -36,7 +36,7 @@ void CommandBuffer::begin() {
     };
     auto res = vkBeginCommandBuffer(*this->commandBuffer, &beginInfo);
     if (res != VK_SUCCESS)
-        throw ls::vulkan_error(res, "Unable to begin command buffer");
+        throw LSFG::vulkan_error(res, "Unable to begin command buffer");
 
     *this->state = CommandBufferState::Recording;
 }
@@ -54,7 +54,7 @@ void CommandBuffer::end() {
 
     auto res = vkEndCommandBuffer(*this->commandBuffer);
     if (res != VK_SUCCESS)
-        throw ls::vulkan_error(res, "Unable to end command buffer");
+        throw LSFG::vulkan_error(res, "Unable to end command buffer");
 
     *this->state = CommandBufferState::Full;
 }
@@ -104,7 +104,7 @@ void CommandBuffer::submit(VkQueue queue, std::optional<Fence> fence,
     };
     auto res = vkQueueSubmit(queue, 1, &submitInfo, fence ? fence->handle() : VK_NULL_HANDLE);
     if (res != VK_SUCCESS)
-        throw ls::vulkan_error(res, "Unable to submit command buffer");
+        throw LSFG::vulkan_error(res, "Unable to submit command buffer");
 
     *this->state = CommandBufferState::Submitted;
 }

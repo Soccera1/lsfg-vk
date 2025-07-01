@@ -1,7 +1,7 @@
 #include "shaderchains/magic.hpp"
 #include "utils.hpp"
 
-using namespace Vulkan::Shaderchains;
+using namespace LSFG::Shaderchains;
 
 Magic::Magic(const Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 4> temporalImgs,

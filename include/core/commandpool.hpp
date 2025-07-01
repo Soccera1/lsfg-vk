@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace Vulkan::Core {
+namespace LSFG::Core {
 
     ///
     /// C++ wrapper class for a Vulkan command pool.
@@ -23,7 +23,7 @@ namespace Vulkan::Core {
         ///
         /// @param device Vulkan device
         ///
-        /// @throws ls::vulkan_error if object creation fails.
+        /// @throws LSFG::vulkan_error if object creation fails.
         ///
         CommandPool(const Device& device);
 

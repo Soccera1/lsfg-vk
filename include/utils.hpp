@@ -10,7 +10,7 @@
 #include <string>
 #include <array>
 
-namespace Vulkan::Utils {
+namespace LSFG::Utils {
 
     ///
     /// Insert memory barriers for images in a command buffer.
@@ -79,13 +79,13 @@ namespace Vulkan::Utils {
     /// @param image The image to clear.
     /// @param white If true, the image will be cleared to white, otherwise to black.
     ///
-    /// @throws ls::vulkan_error If the Vulkan image cannot be cleared.
+    /// @throws LSFG::vulkan_error If the Vulkan image cannot be cleared.
     ///
     void clearImage(const Device& device, Core::Image& image, bool white = false);
 
 }
 
-namespace Vulkan::Globals {
+namespace LSFG::Globals {
 
     /// Global sampler with address mode set to clamp to border.
     extern Core::Sampler samplerClampBorder;
@@ -115,34 +115,6 @@ namespace Vulkan::Globals {
 
     /// Uninitialize global resources.
     void uninitializeGlobals() noexcept;
-
-}
-
-namespace ls {
-
-    /// Simple exception class for Vulkan errors.
-    class vulkan_error : public std::runtime_error {
-    public:
-        ///
-        /// Construct a vulkan_error with a message and a Vulkan result code.
-        ///
-        /// @param result The Vulkan result code associated with the error.
-        /// @param message The error message.
-        ///
-        explicit vulkan_error(VkResult result, const std::string& message);
-
-        /// Get the Vulkan result code associated with this error.
-        [[nodiscard]] VkResult error() const { return this->result; }
-
-        // Trivially copyable, moveable and destructible
-        vulkan_error(const vulkan_error&) = default;
-        vulkan_error(vulkan_error&&) = default;
-        vulkan_error& operator=(const vulkan_error&) = default;
-        vulkan_error& operator=(vulkan_error&&) = default;
-        ~vulkan_error() noexcept override;
-    private:
-        VkResult result;
-    };
 
 }
 

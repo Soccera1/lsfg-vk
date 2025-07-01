@@ -1,9 +1,9 @@
 #include "core/descriptorpool.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
 #include <array>
 
-using namespace Vulkan::Core;
+using namespace LSFG::Core;
 
 DescriptorPool::DescriptorPool(const Device& device) {
     // create descriptor pool
@@ -23,7 +23,7 @@ DescriptorPool::DescriptorPool(const Device& device) {
     VkDescriptorPool poolHandle{};
     auto res = vkCreateDescriptorPool(device.handle(), &desc, nullptr, &poolHandle);
     if (res != VK_SUCCESS || poolHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Unable to create descriptor pool");
+        throw LSFG::vulkan_error(res, "Unable to create descriptor pool");
 
     // store pool in shared ptr
     this->descriptorPool = std::shared_ptr<VkDescriptorPool>(

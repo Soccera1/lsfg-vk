@@ -12,7 +12,7 @@
 
 #include <array>
 
-namespace Vulkan::Shaderchains {
+namespace LSFG::Shaderchains {
 
     ///
     /// Shader chain epsilon.
@@ -22,6 +22,8 @@ namespace Vulkan::Shaderchains {
     ///
     class Epsilon {
     public:
+        Epsilon() = default;
+
         ///
         /// Initialize the shaderchain.
         ///
@@ -31,7 +33,7 @@ namespace Vulkan::Shaderchains {
         /// @param inImg2 The second type image to process.
         /// @param optImg An optional additional input from the previous pass.
         ///
-        /// @throws ls::vulkan_error if resource creation fails.
+        /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Epsilon(const Device& device, const Core::DescriptorPool& pool,
             std::array<Core::Image, 3> inImgs1,

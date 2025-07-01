@@ -1,8 +1,7 @@
 #include "shaderchains/merge.hpp"
 #include "utils.hpp"
-#include <vulkan/vulkan_core.h>
 
-using namespace Vulkan::Shaderchains;
+using namespace LSFG::Shaderchains;
 
 Merge::Merge(const Device& device, const Core::DescriptorPool& pool,
         Core::Image inImg1,

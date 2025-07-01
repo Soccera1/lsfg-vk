@@ -12,7 +12,7 @@
 
 #include <array>
 
-namespace Vulkan::Shaderchains {
+namespace LSFG::Shaderchains {
 
     ///
     /// Shader chain beta.
@@ -22,6 +22,8 @@ namespace Vulkan::Shaderchains {
     ///
     class Beta {
     public:
+        Beta() = default;
+
         ///
         /// Initialize the shaderchain.
         ///
@@ -30,7 +32,7 @@ namespace Vulkan::Shaderchains {
         /// @param temporalImgs The temporal images to use for processing.
         /// @param inImgs The input images to process
         ///
-        /// @throws ls::vulkan_error if resource creation fails.
+        /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Beta(const Device& device, const Core::DescriptorPool& pool,
             std::array<Core::Image, 8> temporalImgs,

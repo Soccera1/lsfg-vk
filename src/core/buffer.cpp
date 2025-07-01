@@ -1,10 +1,10 @@
 #include "core/buffer.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
 #include <algorithm>
 #include <optional>
 
-using namespace Vulkan::Core;
+using namespace LSFG::Core;
 
 void Buffer::construct(const Device& device, const void* data, VkBufferUsageFlags usage) {
     // create buffer
@@ -17,7 +17,7 @@ void Buffer::construct(const Device& device, const void* data, VkBufferUsageFlag
     VkBuffer bufferHandle{};
     auto res = vkCreateBuffer(device.handle(), &desc, nullptr, &bufferHandle);
     if (res != VK_SUCCESS || bufferHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Failed to create Vulkan buffer");
+        throw LSFG::vulkan_error(res, "Failed to create Vulkan buffer");
 
     // find memory type
     VkPhysicalDeviceMemoryProperties memProps;
@@ -38,7 +38,7 @@ void Buffer::construct(const Device& device, const void* data, VkBufferUsageFlag
         } // NOLINTEND
     }
     if (!memType.has_value())
-        throw ls::vulkan_error(VK_ERROR_UNKNOWN, "Unable to find memory type for buffer");
+        throw LSFG::vulkan_error(VK_ERROR_UNKNOWN, "Unable to find memory type for buffer");
 #pragma clang diagnostic pop
 
     // allocate and bind memory
@@ -50,17 +50,17 @@ void Buffer::construct(const Device& device, const void* data, VkBufferUsageFlag
     VkDeviceMemory memoryHandle{};
     res = vkAllocateMemory(device.handle(), &allocInfo, nullptr, &memoryHandle);
     if (res != VK_SUCCESS || memoryHandle == VK_NULL_HANDLE)
-        throw ls::vulkan_error(res, "Failed to allocate memory for Vulkan buffer");
+        throw LSFG::vulkan_error(res, "Failed to allocate memory for Vulkan buffer");
 
     res = vkBindBufferMemory(device.handle(), bufferHandle, memoryHandle, 0);
     if (res != VK_SUCCESS)
-        throw ls::vulkan_error(res, "Failed to bind memory to Vulkan buffer");
+        throw LSFG::vulkan_error(res, "Failed to bind memory to Vulkan buffer");
 
     // upload data to buffer
     uint8_t* buf{};
     res = vkMapMemory(device.handle(), memoryHandle, 0, this->size, 0, reinterpret_cast<void**>(&buf));
     if (res != VK_SUCCESS || buf == nullptr)
-        throw ls::vulkan_error(res, "Failed to map memory for Vulkan buffer");
+        throw LSFG::vulkan_error(res, "Failed to map memory for Vulkan buffer");
     std::copy_n(reinterpret_cast<const uint8_t*>(data), this->size, buf);
     vkUnmapMemory(device.handle(), memoryHandle);
 

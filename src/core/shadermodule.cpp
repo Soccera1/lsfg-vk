@@ -1,9 +1,9 @@
 #include "core/shadermodule.hpp"
-#include "utils.hpp"
+#include "lsfg.hpp"
 
 #include <fstream>
 
-using namespace Vulkan::Core;
+using namespace LSFG::Core;
 
 ShaderModule::ShaderModule(const Device& device, const std::string& path,
         const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes) {
@@ -31,7 +31,7 @@ ShaderModule::ShaderModule(const Device& device, const std::string& path,
     VkShaderModule shaderModuleHandle{};
     auto res = vkCreateShaderModule(device.handle(), &createInfo, nullptr, &shaderModuleHandle);
     if (res != VK_SUCCESS || !shaderModuleHandle)
-        throw ls::vulkan_error(res, "Failed to create shader module");
+        throw LSFG::vulkan_error(res, "Failed to create shader module");
 
     // create descriptor set layout
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
@@ -53,7 +53,7 @@ ShaderModule::ShaderModule(const Device& device, const std::string& path,
     VkDescriptorSetLayout descriptorSetLayout{};
     res = vkCreateDescriptorSetLayout(device.handle(), &layoutDesc, nullptr, &descriptorSetLayout);
     if (res != VK_SUCCESS || !descriptorSetLayout)
-        throw ls::vulkan_error(res, "Failed to create descriptor set layout");
+        throw LSFG::vulkan_error(res, "Failed to create descriptor set layout");
 
     // store module and layout in shared ptr
     this->shaderModule = std::shared_ptr<VkShaderModule>(

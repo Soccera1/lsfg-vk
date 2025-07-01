@@ -10,7 +10,7 @@
 #include "core/shadermodule.hpp"
 #include "device.hpp"
 
-namespace Vulkan::Shaderchains {
+namespace LSFG::Shaderchains {
 
     ///
     /// Shader chain merge.
@@ -20,6 +20,8 @@ namespace Vulkan::Shaderchains {
     ///
     class Merge {
     public:
+        Merge() = default;
+
         ///
         /// Initialize the shaderchain.
         ///
@@ -31,7 +33,7 @@ namespace Vulkan::Shaderchains {
         /// @param inImg4 The second related input texture
         /// @param inImg5 The third related input texture
         ///
-        /// @throws ls::vulkan_error if resource creation fails.
+        /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Merge(const Device& device, const Core::DescriptorPool& pool,
             Core::Image inImg1,
