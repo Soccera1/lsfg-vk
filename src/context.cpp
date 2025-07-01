@@ -1,4 +1,5 @@
 #include "context.hpp"
+#include "core/semaphore.hpp"
 #include "lsfg.hpp"
 
 #include <cassert>
@@ -7,6 +8,18 @@
 using namespace LSFG;
 
 Context::Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1) {
+    // import images
+    this->inImg_0 = Core::Image(device, { width, height },
+        VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        in0);
+    this->inImg_1 = Core::Image(device, { width, height },
+        VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        in1);
+
     // create pools
     this->descPool = Core::DescriptorPool(device);
     this->cmdPool = Core::CommandPool(device);
@@ -81,6 +94,9 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
 }
 
 void Context::present(const Core::Device& device, int inSem, int outSem) {
+    Core::Semaphore inSemaphore(device, inSem);
+    Core::Semaphore outSemaphore(device, outSem);
+
     Core::CommandBuffer cmdBuffer(device, this->cmdPool);
     cmdBuffer.begin();
 
@@ -101,6 +117,10 @@ void Context::present(const Core::Device& device, int inSem, int outSem) {
     this->mergeChain.Dispatch(cmdBuffer, fc);
 
     cmdBuffer.end();
+
+    cmdBuffer.submit(device.getComputeQueue(), std::nullopt,
+        { inSemaphore }, {},
+        { outSemaphore }, {});
 
     fc++;
 }

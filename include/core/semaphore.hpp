@@ -30,6 +30,16 @@ namespace LSFG::Core {
         Semaphore(const Core::Device& device, std::optional<uint32_t> initial = std::nullopt);
 
         ///
+        /// Import a semaphore.
+        ///
+        /// @param device Vulkan device
+        /// @param fd File descriptor to import the semaphore from.
+        ///
+        /// @throws LSFG::vulkan_error if object creation fails.
+        ///
+        Semaphore(const Core::Device& device, int fd);
+
+        ///
         /// Signal the semaphore to a specific value.
         ///
         /// @param device Vulkan device
