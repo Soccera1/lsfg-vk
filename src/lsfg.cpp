@@ -2,6 +2,7 @@
 #include "core/commandbuffer.hpp"
 #include "core/fence.hpp"
 #include "core/image.hpp"
+#include "utils.hpp"
 
 #include <cassert>
 #include <format>
@@ -30,14 +31,14 @@ Generator::Generator(const Context& context) {
             this->downsampleChain.getOutImages().at(i));
     this->betaChain = Shaderchains::Beta(context.device, context.descPool,
         this->alphaChains.at(0).getOutImages0(),
-        this->alphaChains.at(0).getOutImages2(),
-        this->alphaChains.at(0).getOutImages1());
+        this->alphaChains.at(0).getOutImages1(),
+        this->alphaChains.at(0).getOutImages2());
     for (size_t i = 0; i < 7; i++) {
         if (i < 4) {
             this->gammaChains.at(i) = Shaderchains::Gamma(context.device, context.descPool,
                 this->alphaChains.at(6 - i).getOutImages0(),
-                this->alphaChains.at(6 - i).getOutImages2(),
                 this->alphaChains.at(6 - i).getOutImages1(),
+                this->alphaChains.at(6 - i).getOutImages2(),
                 this->betaChain.getOutImages().at(std::min(5UL, 6 - i)),
                 i == 0 ? std::nullopt
                        : std::optional{this->gammaChains.at(i - 1).getOutImage2()},
@@ -48,8 +49,8 @@ Generator::Generator(const Context& context) {
         } else {
             this->magicChains.at(i - 4) = Shaderchains::Magic(context.device, context.descPool,
                 this->alphaChains.at(6 - i).getOutImages0(),
-                this->alphaChains.at(6 - i).getOutImages2(),
                 this->alphaChains.at(6 - i).getOutImages1(),
+                this->alphaChains.at(6 - i).getOutImages2(),
                 i == 4 ? this->gammaChains.at(i - 1).getOutImage2()
                        : this->extractChains.at(i - 5).getOutImage(),
                 i == 4 ? this->gammaChains.at(i - 1).getOutImage1()
@@ -92,10 +93,6 @@ Generator::Generator(const Context& context) {
 }
 
 void Generator::present(const Context& context) {
-    // TEST: upload input images
-    // TODO: implement test, lol
-    // TEST END
-
     Core::CommandBuffer cmdBuffer(context.device, context.cmdPool);
     cmdBuffer.begin();
 
@@ -116,12 +113,6 @@ void Generator::present(const Context& context) {
     this->mergeChain.Dispatch(cmdBuffer, fc);
 
     cmdBuffer.end();
-
-    // TEST: temporary fence submit logic
-    Core::Fence fence(context.device);
-    cmdBuffer.submit(context.device.getComputeQueue(), fence);
-    assert(fence.wait(context.device));
-    // TEST END
 
     fc++;
 }

@@ -13,6 +13,7 @@ Sampler::Sampler(const Device& device, VkSamplerAddressMode mode) {
         .addressModeU = mode,
         .addressModeV = mode,
         .addressModeW = mode,
+        .compareOp = mode == VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE ? VK_COMPARE_OP_ALWAYS : VK_COMPARE_OP_NEVER,
         .maxLod = 15.99609F
     };
     VkSampler samplerHandle{};
