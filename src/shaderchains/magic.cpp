@@ -50,20 +50,20 @@ Magic::Magic(const Device& device, const Core::DescriptorPool& pool,
             VK_IMAGE_ASPECT_COLOR_BIT);
 
     for (size_t fc = 0; fc < 3; fc++) {
-        auto& nextImgs1 = this->inImgs1_0;
-        auto& prevImgs1 = this->inImgs1_2;
+        auto* nextImgs1 = &this->inImgs1_0;
+        auto* prevImgs1 = &this->inImgs1_2;
         if (fc == 1) {
-            nextImgs1 = this->inImgs1_1;
-            prevImgs1 = this->inImgs1_0;
+            nextImgs1 = &this->inImgs1_1;
+            prevImgs1 = &this->inImgs1_0;
         } else if (fc == 2) {
-            nextImgs1 = this->inImgs1_2;
-            prevImgs1 = this->inImgs1_1;
+            nextImgs1 = &this->inImgs1_2;
+            prevImgs1 = &this->inImgs1_1;
         }
         this->descriptorSets.at(fc).update(device)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, prevImgs1)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, nextImgs1)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *prevImgs1)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *nextImgs1)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg3)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg)
@@ -82,18 +82,18 @@ void Magic::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
     const uint32_t threadsX = (extent.width + 7) >> 3;
     const uint32_t threadsY = (extent.height + 7) >> 3;
 
-    auto& nextImgs1 = this->inImgs1_0;
-    auto& prevImgs1 = this->inImgs1_2;
+    auto* nextImgs1 = &this->inImgs1_0;
+    auto* prevImgs1 = &this->inImgs1_2;
     if ((fc % 3) == 1) {
-        nextImgs1 = this->inImgs1_1;
-        prevImgs1 = this->inImgs1_0;
+        nextImgs1 = &this->inImgs1_1;
+        prevImgs1 = &this->inImgs1_0;
     } else if ((fc % 3) == 2) {
-        nextImgs1 = this->inImgs1_2;
-        prevImgs1 = this->inImgs1_1;
+        nextImgs1 = &this->inImgs1_2;
+        prevImgs1 = &this->inImgs1_1;
     }
     Utils::BarrierBuilder(buf)
-        .addW2R(prevImgs1)
-        .addW2R(nextImgs1)
+        .addW2R(*prevImgs1)
+        .addW2R(*nextImgs1)
         .addW2R(this->inImg2)
         .addW2R(this->inImg3)
         .addW2R(this->optImg)

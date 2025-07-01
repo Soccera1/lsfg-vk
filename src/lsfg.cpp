@@ -1,12 +1,26 @@
 #include "lsfg.hpp"
 #include "core/commandbuffer.hpp"
+#include "core/fence.hpp"
+#include "core/image.hpp"
 
+#include <cassert>
 #include <format>
 
 using namespace LSFG;
 
 Generator::Generator(const Context& context) {
-    // TODO: temporal frames
+    // TEST: create temporal images
+    this->inImg_0 = Core::Image(context.device,
+        { 2560, 1411 }, VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT
+    );
+    this->inImg_1 = Core::Image(context.device,
+        { 2560, 1411 }, VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT
+    );
+    // TEST END
 
     // create shader chains
     this->downsampleChain = Shaderchains::Downsample(context.device, context.descPool,
@@ -64,13 +78,13 @@ Generator::Generator(const Context& context) {
             this->extractChains.at(i - 4) = Shaderchains::Extract(context.device, context.descPool,
                 this->zetaChains.at(i - 4).getOutImage(),
                 this->epsilonChains.at(i - 4).getOutImage(),
-                this->extractChains.at(i - 5).getOutImage().getExtent()
+                this->alphaChains.at(6 - i - 1).getOutImages0().at(0).getExtent()
             );
         }
     }
     this->mergeChain = Shaderchains::Merge(context.device, context.descPool,
-        this->inImg_0,
         this->inImg_1,
+        this->inImg_0,
         this->zetaChains.at(2).getOutImage(),
         this->epsilonChains.at(2).getOutImage(),
         this->deltaChains.at(2).getOutImage()
@@ -78,6 +92,10 @@ Generator::Generator(const Context& context) {
 }
 
 void Generator::present(const Context& context) {
+    // TEST: upload input images
+    // TODO: implement test, lol
+    // TEST END
+
     Core::CommandBuffer cmdBuffer(context.device, context.cmdPool);
     cmdBuffer.begin();
 
@@ -99,7 +117,12 @@ void Generator::present(const Context& context) {
 
     cmdBuffer.end();
 
-    // TODO: submit logic
+    // TEST: temporary fence submit logic
+    Core::Fence fence(context.device);
+    cmdBuffer.submit(context.device.getComputeQueue(), fence);
+    assert(fence.wait(context.device));
+    // TEST END
+
     fc++;
 }
 

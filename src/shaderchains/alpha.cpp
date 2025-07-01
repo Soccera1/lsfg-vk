@@ -67,17 +67,20 @@ Alpha::Alpha(const Device& device, const Core::DescriptorPool& pool,
         this->outImgs_0.at(i) = Core::Image(device,
             quarterExtent,
             VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+            | VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             VK_IMAGE_ASPECT_COLOR_BIT);
         this->outImgs_1.at(i) = Core::Image(device,
             quarterExtent,
             VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+            | VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             VK_IMAGE_ASPECT_COLOR_BIT);
         this->outImgs_2.at(i) = Core::Image(device,
             quarterExtent,
             VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+            | VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
@@ -97,13 +100,13 @@ Alpha::Alpha(const Device& device, const Core::DescriptorPool& pool,
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs3)
         .build();
     for (size_t fc = 0; fc < 3; fc++) {
-        auto& outImgs = this->outImgs_0;
-        if (fc == 1) outImgs = this->outImgs_1;
-        else if (fc == 2) outImgs = this->outImgs_2;
+        auto* outImgs = &this->outImgs_0;
+        if (fc == 1) outImgs = &this->outImgs_1;
+        else if (fc == 2) outImgs = &this->outImgs_2;
         this->specialDescriptorSets.at(fc).update(device)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs3)
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outImgs)
+            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, *outImgs)
             .build();
     }
 
@@ -156,12 +159,12 @@ void Alpha::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
     buf.dispatch(threadsX, threadsY, 1);
 
     // fourth pass
-    auto& outImgs = this->outImgs_0;
-    if ((fc % 3) == 1) outImgs = this->outImgs_1;
-    else if ((fc % 3) == 2) outImgs = this->outImgs_2;
+    auto* outImgs = &this->outImgs_0;
+    if ((fc % 3) == 1) outImgs = &this->outImgs_1;
+    else if ((fc % 3) == 2) outImgs = &this->outImgs_2;
     Utils::BarrierBuilder(buf)
         .addW2R(this->tempImgs3)
-        .addR2W(outImgs)
+        .addR2W(*outImgs)
         .build();
 
     this->pipelines.at(3).bind(buf);

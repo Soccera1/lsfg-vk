@@ -42,7 +42,7 @@ Beta::Beta(const Device& device, const Core::DescriptorPool& pool,
     }
     for (size_t i = 0; i < 3; i++)
         this->specialDescriptorSets.at(i) = Core::DescriptorSet(device, pool,
-            this->shaderModules.at(4));
+            this->shaderModules.at(0));
     this->buffer = Core::Buffer(device, Globals::fgBuffer, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
     const auto extent = this->inImgs_0.at(0).getExtent();
@@ -69,23 +69,23 @@ Beta::Beta(const Device& device, const Core::DescriptorPool& pool,
     }
 
     for (size_t fc = 0; fc < 3; fc++) {
-        auto& nextImgs = this->inImgs_0;
-        auto& prevImgs = this->inImgs_2;
-        auto& pprevImgs = this->inImgs_1;
+        auto* nextImgs = &this->inImgs_0;
+        auto* prevImgs = &this->inImgs_2;
+        auto* pprevImgs = &this->inImgs_1;
         if (fc == 1) {
-            nextImgs = this->inImgs_1;
-            prevImgs = this->inImgs_0;
-            pprevImgs = this->inImgs_2;
+            nextImgs = &this->inImgs_1;
+            prevImgs = &this->inImgs_0;
+            pprevImgs = &this->inImgs_2;
         } else if (fc == 2) {
-            nextImgs = this->inImgs_2;
-            prevImgs = this->inImgs_1;
-            pprevImgs = this->inImgs_0;
+            nextImgs = &this->inImgs_2;
+            prevImgs = &this->inImgs_1;
+            pprevImgs = &this->inImgs_0;
         }
         this->specialDescriptorSets.at(fc).update(device)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, pprevImgs)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, prevImgs)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, nextImgs)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *pprevImgs)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *prevImgs)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *nextImgs)
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1)
             .build();
     }

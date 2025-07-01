@@ -98,20 +98,20 @@ Gamma::Gamma(const Device& device, const Core::DescriptorPool& pool,
         VK_IMAGE_ASPECT_COLOR_BIT);
 
     for (size_t fc = 0; fc < 3; fc++) {
-        auto& nextImgs1 = this->inImgs1_0;
-        auto& prevImgs1 = this->inImgs1_2;
+        auto* nextImgs1 = &this->inImgs1_0;
+        auto* prevImgs1 = &this->inImgs1_2;
         if (fc == 1) {
-            nextImgs1 = this->inImgs1_1;
-            prevImgs1 = this->inImgs1_0;
+            nextImgs1 = &this->inImgs1_1;
+            prevImgs1 = &this->inImgs1_0;
         } else if (fc == 2) {
-            nextImgs1 = this->inImgs1_2;
-            prevImgs1 = this->inImgs1_1;
+            nextImgs1 = &this->inImgs1_2;
+            prevImgs1 = &this->inImgs1_1;
         }
         this->specialDescriptorSets.at(fc).update(device)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, prevImgs1)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, nextImgs1)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *prevImgs1)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *nextImgs1)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg1)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg2)
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(0))
@@ -168,18 +168,18 @@ void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
     uint32_t threadsX = (extent.width + 7) >> 3;
     uint32_t threadsY = (extent.height + 7) >> 3;
 
-    auto& nextImgs1 = this->inImgs1_0;
-    auto& prevImgs1 = this->inImgs1_2;
+    auto* nextImgs1 = &this->inImgs1_0;
+    auto* prevImgs1 = &this->inImgs1_2;
     if ((fc % 3) == 1) {
-        nextImgs1 = this->inImgs1_1;
-        prevImgs1 = this->inImgs1_0;
+        nextImgs1 = &this->inImgs1_1;
+        prevImgs1 = &this->inImgs1_0;
     } else if ((fc % 3) == 2) {
-        nextImgs1 = this->inImgs1_2;
-        prevImgs1 = this->inImgs1_1;
+        nextImgs1 = &this->inImgs1_2;
+        prevImgs1 = &this->inImgs1_1;
     }
     Utils::BarrierBuilder(buf)
-        .addW2R(prevImgs1)
-        .addW2R(nextImgs1)
+        .addW2R(*prevImgs1)
+        .addW2R(*nextImgs1)
         .addW2R(this->optImg1)
         .addW2R(this->optImg2)
         .addR2W(this->tempImgs1.at(0))
@@ -200,7 +200,7 @@ void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipelines.at(1).bind(buf);
-    this->descriptorSets.at(1).bind(buf, this->pipelines.at(1));
+    this->descriptorSets.at(0).bind(buf, this->pipelines.at(1));
     buf.dispatch(threadsX, threadsY, 1);
 
     // third pass
@@ -210,7 +210,7 @@ void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipelines.at(2).bind(buf);
-    this->descriptorSets.at(2).bind(buf, this->pipelines.at(2));
+    this->descriptorSets.at(1).bind(buf, this->pipelines.at(2));
     buf.dispatch(threadsX, threadsY, 1);
 
     // fourth pass
@@ -220,7 +220,7 @@ void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipelines.at(3).bind(buf);
-    this->descriptorSets.at(3).bind(buf, this->pipelines.at(3));
+    this->descriptorSets.at(2).bind(buf, this->pipelines.at(3));
     buf.dispatch(threadsX, threadsY, 1);
 
     // fifth pass
@@ -232,7 +232,7 @@ void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipelines.at(4).bind(buf);
-    this->descriptorSets.at(4).bind(buf, this->pipelines.at(4));
+    this->descriptorSets.at(3).bind(buf, this->pipelines.at(4));
     buf.dispatch(threadsX, threadsY, 1);
 
     // sixth pass
@@ -246,6 +246,6 @@ void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipelines.at(5).bind(buf);
-    this->descriptorSets.at(5).bind(buf, this->pipelines.at(5));
+    this->descriptorSets.at(4).bind(buf, this->pipelines.at(5));
     buf.dispatch(threadsX, threadsY, 1);
 }
