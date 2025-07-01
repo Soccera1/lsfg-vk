@@ -33,10 +33,25 @@ public:
     /// @param images The swapchain images.
     ///
     /// @throws std::invalid_argument if the handle is already added.
-    /// @throws ls::vulkan_error if any Vulkan call fails.
+    /// @throws LSFG::vulkan_error if any Vulkan call fails.
     ///
     void addSwapchain(VkSwapchainKHR handle, VkFormat format, VkExtent2D extent,
         const std::vector<VkImage>& images);
+
+    ///
+    /// Present the next frame on a given swapchain.
+    ///
+    /// @param handle The Vulkan handle of the swapchain to present on.
+    /// @param queue The Vulkan queue to present the frame on.
+    /// @param semaphores The semaphores to wait on before presenting.
+    /// @param idx The index of the swapchain image to present.
+    ///
+    /// @throws std::invalid_argument if the handle is not found.
+    /// @throws LSFG::vulkan_error if any Vulkan call fails.
+    ///
+    void presentSwapchain(VkSwapchainKHR handle, VkQueue queue,
+        const std::vector<VkSemaphore>& semaphores, uint32_t idx);
+
 
     ///
     /// Remove a swapchain from the application.
@@ -86,7 +101,7 @@ public:
     /// @param images The swapchain images.
     ///
     /// @throws std::invalid_argument if any parameter is null
-    /// @throws ls::vulkan_error if any Vulkan call fails.
+    /// @throws LSFG::vulkan_error if any Vulkan call fails.
     ///
     SwapchainContext(VkSwapchainKHR swapchain, VkFormat format, VkExtent2D extent,
         const std::vector<VkImage>& images);

@@ -88,6 +88,36 @@ namespace {
         return res;
     }
 
+    VkResult myvkQueuePresentKHR(
+            VkQueue queue,
+            const VkPresentInfoKHR* pPresentInfo) {
+        if (!application.has_value()) {
+            Log::error("Application not initialized, cannot present frame");
+            return VK_ERROR_INITIALIZATION_FAILED;
+        }
+
+        // present the next frame
+        try {
+            std::vector<VkSemaphore> waitSemaphores(pPresentInfo->waitSemaphoreCount);
+            std::copy_n(pPresentInfo->pWaitSemaphores, waitSemaphores.size(), waitSemaphores.data());
+
+            application->presentSwapchain(*pPresentInfo->pSwapchains,
+                queue, waitSemaphores, *pPresentInfo->pImageIndices);
+
+            Log::info("lsfg-vk(hooks): Frame presented successfully");
+        } catch (const LSFG::vulkan_error& e) {
+            Log::error("Encountered Vulkan error {:x} while presenting: {}",
+                static_cast<uint32_t>(e.error()), e.what());
+            return e.error(); // do not exit
+        } catch (const std::exception& e) {
+            Log::error("Encountered error while creating presenting: {}", e.what());
+            exit(EXIT_FAILURE);
+        }
+
+        return VK_SUCCESS;
+    }
+
+
     void myvkDestroySwapchainKHR(
             VkDevice device,
             VkSwapchainKHR swapchain,
@@ -140,6 +170,8 @@ void Hooks::initialize() {
         reinterpret_cast<void*>(myvkCreateSwapchainKHR));
     Loader::VK::registerSymbol("vkDestroySwapchainKHR",
         reinterpret_cast<void*>(myvkDestroySwapchainKHR));
+    Loader::VK::registerSymbol("vkQueuePresentKHR",
+        reinterpret_cast<void*>(myvkQueuePresentKHR));
 
     // register hooks to dynamic loader under libvulkan.so.1
     Loader::DL::File vk1("libvulkan.so.1");
@@ -151,6 +183,8 @@ void Hooks::initialize() {
         reinterpret_cast<void*>(myvkCreateSwapchainKHR));
     vk1.defineSymbol("vkDestroySwapchainKHR",
         reinterpret_cast<void*>(myvkDestroySwapchainKHR));
+    vk1.defineSymbol("vkQueuePresentKHR",
+        reinterpret_cast<void*>(myvkQueuePresentKHR));
     Loader::DL::registerFile(vk1);
 
     // register hooks to dynamic loader under libvulkan.so
@@ -163,5 +197,7 @@ void Hooks::initialize() {
         reinterpret_cast<void*>(myvkCreateSwapchainKHR));
     vk2.defineSymbol("vkDestroySwapchainKHR",
         reinterpret_cast<void*>(myvkDestroySwapchainKHR));
+    vk2.defineSymbol("vkQueuePresentKHR",
+        reinterpret_cast<void*>(myvkQueuePresentKHR));
     Loader::DL::registerFile(vk2);
 }

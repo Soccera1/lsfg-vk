@@ -1,5 +1,7 @@
 #include "application.hpp"
 
+#include <lsfg.hpp>
+
 #include <stdexcept>
 
 Application::Application(VkDevice device, VkPhysicalDevice physicalDevice)
@@ -18,6 +20,33 @@ void Application::addSwapchain(VkSwapchainKHR handle, VkFormat format, VkExtent2
     // initialize the swapchain context
     this->swapchains.emplace(handle, SwapchainContext(handle, format, extent, images));
 }
+
+void Application::presentSwapchain(VkSwapchainKHR handle, VkQueue queue,
+        const std::vector<VkSemaphore>& semaphores, uint32_t idx) {
+    if (handle == VK_NULL_HANDLE)
+        throw std::invalid_argument("Invalid swapchain handle");
+
+    // find the swapchain context
+    auto it = this->swapchains.find(handle);
+    if (it == this->swapchains.end())
+        throw std::logic_error("Swapchain not found");
+
+    // TODO: present
+    const VkPresentInfoKHR presentInfo = {
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .pNext = nullptr,
+        .waitSemaphoreCount = static_cast<uint32_t>(semaphores.size()),
+        .pWaitSemaphores = semaphores.data(),
+        .swapchainCount = 1,
+        .pSwapchains = &handle,
+        .pImageIndices = &idx,
+        .pResults = nullptr // can be null if not needed
+    };
+    auto res = vkQueuePresentKHR(queue, &presentInfo);
+    if (res != VK_SUCCESS) // do NOT check VK_SUBOPTIMAL_KHR
+        throw LSFG::vulkan_error(res, "Failed to present swapchain");
+}
+
 
 SwapchainContext::SwapchainContext(VkSwapchainKHR swapchain, VkFormat format, VkExtent2D extent,
         const std::vector<VkImage>& images)
