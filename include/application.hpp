@@ -18,11 +18,13 @@ public:
     ///
     /// @param device Vulkan device
     /// @param physicalDevice Vulkan physical device
+    /// @param graphicsQueue Vulkan queue for graphics operations
+    /// @param presentQueue Vulkan queue for presentation operations
     ///
-    /// @throws std::invalid_argument if the device or physicalDevice is null.
     /// @throws LSFG::vulkan_error if any Vulkan call fails.
     ///
-    Application(VkDevice device, VkPhysicalDevice physicalDevice);
+    Application(VkDevice device, VkPhysicalDevice physicalDevice,
+        VkQueue graphicsQueue, VkQueue presentQueue);
 
     ///
     /// Add a swapchain to the application.
@@ -32,7 +34,6 @@ public:
     /// @param extent The extent of the images.
     /// @param images The swapchain images.
     ///
-    /// @throws std::invalid_argument if the handle is already added.
     /// @throws LSFG::vulkan_error if any Vulkan call fails.
     ///
     void addSwapchain(VkSwapchainKHR handle, VkFormat format, VkExtent2D extent,
@@ -46,12 +47,10 @@ public:
     /// @param semaphores The semaphores to wait on before presenting.
     /// @param idx The index of the swapchain image to present.
     ///
-    /// @throws std::invalid_argument if the handle is not found.
     /// @throws LSFG::vulkan_error if any Vulkan call fails.
     ///
     void presentSwapchain(VkSwapchainKHR handle, VkQueue queue,
         const std::vector<VkSemaphore>& semaphores, uint32_t idx);
-
 
     ///
     /// Remove a swapchain from the application.
@@ -59,15 +58,16 @@ public:
     /// @param handle The Vulkan handle of the swapchain state to remove.
     /// @return true if the swapchain was removed, false if it was already retired.
     ///
-    /// @throws std::invalid_argument if the handle is null.
-    ///
     bool removeSwapchain(VkSwapchainKHR handle);
-
 
     /// Get the Vulkan device.
     [[nodiscard]] VkDevice getDevice() const { return this->device; }
     /// Get the Vulkan physical device.
     [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const { return this->physicalDevice; }
+    /// Get the Vulkan graphics queue.
+    [[nodiscard]] VkQueue getGraphicsQueue() const { return this->graphicsQueue; }
+    /// Get the Vulkan present queue.
+    [[nodiscard]] VkQueue getPresentQueue() const { return this->presentQueue; }
 
     // Non-copyable and non-movable
     Application(const Application&) = delete;
@@ -81,6 +81,8 @@ private:
     // (non-owned resources)
     VkDevice device;
     VkPhysicalDevice physicalDevice;
+    VkQueue graphicsQueue;
+    VkQueue presentQueue;
 
     // (owned resources)
     std::unordered_map<VkSwapchainKHR, SwapchainContext> swapchains;
@@ -95,16 +97,29 @@ public:
     ///
     /// Create the swapchain context.
     ///
+    /// @param app The application context to use.
     /// @param swapchain The Vulkan swapchain handle.
     /// @param format The format of the swapchain images.
     /// @param extent The extent of the swapchain images.
     /// @param images The swapchain images.
     ///
-    /// @throws std::invalid_argument if any parameter is null
     /// @throws LSFG::vulkan_error if any Vulkan call fails.
     ///
-    SwapchainContext(VkSwapchainKHR swapchain, VkFormat format, VkExtent2D extent,
-        const std::vector<VkImage>& images);
+    SwapchainContext(const Application& app, VkSwapchainKHR swapchain,
+        VkFormat format, VkExtent2D extent, const std::vector<VkImage>& images);
+
+    ///
+    /// Present the next frame
+    ///
+    /// @param app The application context to use
+    /// @param queue The Vulkan queue to present the frame on.
+    /// @param semaphores The semaphores to wait on before presenting.
+    /// @param idx The index of the swapchain image to present.
+    ///
+    /// @throws LSFG::vulkan_error if any Vulkan call fails.
+    ///
+    void present(const Application& app, VkQueue queue,
+        const std::vector<VkSemaphore>& semaphores, uint32_t idx);
 
     /// Get the Vulkan swapchain handle.
     [[nodiscard]] VkSwapchainKHR handle() const { return this->swapchain; }
