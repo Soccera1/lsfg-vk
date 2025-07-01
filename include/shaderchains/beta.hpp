@@ -29,9 +29,9 @@ namespace LSFG::Shaderchains {
         ///
         /// @param device The Vulkan device to create the resources on.
         /// @param pool The descriptor pool to allocate in.
-        /// @param inImgs_0 The next input images to process (when fc % 2 == 0)
-        /// @param inImgs_1 The prev input images to process (when fc % 2 == 0)
-        /// @param inImgs_2 The prev prev input images to process (when fc % 2 == 0)
+        /// @param inImgs_0 The next input images to process (when fc % 3 == 0)
+        /// @param inImgs_1 The prev input images to process (when fc % 3 == 0)
+        /// @param inImgs_2 The prev prev input images to process (when fc % 3 == 0)
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///

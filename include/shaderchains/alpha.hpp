@@ -44,11 +44,11 @@ namespace LSFG::Shaderchains {
         ///
         void Dispatch(const Core::CommandBuffer& buf, uint64_t fc);
 
-        /// Get the output images written to when fc % 2 == 0
+        /// Get the output images written to when fc % 3 == 0
         [[nodiscard]] const auto& getOutImages0() const { return this->outImgs_0; }
-        /// Get the output images written to when fc % 2 == 1
+        /// Get the output images written to when fc % 3 == 1
         [[nodiscard]] const auto& getOutImages1() const { return this->outImgs_1; }
-        /// Get the output images written to when fc % 2 == 2
+        /// Get the output images written to when fc % 3 == 2
         [[nodiscard]] const auto& getOutImages2() const { return this->outImgs_2; }
 
         /// Trivially copyable, moveable and destructible

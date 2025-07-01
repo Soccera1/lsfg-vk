@@ -37,7 +37,7 @@ Beta::Beta(const Device& device, const Core::DescriptorPool& pool,
         this->pipelines.at(i) = Core::Pipeline(device,
             this->shaderModules.at(i));
         if (i == 0) continue; // first shader has special logic
-        this->descriptorSets.at(i+1) = Core::DescriptorSet(device, pool,
+        this->descriptorSets.at(i - 1) = Core::DescriptorSet(device, pool,
             this->shaderModules.at(i));
     }
     for (size_t i = 0; i < 3; i++)

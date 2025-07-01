@@ -106,6 +106,13 @@ Alpha::Alpha(const Device& device, const Core::DescriptorPool& pool,
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outImgs)
             .build();
     }
+
+    // clear the output images (so they're not undefined)
+    for (size_t i = 0; i < 4; i++) {
+        Utils::clearImage(device, this->outImgs_0.at(i));
+        Utils::clearImage(device, this->outImgs_1.at(i));
+        Utils::clearImage(device, this->outImgs_2.at(i));
+    }
 }
 
 void Alpha::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
