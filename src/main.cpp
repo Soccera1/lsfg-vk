@@ -51,12 +51,12 @@ int main() {
     // Globals::initializeGlobals(device);
 
     // create downsample shader chain
-    Core::Image inputImage(
-        device, { 2560, 1411 }, VK_FORMAT_R8G8B8A8_UNORM,
-        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-        VK_IMAGE_ASPECT_COLOR_BIT
-    );
-    Utils::uploadImage(device, commandPool, inputImage, "rsc/images/source.dds");
+    // Core::Image inputImage(
+    //     device, { 2560, 1411 }, VK_FORMAT_R8G8B8A8_UNORM,
+    //     VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+    //     VK_IMAGE_ASPECT_COLOR_BIT
+    // );
+    // Utils::uploadImage(device, commandPool, inputImage, "rsc/images/source.dds");
 
     // Shaderchains::Downsample downsample(device, descriptorPool, inputImage);
 
@@ -83,7 +83,7 @@ int main() {
     // Shaderchains::Beta beta(device, descriptorPool,
     //     betaTemporalImages,
     //     alphas.at(0).getOutImages()
-    );
+    // );
 
     // create gamma to zeta shader chains
     // std::vector<Shaderchains::Gamma> gammas;
