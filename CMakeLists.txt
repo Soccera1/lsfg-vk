@@ -20,6 +20,7 @@ add_subdirectory(lsfg-vk-gen)
 
 file(GLOB SOURCES
     "src/loader/*.cpp"
+    "src/mini/*.cpp"
     "src/*.cpp"
 )
 

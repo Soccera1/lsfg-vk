@@ -1,6 +1,7 @@
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
+#include "mini/image.hpp"
 #include <unordered_map>
 #include <vector>
 
@@ -76,7 +77,7 @@ public:
     Application& operator=(Application&&) = delete;
 
     /// Destructor, cleans up resources.
-    ~Application() = default; // no resources to clean up as of right now.
+    ~Application();
 private:
     // (non-owned resources)
     VkDevice device;
@@ -93,7 +94,6 @@ private:
 ///
 class SwapchainContext {
 public:
-
     ///
     /// Create the swapchain context.
     ///
@@ -130,20 +130,24 @@ public:
     /// Get the swapchain images.
     [[nodiscard]] const std::vector<VkImage>& getImages() const { return this->images; }
 
-    // Non-copyable, trivially moveable and destructible
+    // Non-copyable, trivially moveable
     SwapchainContext(const SwapchainContext&) = delete;
     SwapchainContext& operator=(const SwapchainContext&) = delete;
     SwapchainContext(SwapchainContext&&) = default;
     SwapchainContext& operator=(SwapchainContext&&) = default;
-    ~SwapchainContext() = default;
+
+    /// Destructor, cleans up resources.
+    ~SwapchainContext();
 private:
     // (non-owned resources)
-    VkSwapchainKHR swapchain{};
-    VkFormat format{};
-    VkExtent2D extent{};
+    VkSwapchainKHR swapchain;
+    VkFormat format;
+    VkExtent2D extent;
     std::vector<VkImage> images;
 
     // (owned resources)
+    Mini::Image frame_0, frame_1;
+    int32_t lsfgId;
 };
 
 #endif // APPLICATION_HPP

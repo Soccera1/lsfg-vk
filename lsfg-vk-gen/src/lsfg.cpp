@@ -2,6 +2,7 @@
 #include "core/device.hpp"
 #include "core/instance.hpp"
 #include "context.hpp"
+#include "utils.hpp"
 
 #include <ctime>
 #include <optional>
@@ -21,6 +22,8 @@ void LSFG::initialize() {
 
     instance.emplace();
     device.emplace(*instance);
+
+    Globals::initializeGlobals(*device);
 
     std::srand(static_cast<uint32_t>(std::time(nullptr)));
 }
@@ -60,6 +63,8 @@ void LSFG::deleteContext(int32_t id) {
 void LSFG::finalize() {
     if (!instance.has_value() && !device.has_value())
         return;
+
+    Globals::uninitializeGlobals();
 
     instance.reset();
     device.reset();
