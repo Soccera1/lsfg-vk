@@ -1,7 +1,7 @@
 #ifndef HOOKS_HPP
 #define HOOKS_HPP
 
-namespace Vulkan::Hooks {
+namespace Hooks {
 
     ///
     /// Install overrides for hooked Vulkan functions.

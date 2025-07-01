@@ -1,7 +1,6 @@
 #include "loader/dl.hpp"
 #include "loader/vk.hpp"
-#include "vulkan/funcs.hpp"
-#include "vulkan/hooks.hpp"
+#include "hooks.hpp"
 #include "log.hpp"
 
 extern "C" void __attribute__((constructor)) init();
@@ -14,9 +13,8 @@ void init() {
     Loader::DL::initialize();
     Loader::VK::initialize();
 
-    // setup vulkan stuff
-    Vulkan::Funcs::initialize();
-    Vulkan::Hooks::initialize();
+    // setup hooks
+    Hooks::initialize();
 
     Log::info("lsfg-vk: init() completed successfully");
 }

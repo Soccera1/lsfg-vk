@@ -1,5 +1,4 @@
-#include "vulkan/hooks.hpp"
-#include "vulkan/funcs.hpp"
+#include "hooks.hpp"
 #include "loader/dl.hpp"
 #include "loader/vk.hpp"
 #include "application.hpp"
@@ -9,31 +8,18 @@
 
 #include <optional>
 
-using namespace Vulkan;
+using namespace Hooks;
 
 namespace {
     bool initialized{false};
     std::optional<Application> application;
-
-    VkResult myvkCreateInstance(
-            const VkInstanceCreateInfo* pCreateInfo,
-            const VkAllocationCallbacks* pAllocator,
-            VkInstance* pInstance) {
-        auto res = Funcs::ovkCreateInstance(pCreateInfo, pAllocator, pInstance);
-
-        Funcs::initializeInstance(*pInstance);
-
-        return res;
-    }
 
     VkResult myvkCreateDevice(
             VkPhysicalDevice physicalDevice,
             const VkDeviceCreateInfo* pCreateInfo,
             const VkAllocationCallbacks* pAllocator,
             VkDevice* pDevice) {
-        auto res = Funcs::ovkCreateDevice(physicalDevice, pCreateInfo, pAllocator, pDevice);
-
-        Funcs::initializeDevice(*pDevice);
+        auto res = vkCreateDevice(physicalDevice, pCreateInfo, pAllocator, pDevice);
 
         // create the main application
         if (application.has_value()) {
@@ -61,7 +47,7 @@ namespace {
             const VkSwapchainCreateInfoKHR* pCreateInfo,
             const VkAllocationCallbacks* pAllocator,
             VkSwapchainKHR* pSwapchain) {
-        auto res = Funcs::ovkCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);
+        auto res = vkCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);
 
         // add the swapchain to the application
         if (!application.has_value()) {
@@ -120,7 +106,7 @@ namespace {
             exit(EXIT_FAILURE);
         }
 
-        Funcs::ovkDestroySwapchainKHR(device, swapchain, pAllocator);
+        vkDestroySwapchainKHR(device, swapchain, pAllocator);
     }
 
     void myvkDestroyDevice(
@@ -134,7 +120,7 @@ namespace {
             Log::warn("lsfg-vk(hooks): No application to destroy, continuing");
         }
 
-        Funcs::ovkDestroyDevice(device, pAllocator);
+        vkDestroyDevice(device, pAllocator);
     }
 
 }
@@ -146,8 +132,6 @@ void Hooks::initialize() {
     }
 
     // register hooks to vulkan loader
-    Loader::VK::registerSymbol("vkCreateInstance",
-        reinterpret_cast<void*>(myvkCreateInstance));
     Loader::VK::registerSymbol("vkCreateDevice",
         reinterpret_cast<void*>(myvkCreateDevice));
     Loader::VK::registerSymbol("vkDestroyDevice",
@@ -159,8 +143,6 @@ void Hooks::initialize() {
 
     // register hooks to dynamic loader under libvulkan.so.1
     Loader::DL::File vk1("libvulkan.so.1");
-    vk1.defineSymbol("vkCreateInstance",
-        reinterpret_cast<void*>(myvkCreateInstance));
     vk1.defineSymbol("vkCreateDevice",
         reinterpret_cast<void*>(myvkCreateDevice));
     vk1.defineSymbol("vkDestroyDevice",
@@ -173,8 +155,6 @@ void Hooks::initialize() {
 
     // register hooks to dynamic loader under libvulkan.so
     Loader::DL::File vk2("libvulkan.so");
-    vk2.defineSymbol("vkCreateInstance",
-        reinterpret_cast<void*>(myvkCreateInstance));
     vk2.defineSymbol("vkCreateDevice",
         reinterpret_cast<void*>(myvkCreateDevice));
     vk2.defineSymbol("vkDestroyDevice",
