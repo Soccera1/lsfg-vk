@@ -14,12 +14,53 @@ namespace {
     bool initialized{false};
     std::optional<Application> application;
 
+    VkResult myvkCreateInstance(
+            const VkInstanceCreateInfo* pCreateInfo,
+            const VkAllocationCallbacks* pAllocator,
+            VkInstance* pInstance) {
+        // add extensions
+        std::vector<const char*> extensions(pCreateInfo->enabledExtensionCount);
+        std::copy_n(pCreateInfo->ppEnabledExtensionNames, extensions.size(), extensions.data());
+
+        const std::vector<const char*> requiredExtensions = {
+            VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
+            VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME
+        };
+        for (const auto& ext : requiredExtensions) {
+            auto it = std::ranges::find(extensions, ext);
+            if (it == extensions.end())
+                extensions.push_back(ext);
+        }
+
+        VkInstanceCreateInfo createInfo = *pCreateInfo;
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+        createInfo.ppEnabledExtensionNames = extensions.data();
+        return vkCreateInstance(&createInfo, pAllocator, pInstance);
+    }
+
     VkResult myvkCreateDevice(
             VkPhysicalDevice physicalDevice,
             const VkDeviceCreateInfo* pCreateInfo,
             const VkAllocationCallbacks* pAllocator,
             VkDevice* pDevice) {
-        auto res = vkCreateDevice(physicalDevice, pCreateInfo, pAllocator, pDevice);
+        // add extensions
+        std::vector<const char*> extensions(pCreateInfo->enabledExtensionCount);
+        std::copy_n(pCreateInfo->ppEnabledExtensionNames, extensions.size(), extensions.data());
+
+        const std::vector<const char*> requiredExtensions = {
+            VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
+            VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME
+        };
+        for (const auto& ext : requiredExtensions) {
+            auto it = std::ranges::find(extensions, ext);
+            if (it == extensions.end())
+                extensions.push_back(ext);
+        }
+
+        VkDeviceCreateInfo createInfo = *pCreateInfo;
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+        createInfo.ppEnabledExtensionNames = extensions.data();
+        auto res = vkCreateDevice(physicalDevice, &createInfo, pAllocator, pDevice);
 
         // extract graphics and present queues
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos(pCreateInfo->queueCreateInfoCount);
@@ -150,7 +191,6 @@ namespace {
         return VK_SUCCESS;
     }
 
-
     void myvkDestroySwapchainKHR(
             VkDevice device,
             VkSwapchainKHR swapchain,
@@ -195,6 +235,8 @@ void Hooks::initialize() {
     }
 
     // register hooks to vulkan loader
+    Loader::VK::registerSymbol("vkCreateInstance",
+        reinterpret_cast<void*>(myvkCreateInstance));
     Loader::VK::registerSymbol("vkCreateDevice",
         reinterpret_cast<void*>(myvkCreateDevice));
     Loader::VK::registerSymbol("vkDestroyDevice",
@@ -208,6 +250,8 @@ void Hooks::initialize() {
 
     // register hooks to dynamic loader under libvulkan.so.1
     Loader::DL::File vk1("libvulkan.so.1");
+    vk1.defineSymbol("vkCreateInstance",
+        reinterpret_cast<void*>(myvkCreateInstance));
     vk1.defineSymbol("vkCreateDevice",
         reinterpret_cast<void*>(myvkCreateDevice));
     vk1.defineSymbol("vkDestroyDevice",
@@ -222,6 +266,8 @@ void Hooks::initialize() {
 
     // register hooks to dynamic loader under libvulkan.so
     Loader::DL::File vk2("libvulkan.so");
+    vk2.defineSymbol("vkCreateInstance",
+        reinterpret_cast<void*>(myvkCreateInstance));
     vk2.defineSymbol("vkCreateDevice",
         reinterpret_cast<void*>(myvkCreateDevice));
     vk2.defineSymbol("vkDestroyDevice",
