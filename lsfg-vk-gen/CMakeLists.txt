@@ -1,34 +1,22 @@
-cmake_minimum_required(VERSION 3.29)
-
-# cmake options
-
-set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_CLANG_TIDY clang-tidy)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# main project
-
-project(lsfg-vk
+project(lsfg-vk-gen
     VERSION 0.0.1
-    DESCRIPTION "lsfg-vk: LSFG on Linux through Vulkan"
+    DESCRIPTION "lsfg-vk-gen: LSFG on Linux through Vulkan (backend)"
     LANGUAGES CXX)
 
-add_subdirectory(lsfg-vk-gen)
-
-file(GLOB SOURCES
+file(GLOB BACKEND_SOURCES
+    "src/core/*.cpp"
+    "src/shaderchains/*.cpp"
     "src/*.cpp"
 )
 
-add_library(lsfg-vk SHARED ${SOURCES})
+add_library(lsfg-vk-gen SHARED ${BACKEND_SOURCES})
 
-target_include_directories(lsfg-vk
-    PRIVATE include)
-target_link_libraries(lsfg-vk
-    PRIVATE lsfg-vk-gen)
-target_compile_options(lsfg-vk PRIVATE
+target_include_directories(lsfg-vk-gen
+    PRIVATE include
+    PUBLIC public)
+target_link_libraries(lsfg-vk-gen
+    PUBLIC vulkan)
+target_compile_options(lsfg-vk-gen PRIVATE
     -Weverything
     # disable compat c++ flags
     -Wno-pre-c++20-compat-pedantic
@@ -42,6 +30,7 @@ target_compile_options(lsfg-vk PRIVATE
     -Wno-switch-default # ignore missing default
     -Wno-padded         # ignore automatic padding
     -Wno-exit-time-destructors # allow globals
+    -Wno-global-constructors
     # required for vulkan
     -Wno-cast-function-type-strict
 )

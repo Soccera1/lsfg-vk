@@ -94,8 +94,8 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
 }
 
 void Context::present(const Core::Device& device, int inSem, int outSem) {
-    Core::Semaphore inSemaphore(device, inSem);
-    Core::Semaphore outSemaphore(device, outSem);
+    const Core::Semaphore inSemaphore(device, inSem);
+    const Core::Semaphore outSemaphore(device, outSem);
 
     Core::CommandBuffer cmdBuffer(device, this->cmdPool);
     cmdBuffer.begin();
