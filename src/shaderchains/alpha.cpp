@@ -27,9 +27,13 @@ Alpha::Alpha(const Device& device, const Core::DescriptorPool& pool,
     for (size_t i = 0; i < 4; i++) {
         this->pipelines.at(i) = Core::Pipeline(device,
             this->shaderModules.at(i));
+        if (i == 3) continue; // last shader is special
         this->descriptorSets.at(i) = Core::DescriptorSet(device, pool,
             this->shaderModules.at(i));
     }
+    for (size_t i = 0; i < 3; i++)
+        this->specialDescriptorSets.at(i) = Core::DescriptorSet(device, pool,
+            this->shaderModules.at(3));
 
     const auto extent = this->inImg.getExtent();
 
@@ -60,7 +64,17 @@ Alpha::Alpha(const Device& device, const Core::DescriptorPool& pool,
             VK_FORMAT_R8G8B8A8_UNORM,
             VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT);
-        this->outImgs.at(i) = Core::Image(device,
+        this->outImgs_0.at(i) = Core::Image(device,
+            quarterExtent,
+            VK_FORMAT_R8G8B8A8_UNORM,
+            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+            VK_IMAGE_ASPECT_COLOR_BIT);
+        this->outImgs_1.at(i) = Core::Image(device,
+            quarterExtent,
+            VK_FORMAT_R8G8B8A8_UNORM,
+            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+            VK_IMAGE_ASPECT_COLOR_BIT);
+        this->outImgs_2.at(i) = Core::Image(device,
             quarterExtent,
             VK_FORMAT_R8G8B8A8_UNORM,
             VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -82,14 +96,19 @@ Alpha::Alpha(const Device& device, const Core::DescriptorPool& pool,
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs3)
         .build();
-    this->descriptorSets.at(3).update(device)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs3)
-        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs)
-        .build();
+    for (size_t fc = 0; fc < 3; fc++) {
+        auto& outImgs = this->outImgs_0;
+        if (fc == 1) outImgs = this->outImgs_1;
+        else if (fc == 2) outImgs = this->outImgs_2;
+        this->specialDescriptorSets.at(fc).update(device)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs3)
+            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, outImgs)
+            .build();
+    }
 }
 
-void Alpha::Dispatch(const Core::CommandBuffer& buf) {
+void Alpha::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
     const auto halfExtent = this->tempImgs1.at(0).getExtent();
     const auto quarterExtent = this->tempImgs3.at(0).getExtent();
 
@@ -130,12 +149,15 @@ void Alpha::Dispatch(const Core::CommandBuffer& buf) {
     buf.dispatch(threadsX, threadsY, 1);
 
     // fourth pass
+    auto& outImgs = this->outImgs_0;
+    if ((fc % 3) == 1) outImgs = this->outImgs_1;
+    else if ((fc % 3) == 2) outImgs = this->outImgs_2;
     Utils::BarrierBuilder(buf)
         .addW2R(this->tempImgs3)
-        .addR2W(this->outImgs)
+        .addR2W(outImgs)
         .build();
 
     this->pipelines.at(3).bind(buf);
-    this->descriptorSets.at(3).bind(buf, this->pipelines.at(3));
+    this->specialDescriptorSets.at(fc % 3).bind(buf, this->pipelines.at(3));
     buf.dispatch(threadsX, threadsY, 1);
 }

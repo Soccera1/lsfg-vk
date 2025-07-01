@@ -38,13 +38,18 @@ namespace LSFG::Shaderchains {
         /// Dispatch the shaderchain.
         ///
         /// @param buf The command buffer to use for dispatching.
+        /// @param fc The frame count, used to determine which output images to write to.
         ///
         /// @throws std::logic_error if the command buffer is not recording.
         ///
-        void Dispatch(const Core::CommandBuffer& buf);
+        void Dispatch(const Core::CommandBuffer& buf, uint64_t fc);
 
-        /// Get the output images.
-        [[nodiscard]] const auto& getOutImages() const { return this->outImgs; }
+        /// Get the output images written to when fc % 2 == 0
+        [[nodiscard]] const auto& getOutImages0() const { return this->outImgs_0; }
+        /// Get the output images written to when fc % 2 == 1
+        [[nodiscard]] const auto& getOutImages1() const { return this->outImgs_1; }
+        /// Get the output images written to when fc % 2 == 2
+        [[nodiscard]] const auto& getOutImages2() const { return this->outImgs_2; }
 
         /// Trivially copyable, moveable and destructible
         Alpha(const Alpha&) noexcept = default;
@@ -55,15 +60,18 @@ namespace LSFG::Shaderchains {
     private:
         std::array<Core::ShaderModule, 4> shaderModules;
         std::array<Core::Pipeline, 4> pipelines;
-        std::array<Core::DescriptorSet, 4> descriptorSets;
+        std::array<Core::DescriptorSet, 3> descriptorSets; // last shader is special
+        std::array<Core::DescriptorSet, 3> specialDescriptorSets;
 
         Core::Image inImg;
 
-        std::array<Core::Image, 2> tempImgs1; // half-size
-        std::array<Core::Image, 2> tempImgs2; // half-size
-        std::array<Core::Image, 4> tempImgs3; // quarter-size
+        std::array<Core::Image, 2> tempImgs1;
+        std::array<Core::Image, 2> tempImgs2;
+        std::array<Core::Image, 4> tempImgs3;
 
-        std::array<Core::Image, 4> outImgs; // quarter-size
+        std::array<Core::Image, 4> outImgs_0;
+        std::array<Core::Image, 4> outImgs_1;
+        std::array<Core::Image, 4> outImgs_2;
     };
 
 }

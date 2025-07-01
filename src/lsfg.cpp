@@ -11,13 +11,13 @@ Generator::Generator(const Context& context) {
     // create shader chains
     this->downsampleChain = Shaderchains::Downsample(context.device, context.descPool,
         this->inImg_0, this->inImg_1);
-    // for (size_t i = 0; i < 7; i++)
-    //     this->alphaChains.at(i) = Shaderchains::Alpha(context.device, context.descPool,
-    //         this->downsampleChain.getOutImages().at(i), i == 0);
-    // this->betaChain = Shaderchains::Beta(context.device, context.descPool,
-    //     this->alphaChains.at(0).getOutImages0(),
-    //     this->alphaChains.at(0).getOutImages1(),
-    //     this->alphaChains.at(0).getOutImages2());
+    for (size_t i = 0; i < 7; i++)
+        this->alphaChains.at(i) = Shaderchains::Alpha(context.device, context.descPool,
+            this->downsampleChain.getOutImages().at(i));
+    this->betaChain = Shaderchains::Beta(context.device, context.descPool,
+        this->alphaChains.at(0).getOutImages0(),
+        this->alphaChains.at(0).getOutImages2(),
+        this->alphaChains.at(0).getOutImages1());
     // for (size_t i = 0; i < 7; i++) {
     //     if (i < 4) {
     //         this->gammaChains.at(i) = Shaderchains::Gamma(context.device, context.descPool,
@@ -79,9 +79,9 @@ void Generator::present(const Context& context) {
     cmdBuffer.begin();
 
     this->downsampleChain.Dispatch(cmdBuffer, fc);
-    // for (size_t i = 0; i < 7; i++)
-    //     this->alphaChains.at(6 - i).Dispatch(cmdBuffer, fc);
-    // this->betaChain.Dispatch(cmdBuffer, fc);
+    for (size_t i = 0; i < 7; i++)
+        this->alphaChains.at(6 - i).Dispatch(cmdBuffer, fc);
+    this->betaChain.Dispatch(cmdBuffer, fc);
     // for (size_t i = 0; i < 4; i++)
     //     this->gammaChains.at(i).Dispatch(cmdBuffer);
     // for (size_t i = 0; i < 3; i++) {
