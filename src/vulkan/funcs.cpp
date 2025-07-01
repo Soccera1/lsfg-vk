@@ -2,6 +2,7 @@
 #include "loader/dl.hpp"
 #include "loader/vk.hpp"
 #include "log.hpp"
+#include <vulkan/vulkan_core.h>
 
 using namespace Vulkan;
 
@@ -11,6 +12,9 @@ namespace {
 
     PFN_vkCreateDevice vkCreateDevice_ptr{};
     PFN_vkDestroyDevice vkDestroyDevice_ptr{};
+
+    PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR_ptr{};
+    PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR_ptr{};
 }
 
 void Funcs::initialize() {
@@ -51,6 +55,20 @@ void Funcs::initializeInstance(VkInstance instance) {
 }
 
 void Funcs::initializeDevice(VkDevice device) {
+    if (vkCreateSwapchainKHR_ptr || vkDestroySwapchainKHR_ptr) {
+        Log::warn("lsfg-vk(funcs): Device Vulkan functions already initialized, did you call it twice?");
+        return;
+    }
+
+    vkCreateSwapchainKHR_ptr = reinterpret_cast<PFN_vkCreateSwapchainKHR>(
+        Loader::VK::ovkGetDeviceProcAddr(device, "vkCreateSwapchainKHR"));
+    vkDestroySwapchainKHR_ptr = reinterpret_cast<PFN_vkDestroySwapchainKHR>(
+        Loader::VK::ovkGetDeviceProcAddr(device, "vkDestroySwapchainKHR"));
+    if (!vkCreateSwapchainKHR_ptr || !vkDestroySwapchainKHR_ptr) {
+        Log::error("lsfg-vk(funcs): Failed to initialize Vulkan device functions, missing symbols");
+        exit(EXIT_FAILURE);
+    }
+
     Log::debug("lsfg-vk(funcs): Initialized device Vulkan functions with original pointers");
 }
 
@@ -81,4 +99,19 @@ void Funcs::ovkDestroyDevice(
         VkDevice device,
         const VkAllocationCallbacks* pAllocator) {
     vkDestroyDevice_ptr(device, pAllocator);
+}
+
+VkResult Funcs::ovkCreateSwapchainKHR(
+        VkDevice device,
+        const VkSwapchainCreateInfoKHR* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkSwapchainKHR* pSwapchain) {
+    return vkCreateSwapchainKHR_ptr(device, pCreateInfo, pAllocator, pSwapchain);
+}
+
+void Funcs::ovkDestroySwapchainKHR(
+        VkDevice device,
+        VkSwapchainKHR swapchain,
+        const VkAllocationCallbacks* pAllocator) {
+    vkDestroySwapchainKHR_ptr(device, swapchain, pAllocator);
 }

@@ -29,7 +29,7 @@ add_library(lsfg-vk SHARED ${SOURCES})
 target_include_directories(lsfg-vk
     PRIVATE include)
 target_link_libraries(lsfg-vk
-    PRIVATE lsfg-vk-gen)
+    PRIVATE lsfg-vk-gen vulkan)
 target_compile_options(lsfg-vk PRIVATE
     -Weverything
     # disable compat c++ flags

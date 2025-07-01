@@ -48,6 +48,20 @@ namespace Vulkan::Funcs {
         VkDevice device,
         const VkAllocationCallbacks* pAllocator
     );
+
+    /// Call to the original vkCreateSwapchainKHR function.
+    VkResult ovkCreateSwapchainKHR(
+        VkDevice device,
+        const VkSwapchainCreateInfoKHR* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkSwapchainKHR* pSwapchain
+    );
+    /// Call to the original vkDestroySwapchainKHR function.
+    void ovkDestroySwapchainKHR(
+        VkDevice device,
+        VkSwapchainKHR swapchain,
+        const VkAllocationCallbacks* pAllocator
+    );
 }
 
 #endif // FUNCS_HPP
