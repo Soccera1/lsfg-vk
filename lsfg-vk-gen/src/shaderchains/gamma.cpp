@@ -10,7 +10,8 @@ Gamma::Gamma(const Core::Device& device, const Core::DescriptorPool& pool,
         Core::Image inImg2,
         std::optional<Core::Image> optImg1, // NOLINT
         std::optional<Core::Image> optImg2,
-        VkExtent2D outExtent)
+        VkExtent2D outExtent,
+        size_t genc)
         : inImgs1_0(std::move(inImgs1_0)),
           inImgs1_1(std::move(inImgs1_1)),
           inImgs1_2(std::move(inImgs1_2)),
@@ -48,17 +49,28 @@ Gamma::Gamma(const Core::Device& device, const Core::DescriptorPool& pool,
     for (size_t i = 0; i < 6; i++) {
         this->pipelines.at(i) = Core::Pipeline(device,
             this->shaderModules.at(i));
-        if (i == 0) continue; // first shader has special logic
+        if (i == 0 || i >= 4) continue; // first shader has special logic
         this->descriptorSets.at(i - 1) = Core::DescriptorSet(device, pool,
             this->shaderModules.at(i));
     }
-    for (size_t i = 0; i < 3; i++)
-        this->specialDescriptorSets.at(i) = Core::DescriptorSet(device, pool,
-            this->shaderModules.at(0));
-
-    Globals::FgBuffer data = Globals::fgBuffer;
-    data.firstIter = !optImg1.has_value();
-    this->buffer = Core::Buffer(device, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    for (size_t i = 0; i < genc; i++)
+        this->n1DescriptorSets.emplace_back(device, pool,
+            this->shaderModules.at(4));
+    for (size_t i = 0; i < genc; i++)
+        this->n2DescriptorSets.emplace_back(device, pool,
+            this->shaderModules.at(5));
+    for (size_t i = 0; i < genc; i++) {
+        this->nSpecialDescriptorSets.emplace_back();
+        for (size_t j = 0; j < 3; j++)
+            this->nSpecialDescriptorSets.at(i).at(j) = Core::DescriptorSet(device, pool,
+                this->shaderModules.at(0));
+    }
+    for (size_t i = 0; i < genc; i++) {
+        auto data = Globals::fgBuffer;
+        data.timestamp = static_cast<float>(i + 1) / static_cast<float>(genc + 1);
+        data.firstIter = !optImg1.has_value();
+        this->buffers.emplace_back(device, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    }
 
     const auto extent = this->inImgs1_0.at(0).getExtent();
 
@@ -107,18 +119,20 @@ Gamma::Gamma(const Core::Device& device, const Core::DescriptorPool& pool,
             nextImgs1 = &this->inImgs1_2;
             prevImgs1 = &this->inImgs1_1;
         }
-        this->specialDescriptorSets.at(fc).update(device)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *prevImgs1)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *nextImgs1)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg1)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg2)
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(0))
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(1))
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(2))
-            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
-            .build();
+        for (size_t i = 0; i < genc; i++) {
+            this->nSpecialDescriptorSets.at(i).at(fc).update(device)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *prevImgs1)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *nextImgs1)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg1)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg2)
+                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(0))
+                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(1))
+                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(2))
+                .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
+                .build();
+        }
     }
     this->descriptorSets.at(0).update(device)
         .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
@@ -137,23 +151,25 @@ Gamma::Gamma(const Core::Device& device, const Core::DescriptorPool& pool,
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
         .build();
-    this->descriptorSets.at(3).update(device)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg2)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
-        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg1)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
-        .build();
-    this->descriptorSets.at(4).update(device)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->whiteImg)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->outImg1)
-        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg2)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
-        .build();
+    for (size_t i = 0; i < genc; i++) {
+        this->n1DescriptorSets.at(i).update(device)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg2)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
+            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg1)
+            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
+            .build();
+        this->n2DescriptorSets.at(i).update(device)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->whiteImg)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->outImg1)
+            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg2)
+            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
+            .build();
+    }
 
     // clear white image and optImg1 if needed
     Utils::clearImage(device, this->whiteImg, true);
@@ -161,7 +177,7 @@ Gamma::Gamma(const Core::Device& device, const Core::DescriptorPool& pool,
         Utils::clearImage(device, this->optImg1);
 }
 
-void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
+void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc, uint64_t pass) {
     const auto extent = this->tempImgs1.at(0).getExtent();
 
     // first pass
@@ -188,7 +204,7 @@ void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipelines.at(0).bind(buf);
-    this->specialDescriptorSets.at(fc % 3).bind(buf, this->pipelines.at(0));
+    this->nSpecialDescriptorSets.at(pass).at(fc % 3).bind(buf, this->pipelines.at(0));
     buf.dispatch(threadsX, threadsY, 1);
 
     // second pass
@@ -232,7 +248,7 @@ void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipelines.at(4).bind(buf);
-    this->descriptorSets.at(3).bind(buf, this->pipelines.at(4));
+    this->n1DescriptorSets.at(pass).bind(buf, this->pipelines.at(4));
     buf.dispatch(threadsX, threadsY, 1);
 
     // sixth pass
@@ -246,6 +262,6 @@ void Gamma::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipelines.at(5).bind(buf);
-    this->descriptorSets.at(4).bind(buf, this->pipelines.at(5));
+    this->n2DescriptorSets.at(pass).bind(buf, this->pipelines.at(5));
     buf.dispatch(threadsX, threadsY, 1);
 }

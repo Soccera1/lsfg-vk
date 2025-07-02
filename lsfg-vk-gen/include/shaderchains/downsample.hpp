@@ -30,11 +30,13 @@ namespace LSFG::Shaderchains {
         /// @param pool The descriptor pool to allocate in.
         /// @param inImg_0 The next full image to downsample (when fc % 2 == 0)
         /// @param inImg_1 The next full image to downsample (when fc % 2 == 1)
+        /// @param genc Amount of frames to generate.
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Downsample(const Core::Device& device, const Core::DescriptorPool& pool,
-            Core::Image inImg_0, Core::Image inImg_1);
+            Core::Image inImg_0, Core::Image inImg_1,
+            size_t genc);
 
         ///
         /// Dispatch the shaderchain.

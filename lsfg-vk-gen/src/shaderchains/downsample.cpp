@@ -4,7 +4,8 @@
 using namespace LSFG::Shaderchains;
 
 Downsample::Downsample(const Core::Device& device, const Core::DescriptorPool& pool,
-        Core::Image inImg_0, Core::Image inImg_1)
+        Core::Image inImg_0, Core::Image inImg_1,
+        size_t genc)
         : inImg_0(std::move(inImg_0)),
           inImg_1(std::move(inImg_1)) {
     this->shaderModule = Core::ShaderModule(device, "rsc/shaders/downsample.spv",
@@ -15,7 +16,10 @@ Downsample::Downsample(const Core::Device& device, const Core::DescriptorPool& p
     this->pipeline = Core::Pipeline(device, this->shaderModule);
     for (size_t i = 0; i < 2; i++)
         this->descriptorSets.at(i) = Core::DescriptorSet(device, pool, this->shaderModule);
-    this->buffer = Core::Buffer(device, Globals::fgBuffer, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+
+    auto data = Globals::fgBuffer;
+    data.timestamp = 1.0F / static_cast<float>(genc + 1);
+    this->buffer = Core::Buffer(device, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
     auto extent = this->inImg_0.getExtent();
     for (size_t i = 0; i < 7; i++)

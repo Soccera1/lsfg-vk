@@ -32,22 +32,25 @@ namespace LSFG::Shaderchains {
         /// @param inImgs1 The first set of input images to process.
         /// @param inImg2 The second type image to process.
         /// @param optImg An optional additional input from the previous pass.
+        /// @param genc Amount of frames to generate.
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Epsilon(const Core::Device& device, const Core::DescriptorPool& pool,
             std::array<Core::Image, 3> inImgs1,
             Core::Image inImg2,
-            std::optional<Core::Image> optImg);
+            std::optional<Core::Image> optImg,
+            size_t genc);
 
         ///
         /// Dispatch the shaderchain.
         ///
         /// @param buf The command buffer to use for dispatching.
+        /// @param pass The pass number.
         ///
         /// @throws std::logic_error if the command buffer is not recording.
         ///
-        void Dispatch(const Core::CommandBuffer& buf);
+        void Dispatch(const Core::CommandBuffer& buf, uint64_t pass);
 
         /// Get the output image.
         [[nodiscard]] const auto& getOutImage() const { return this->outImg; }
@@ -61,8 +64,9 @@ namespace LSFG::Shaderchains {
     private:
         std::array<Core::ShaderModule, 4> shaderModules;
         std::array<Core::Pipeline, 4> pipelines;
-        std::array<Core::DescriptorSet, 4> descriptorSets;
-        Core::Buffer buffer;
+        std::array<Core::DescriptorSet, 3> descriptorSets;
+        std::vector<Core::DescriptorSet> nDescriptorSets;
+        std::vector<Core::Buffer> buffers;
 
         std::array<Core::Image, 3> inImgs1;
         Core::Image inImg2;

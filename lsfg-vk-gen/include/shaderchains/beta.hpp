@@ -32,23 +32,26 @@ namespace LSFG::Shaderchains {
         /// @param inImgs_0 The next input images to process (when fc % 3 == 0)
         /// @param inImgs_1 The prev input images to process (when fc % 3 == 0)
         /// @param inImgs_2 The prev prev input images to process (when fc % 3 == 0)
+        /// @param genc Amount of frames to generate.
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Beta(const Core::Device& device, const Core::DescriptorPool& pool,
             std::array<Core::Image, 4> inImgs_0,
             std::array<Core::Image, 4> inImgs_1,
-            std::array<Core::Image, 4> inImgs_2);
+            std::array<Core::Image, 4> inImgs_2,
+            size_t genc);
 
         ///
         /// Dispatch the shaderchain.
         ///
         /// @param buf The command buffer to use for dispatching.
         /// @param fc The frame count, used to select the input images.
+        /// @param pass The pass number
         ///
         /// @throws std::logic_error if the command buffer is not recording.
         ///
-        void Dispatch(const Core::CommandBuffer& buf, uint64_t fc);
+        void Dispatch(const Core::CommandBuffer& buf, uint64_t fc, uint64_t pass);
 
         /// Get the output images.
         [[nodiscard]] const auto& getOutImages() const { return this->outImgs; }
@@ -62,9 +65,10 @@ namespace LSFG::Shaderchains {
     private:
         std::array<Core::ShaderModule, 5> shaderModules;
         std::array<Core::Pipeline, 5> pipelines;
-        std::array<Core::DescriptorSet, 4> descriptorSets; // first shader has special logic
+        std::array<Core::DescriptorSet, 3> descriptorSets; // first shader has special logic
         std::array<Core::DescriptorSet, 3> specialDescriptorSets;
-        Core::Buffer buffer;
+        std::vector<Core::DescriptorSet> nDescriptorSets;
+        std::vector<Core::Buffer> buffers;
 
         std::array<Core::Image, 4> inImgs_0;
         std::array<Core::Image, 4> inImgs_1;

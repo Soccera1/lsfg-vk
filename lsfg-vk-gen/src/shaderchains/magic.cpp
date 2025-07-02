@@ -9,7 +9,8 @@ Magic::Magic(const Core::Device& device, const Core::DescriptorPool& pool,
     std::array<Core::Image, 4> inImgs1_2,
         Core::Image inImg2,
         Core::Image inImg3,
-        std::optional<Core::Image> optImg)
+        std::optional<Core::Image> optImg,
+        size_t genc)
         : inImgs1_0(std::move(inImgs1_0)),
           inImgs1_1(std::move(inImgs1_1)),
           inImgs1_2(std::move(inImgs1_2)),
@@ -21,12 +22,17 @@ Magic::Magic(const Core::Device& device, const Core::DescriptorPool& pool,
           { 3+3+2,   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
           { 1,       VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } });
     this->pipeline = Core::Pipeline(device, this->shaderModule);
-    for (size_t i = 0; i < 3; i++)
-        this->descriptorSets.at(i) = Core::DescriptorSet(device, pool, this->shaderModule);
-
-    Globals::FgBuffer data = Globals::fgBuffer;
-    data.firstIterS = !this->optImg.has_value();
-    this->buffer = Core::Buffer(device, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    for (size_t i = 0; i < genc; i++) {
+        this->nDescriptorSets.emplace_back();
+        for (size_t j = 0; j < 3; j++)
+            this->nDescriptorSets.at(i).at(j) = Core::DescriptorSet(device, pool, this->shaderModule);
+    }
+    for (size_t i = 0; i < genc; i++) {
+        auto data = Globals::fgBuffer;
+        data.timestamp = static_cast<float>(i + 1) / static_cast<float>(genc + 1);
+        data.firstIterS = !this->optImg.has_value();
+        this->buffers.emplace_back(device, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    }
 
     auto extent = this->inImgs1_0.at(0).getExtent();
 
@@ -59,23 +65,25 @@ Magic::Magic(const Core::Device& device, const Core::DescriptorPool& pool,
             nextImgs1 = &this->inImgs1_2;
             prevImgs1 = &this->inImgs1_1;
         }
-        this->descriptorSets.at(fc).update(device)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *prevImgs1)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *nextImgs1)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg3)
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg)
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs3)
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs2)
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs1)
-            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
-            .build();
+        for (size_t i = 0; i < genc; i++) {
+            this->nDescriptorSets.at(i).at(fc).update(device)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *prevImgs1)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *nextImgs1)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg3)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg)
+                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs3)
+                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs2)
+                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs1)
+                .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
+                .build();
+        }
     }
 }
 
-void Magic::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
+void Magic::Dispatch(const Core::CommandBuffer& buf, uint64_t fc, uint64_t pass) {
     auto extent = this->inImgs1_0.at(0).getExtent();
 
     // first pass
@@ -103,6 +111,6 @@ void Magic::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipeline.bind(buf);
-    this->descriptorSets.at(fc % 3).bind(buf, this->pipeline);
+    this->nDescriptorSets.at(pass).at(fc % 3).bind(buf, this->pipeline);
     buf.dispatch(threadsX, threadsY, 1);
 }

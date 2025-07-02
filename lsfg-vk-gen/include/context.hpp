@@ -32,22 +32,24 @@ namespace LSFG {
         /// @param height Height of the input images.
         /// @param in0 File descriptor for the first input image.
         /// @param in1 File descriptor for the second input image.
-        /// @param out File descriptor for the output image.
+        /// @param outN File descriptor for the output image.
         ///
         /// @throws LSFG::vulkan_error if the generator fails to initialize.
         ///
-        Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1, int out);
+        Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1,
+            const std::vector<int>& outN);
 
         ///
         /// Schedule the next generation.
         ///
         /// @param device The Vulkan device to use.
         /// @param inSem Semaphore to wait on before starting the generation.
-        /// @param outSem Semaphore to signal when the generation is complete.
+        /// @param outSem Semaphores to signal after each generation is done.
         ///
         /// @throws LSFG::vulkan_error if the generator fails to present.
         ///
-        void present(const Core::Device& device, int inSem, int outSem);
+        void present(const Core::Device& device, int inSem,
+            const std::vector<int>& outSem);
 
         // Trivially copyable, moveable and destructible
         Context(const Context&) = default;
@@ -61,8 +63,10 @@ namespace LSFG {
 
         Core::Image inImg_0, inImg_1; // inImg_0 is next (inImg_1 prev) when fc % 2 == 0
         std::array<Core::Semaphore, 8> inSemaphores;
-        std::array<Core::Semaphore, 8> outSemaphores;
-        std::array<Core::CommandBuffer, 8> cmdBuffers;
+        std::array<std::vector<Core::Semaphore>, 8> internalSemaphores;
+        std::vector<std::array<Core::Semaphore, 8>> outSemaphores;
+        std::array<Core::CommandBuffer, 8> cmdBuffers1;
+        std::vector<std::array<Core::CommandBuffer, 8>> cmdBuffers2;
         uint64_t fc{0};
 
         Shaderchains::Downsample downsampleChain;

@@ -30,22 +30,25 @@ namespace LSFG::Shaderchains {
         /// @param inImg1 The first set of input images to process.
         /// @param inImg2 The second type image to process.
         /// @param outExtent The extent of the output image.
+        /// @param genc Amount of frames to generate.
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
         Extract(const Core::Device& device, const Core::DescriptorPool& pool,
             Core::Image inImg1,
             Core::Image inImg2,
-            VkExtent2D outExtent);
+            VkExtent2D outExtent,
+            size_t genc);
 
         ///
         /// Dispatch the shaderchain.
         ///
         /// @param buf The command buffer to use for dispatching.
+        /// @param pass The pass number.
         ///
         /// @throws std::logic_error if the command buffer is not recording.
         ///
-        void Dispatch(const Core::CommandBuffer& buf);
+        void Dispatch(const Core::CommandBuffer& buf, uint64_t pass);
 
         /// Get the output image.
         [[nodiscard]] const auto& getOutImage() const { return this->outImg; }
@@ -59,8 +62,8 @@ namespace LSFG::Shaderchains {
     private:
         Core::ShaderModule shaderModule;
         Core::Pipeline pipeline;
-        Core::DescriptorSet descriptorSet;
-        Core::Buffer buffer;
+        std::vector<Core::DescriptorSet> nDescriptorSets;
+        std::vector<Core::Buffer> buffers;
 
         Core::Image inImg1;
         Core::Image inImg2;

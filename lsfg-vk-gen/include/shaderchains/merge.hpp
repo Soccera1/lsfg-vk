@@ -34,7 +34,8 @@ namespace LSFG::Shaderchains {
         /// @param inImg3 The first related input texture
         /// @param inImg4 The second related input texture
         /// @param inImg5 The third related input texture
-        /// @param outFd File descriptor for the output image.
+        /// @param outFds File descriptors for the output images.
+        /// @param genc The amount of frames to generaten.
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
@@ -44,20 +45,22 @@ namespace LSFG::Shaderchains {
             Core::Image inImg3,
             Core::Image inImg4,
             Core::Image inImg5,
-            int outFd);
+            const std::vector<int>& outFds,
+            size_t genc);
 
         ///
         /// Dispatch the shaderchain.
         ///
         /// @param buf The command buffer to use for dispatching.
         /// @param fc The frame count, used to select the input images.
+        /// @param pass The pass number.
         ///
         /// @throws std::logic_error if the command buffer is not recording.
         ///
-        void Dispatch(const Core::CommandBuffer& buf, uint64_t fc);
+        void Dispatch(const Core::CommandBuffer& buf, uint64_t fc, uint64_t pass);
 
         /// Get the output image
-        [[nodiscard]] const auto& getOutImage() const { return this->outImg; }
+        [[nodiscard]] const auto& getOutImage(size_t pass) const { return this->outImgs.at(pass); }
 
         /// Trivially copyable, moveable and destructible
         Merge(const Merge&) noexcept = default;
@@ -68,8 +71,8 @@ namespace LSFG::Shaderchains {
     private:
         Core::ShaderModule shaderModule;
         Core::Pipeline pipeline;
-        std::array<Core::DescriptorSet, 2> descriptorSets; // one for each input combination
-        Core::Buffer buffer;
+        std::vector<std::array<Core::DescriptorSet, 2>> nDescriptorSets; // per combo
+        std::vector<Core::Buffer> buffers;
 
         Core::Image inImg1;
         Core::Image inImg2;
@@ -77,7 +80,7 @@ namespace LSFG::Shaderchains {
         Core::Image inImg4;
         Core::Image inImg5;
 
-        Core::Image outImg;
+        std::vector<Core::Image> outImgs;
     };
 
 }

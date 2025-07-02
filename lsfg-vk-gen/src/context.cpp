@@ -8,7 +8,8 @@
 
 using namespace LSFG;
 
-Context::Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1, int out) {
+Context::Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1,
+        const std::vector<int>& outN) {
     // import images
     this->inImg_0 = Core::Image(device, { width, height },
         VK_FORMAT_R8G8B8A8_UNORM,
@@ -25,16 +26,24 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
     this->descPool = Core::DescriptorPool(device);
     this->cmdPool = Core::CommandPool(device);
 
+    // prepare vectors
+    for (size_t i = 0; i < 8; i++)
+        this->internalSemaphores.at(i).resize(outN.size());
+    for (size_t i = 0; i < outN.size(); i++) {
+        this->outSemaphores.emplace_back();
+        this->cmdBuffers2.emplace_back();
+    }
+
     // create shader chains
     this->downsampleChain = Shaderchains::Downsample(device, this->descPool,
-        this->inImg_0, this->inImg_1);
+        this->inImg_0, this->inImg_1, outN.size());
     for (size_t i = 0; i < 7; i++)
         this->alphaChains.at(i) = Shaderchains::Alpha(device, this->descPool,
             this->downsampleChain.getOutImages().at(i));
     this->betaChain = Shaderchains::Beta(device, this->descPool,
         this->alphaChains.at(0).getOutImages0(),
         this->alphaChains.at(0).getOutImages1(),
-        this->alphaChains.at(0).getOutImages2());
+        this->alphaChains.at(0).getOutImages2(), outN.size());
     for (size_t i = 0; i < 7; i++) {
         if (i < 4) {
             this->gammaChains.at(i) = Shaderchains::Gamma(device, this->descPool,
@@ -46,7 +55,8 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
                        : std::optional{this->gammaChains.at(i - 1).getOutImage2()},
                 i == 0 ? std::nullopt
                        : std::optional{this->gammaChains.at(i - 1).getOutImage1()},
-                this->alphaChains.at(6 - i - 1).getOutImages0().at(0).getExtent()
+                this->alphaChains.at(6 - i - 1).getOutImages0().at(0).getExtent(),
+                outN.size()
             );
         } else {
             this->magicChains.at(i - 4) = Shaderchains::Magic(device, this->descPool,
@@ -57,31 +67,36 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
                        : this->extractChains.at(i - 5).getOutImage(),
                 i == 4 ? this->gammaChains.at(i - 1).getOutImage1()
                        : this->zetaChains.at(i - 5).getOutImage(),
-                i == 4 ? std::nullopt : std::optional{this->epsilonChains.at(i - 5).getOutImage()}
+                i == 4 ? std::nullopt : std::optional{this->epsilonChains.at(i - 5).getOutImage()},
+                outN.size()
             );
             this->deltaChains.at(i - 4) = Shaderchains::Delta(device, this->descPool,
                 this->magicChains.at(i - 4).getOutImages1(),
                 i == 4 ? std::nullopt
-                       : std::optional{this->deltaChains.at(i - 5).getOutImage()}
+                       : std::optional{this->deltaChains.at(i - 5).getOutImage()},
+                       outN.size()
             );
             this->epsilonChains.at(i - 4) = Shaderchains::Epsilon(device, this->descPool,
                 this->magicChains.at(i - 4).getOutImages2(),
                 this->betaChain.getOutImages().at(6 - i),
                 i == 4 ? std::nullopt
-                       : std::optional{this->epsilonChains.at(i - 5).getOutImage()}
+                       : std::optional{this->epsilonChains.at(i - 5).getOutImage()},
+                       outN.size()
             );
             this->zetaChains.at(i - 4) = Shaderchains::Zeta(device, this->descPool,
                 this->magicChains.at(i - 4).getOutImages3(),
                 i == 4 ? this->gammaChains.at(i - 1).getOutImage1()
                        : this->zetaChains.at(i - 5).getOutImage(),
-                this->betaChain.getOutImages().at(6 - i)
+                this->betaChain.getOutImages().at(6 - i),
+                outN.size()
             );
             if (i >= 6)
                 continue; // no extract for i >= 6
             this->extractChains.at(i - 4) = Shaderchains::Extract(device, this->descPool,
                 this->zetaChains.at(i - 4).getOutImage(),
                 this->epsilonChains.at(i - 4).getOutImage(),
-                this->alphaChains.at(6 - i - 1).getOutImages0().at(0).getExtent()
+                this->alphaChains.at(6 - i - 1).getOutImages0().at(0).getExtent(),
+                outN.size()
             );
         }
     }
@@ -91,41 +106,61 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
         this->zetaChains.at(2).getOutImage(),
         this->epsilonChains.at(2).getOutImage(),
         this->deltaChains.at(2).getOutImage(),
-        out
+        outN,
+        outN.size()
     );
 }
 
-void Context::present(const Core::Device& device, int inSem, int outSem) {
+void Context::present(const Core::Device& device, int inSem,
+        const std::vector<int>& outSem) {
     auto& inSemaphore = this->inSemaphores.at(this->fc % 8);
     inSemaphore = Core::Semaphore(device, inSem);
-    auto& outSemaphore = this->outSemaphores.at(this->fc % 8);
-    outSemaphore = Core::Semaphore(device, outSem);
+    auto& internalSemaphores = this->internalSemaphores.at(this->fc % 8);
+    for (size_t i = 0; i < outSem.size(); i++)
+        internalSemaphores.at(i) = Core::Semaphore(device);
 
-    auto& cmdBuffer = this->cmdBuffers.at(this->fc % 8);
-    cmdBuffer = Core::CommandBuffer(device, this->cmdPool);
-    cmdBuffer.begin();
+    auto& cmdBuffer1 = this->cmdBuffers1.at(this->fc % 8);
+    cmdBuffer1 = Core::CommandBuffer(device, this->cmdPool);
+    cmdBuffer1.begin();
 
-    this->downsampleChain.Dispatch(cmdBuffer, fc);
+    this->downsampleChain.Dispatch(cmdBuffer1, fc);
     for (size_t i = 0; i < 7; i++)
-        this->alphaChains.at(6 - i).Dispatch(cmdBuffer, fc);
-    this->betaChain.Dispatch(cmdBuffer, fc);
-    for (size_t i = 0; i < 4; i++)
-        this->gammaChains.at(i).Dispatch(cmdBuffer, fc);
-    for (size_t i = 0; i < 3; i++) {
-        this->magicChains.at(i).Dispatch(cmdBuffer, fc);
-        this->deltaChains.at(i).Dispatch(cmdBuffer);
-        this->epsilonChains.at(i).Dispatch(cmdBuffer);
-        this->zetaChains.at(i).Dispatch(cmdBuffer);
-        if (i < 2)
-            this->extractChains.at(i).Dispatch(cmdBuffer);
-    }
-    this->mergeChain.Dispatch(cmdBuffer, fc);
+        this->alphaChains.at(6 - i).Dispatch(cmdBuffer1, fc);
 
-    cmdBuffer.end();
+    cmdBuffer1.end();
 
-    cmdBuffer.submit(device.getComputeQueue(), std::nullopt,
+    cmdBuffer1.submit(device.getComputeQueue(), std::nullopt,
         { inSemaphore }, std::nullopt,
-        { outSemaphore }, std::nullopt);
+        internalSemaphores, std::nullopt);
+
+
+    for (size_t pass = 0; pass < outSem.size(); pass++) {
+        auto& outSemaphore = this->outSemaphores.at(pass).at(this->fc % 8);
+        outSemaphore = Core::Semaphore(device, outSem.at(pass));
+
+        auto& cmdBuffer2 = this->cmdBuffers2.at(pass).at(this->fc % 8);
+        cmdBuffer2 = Core::CommandBuffer(device, this->cmdPool);
+        cmdBuffer2.begin();
+
+        this->betaChain.Dispatch(cmdBuffer2, fc, pass);
+        for (size_t i = 0; i < 4; i++)
+            this->gammaChains.at(i).Dispatch(cmdBuffer2, fc, pass);
+        for (size_t i = 0; i < 3; i++) {
+            this->magicChains.at(i).Dispatch(cmdBuffer2, fc, pass);
+            this->deltaChains.at(i).Dispatch(cmdBuffer2, pass);
+            this->epsilonChains.at(i).Dispatch(cmdBuffer2, pass);
+            this->zetaChains.at(i).Dispatch(cmdBuffer2, pass);
+            if (i < 2)
+                this->extractChains.at(i).Dispatch(cmdBuffer2, pass);
+        }
+        this->mergeChain.Dispatch(cmdBuffer2, fc, pass);
+
+        cmdBuffer2.end();
+
+        cmdBuffer2.submit(device.getComputeQueue(), std::nullopt,
+            { internalSemaphores.at(pass) }, std::nullopt,
+            { outSemaphore }, std::nullopt);
+    }
 
     fc++;
 }

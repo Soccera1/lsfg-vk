@@ -38,6 +38,7 @@ namespace LSFG::Shaderchains {
         /// @param optImg1 An optional additional input from the previous pass.
         /// @param optImg2 An optional additional input image for processing non-first passes.
         /// @param outExtent The extent of the output image.
+        /// @param genc Amount of frames to generate.
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
@@ -48,17 +49,19 @@ namespace LSFG::Shaderchains {
             Core::Image inImg2,
             std::optional<Core::Image> optImg1,
             std::optional<Core::Image> optImg2,
-            VkExtent2D outExtent);
+            VkExtent2D outExtent,
+            size_t genc);
 
         ///
         /// Dispatch the shaderchain.
         ///
         /// @param buf The command buffer to use for dispatching.
         /// @param fc The frame count, used to select the input images.
+        /// @param pass The pass number.
         ///
         /// @throws std::logic_error if the command buffer is not recording.
         ///
-        void Dispatch(const Core::CommandBuffer& buf, uint64_t fc);
+        void Dispatch(const Core::CommandBuffer& buf, uint64_t fc, uint64_t pass);
 
         /// Get the first output image.
         [[nodiscard]] const auto& getOutImage1() const { return this->outImg1; }
@@ -74,9 +77,11 @@ namespace LSFG::Shaderchains {
     private:
         std::array<Core::ShaderModule, 6> shaderModules;
         std::array<Core::Pipeline, 6> pipelines;
-        std::array<Core::DescriptorSet, 5> descriptorSets; // first shader has special logic
-        std::array<Core::DescriptorSet, 3> specialDescriptorSets;
-        Core::Buffer buffer;
+        std::array<Core::DescriptorSet, 3> descriptorSets; // first shader has special logic
+        std::vector<Core::DescriptorSet> n1DescriptorSets;
+        std::vector<Core::DescriptorSet> n2DescriptorSets;
+        std::vector<std::array<Core::DescriptorSet, 3>> nSpecialDescriptorSets;
+        std::vector<Core::Buffer> buffers;
 
         std::array<Core::Image, 4> inImgs1_0;
         std::array<Core::Image, 4> inImgs1_1;

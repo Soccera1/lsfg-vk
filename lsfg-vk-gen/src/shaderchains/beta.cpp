@@ -6,7 +6,8 @@ using namespace LSFG::Shaderchains;
 Beta::Beta(const Core::Device& device, const Core::DescriptorPool& pool,
         std::array<Core::Image, 4> inImgs_0,
         std::array<Core::Image, 4> inImgs_1,
-        std::array<Core::Image, 4> inImgs_2)
+        std::array<Core::Image, 4> inImgs_2,
+        size_t genc)
         : inImgs_0(std::move(inImgs_0)),
           inImgs_1(std::move(inImgs_1)),
           inImgs_2(std::move(inImgs_2)) {
@@ -36,14 +37,21 @@ Beta::Beta(const Core::Device& device, const Core::DescriptorPool& pool,
     for (size_t i = 0; i < 5; i++) {
         this->pipelines.at(i) = Core::Pipeline(device,
             this->shaderModules.at(i));
-        if (i == 0) continue; // first shader has special logic
+        if (i == 0 || i == 4) continue; // first shader has special logic
         this->descriptorSets.at(i - 1) = Core::DescriptorSet(device, pool,
             this->shaderModules.at(i));
     }
     for (size_t i = 0; i < 3; i++)
         this->specialDescriptorSets.at(i) = Core::DescriptorSet(device, pool,
             this->shaderModules.at(0));
-    this->buffer = Core::Buffer(device, Globals::fgBuffer, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    for (size_t i = 0; i < genc; i++)
+        this->nDescriptorSets.emplace_back(device, pool,
+            this->shaderModules.at(4));
+    for (size_t i = 0; i < genc; i++) {
+        auto data = Globals::fgBuffer;
+        data.timestamp = static_cast<float>(i + 1) / static_cast<float>(genc + 1);
+        this->buffers.emplace_back(device, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    }
 
     const auto extent = this->inImgs_0.at(0).getExtent();
 
@@ -104,15 +112,17 @@ Beta::Beta(const Core::Device& device, const Core::DescriptorPool& pool,
         .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
         .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
         .build();
-    this->descriptorSets.at(3).update(device)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
-        .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
-        .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs)
-        .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
-        .build();
+    for (size_t i = 0; i < genc; i++) {
+        this->nDescriptorSets.at(i).update(device)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
+            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs)
+            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
+            .build();
+    }
 }
 
-void Beta::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
+void Beta::Dispatch(const Core::CommandBuffer& buf, uint64_t fc, uint64_t pass) {
     const auto extent = this->tempImgs1.at(0).getExtent();
 
     // first pass
@@ -170,6 +180,6 @@ void Beta::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipelines.at(4).bind(buf);
-    this->descriptorSets.at(3).bind(buf, this->pipelines.at(4));
+    this->nDescriptorSets.at(pass).bind(buf, this->pipelines.at(4));
     buf.dispatch(threadsX, threadsY, 1);
 }

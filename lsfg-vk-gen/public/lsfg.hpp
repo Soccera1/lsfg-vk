@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 namespace LSFG {
@@ -21,23 +22,24 @@ namespace LSFG {
     /// @param height Height of the input images.
     /// @param in0 File descriptor for the first input image.
     /// @param in1 File descriptor for the second input image.
-    /// @param out File descriptor for the output image.
+    /// @param outN File descriptor for each output image. This defines the LSFG level.
     /// @return A unique identifier for the created context.
     ///
     /// @throws LSFG::vulkan_error if the context cannot be created.
     ///
-    int32_t createContext(uint32_t width, uint32_t height, int in0, int in1, int out);
+    int32_t createContext(uint32_t width, uint32_t height, int in0, int in1,
+        const std::vector<int>& outN);
 
     ///
     /// Present a context.
     ///
     /// @param id Unique identifier of the context to present.
     /// @param inSem Semaphore to wait on before starting the generation.
-    /// @param outSem Semaphore to signal when the generation is complete.
+    /// @param outSem Semaphores to signal once each output image is ready.
     ///
     /// @throws LSFG::vulkan_error if the context cannot be presented.
     ///
-    void presentContext(int32_t id, int inSem, int outSem);
+    void presentContext(int32_t id, int inSem, const std::vector<int>& outSem);
 
     ///
     /// Delete an LSFG context.
