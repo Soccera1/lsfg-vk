@@ -120,7 +120,11 @@ namespace {
             const VkSwapchainCreateInfoKHR* pCreateInfo,
             const VkAllocationCallbacks* pAllocator,
             VkSwapchainKHR* pSwapchain) {
-        auto res = vkCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);
+        VkSwapchainCreateInfoKHR createInfo = *pCreateInfo;
+        createInfo.minImageCount += 2;
+        createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        auto res = vkCreateSwapchainKHR(device, &createInfo, pAllocator, pSwapchain);
 
         // add the swapchain to the application
         if (!application.has_value()) {
