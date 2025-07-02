@@ -121,7 +121,7 @@ namespace {
             const VkAllocationCallbacks* pAllocator,
             VkSwapchainKHR* pSwapchain) {
         VkSwapchainCreateInfoKHR createInfo = *pCreateInfo;
-        createInfo.minImageCount += 2;
+        createInfo.minImageCount = 8;
         createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         auto res = vkCreateSwapchainKHR(device, &createInfo, pAllocator, pSwapchain);

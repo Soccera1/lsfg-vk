@@ -4,11 +4,12 @@
 #include "mini/image.hpp"
 #include "mini/semaphore.hpp"
 
-#include <exception>
-#include <iostream>
 #include <lsfg.hpp>
 #include <memory>
+#include <vector>
 #include <vulkan/vulkan_core.h>
+
+const int FRAMEGEN_N = 4; // number of frames to generate
 
 Application::Application(VkDevice device, VkPhysicalDevice physicalDevice,
         VkQueue graphicsQueue, uint32_t graphicsQueueFamilyIndex)
@@ -47,15 +48,25 @@ SwapchainContext::SwapchainContext(const Application& app, VkSwapchainKHR swapch
         VK_IMAGE_ASPECT_COLOR_BIT, &frame1fd
     );
 
-    int outfd{};
-    this->out_img = Mini::Image(
-        app.getDevice(), app.getPhysicalDevice(),
-        extent, VK_FORMAT_R8G8B8A8_UNORM,
-        VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-        VK_IMAGE_ASPECT_COLOR_BIT, &outfd
-    );
+    std::vector<int> outFds(FRAMEGEN_N);
+    for (size_t i = 0; i < FRAMEGEN_N; ++i) {
+        this->outImgs.emplace_back(
+            app.getDevice(), app.getPhysicalDevice(),
+            extent, VK_FORMAT_R8G8B8A8_UNORM,
+            VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+            VK_IMAGE_ASPECT_COLOR_BIT, &outFds.at(i)
+        );
+    }
 
-    auto id = LSFG::createContext(extent.width, extent.height, frame0fd, frame1fd, outfd);
+    for (size_t i = 0; i < 8; i++) {
+        this->cmdBufs2.at(i).resize(FRAMEGEN_N);
+        this->acquireSemaphores.at(i).resize(FRAMEGEN_N);
+        this->renderSemaphores.at(i).resize(FRAMEGEN_N);
+        this->prevPresentSemaphores.at(i).resize(FRAMEGEN_N);
+        this->presentSemaphores.at(i).resize(FRAMEGEN_N);
+    }
+
+    auto id = LSFG::createContext(extent.width, extent.height, frame0fd, frame1fd, outFds);
     this->lsfgId = std::shared_ptr<int32_t>(
         new int32_t(id),
         [](const int32_t* id) {
@@ -99,13 +110,6 @@ void SwapchainContext::present(const Application& app, VkQueue queue,
     copySemaphore1 = Mini::Semaphore(app.getDevice(), &copySem);
     Mini::Semaphore& copySemaphore2 = this->copySemaphores2.at(this->frameIdx % 8);
     copySemaphore2 = Mini::Semaphore(app.getDevice());
-    Mini::Semaphore& acquireSemaphore = this->acquireSemaphores.at(this->frameIdx % 8);
-    acquireSemaphore = Mini::Semaphore(app.getDevice());
-    int renderSem{};
-    Mini::Semaphore& renderSemaphore = this->renderSemaphores.at(this->frameIdx % 8);
-    renderSemaphore = Mini::Semaphore(app.getDevice(), &renderSem);
-    Mini::Semaphore& presentSemaphore = this->presentSemaphores.at(this->frameIdx % 8);
-    presentSemaphore = Mini::Semaphore(app.getDevice());
 
     // copy swapchain image to next frame image
     auto& cmdBuf1 = this->cmdBufs1.at(this->frameIdx % 8);
@@ -183,115 +187,137 @@ void SwapchainContext::present(const Application& app, VkQueue queue,
     cmdBuf1.submit(app.getGraphicsQueue(),
         semaphores, { copySemaphore1.handle(), copySemaphore2.handle() });
 
-    // render the intermediary frame
-    try {
-        LSFG::presentContext(*this->lsfgId, copySem, renderSem);
-    } catch(std::exception& e) {
-        std::cerr << "LSFG error: " << e.what() << '\n';
+    // render the intermediary frames
+    std::vector<int> renderSems(FRAMEGEN_N);
+    auto& renderSemaphores = this->renderSemaphores.at(this->frameIdx % 8);
+    for (size_t i = 0; i < FRAMEGEN_N; i++)
+        renderSemaphores.at(i) = Mini::Semaphore(app.getDevice(), &renderSems.at(i));
+    LSFG::presentContext(*this->lsfgId, copySem, renderSems);
+
+    auto& acquireSemaphores = this->acquireSemaphores.at(this->frameIdx % 8);
+    auto& prevPresentSemaphores = this->prevPresentSemaphores.at(this->frameIdx % 8);
+    auto& presentSemaphores = this->presentSemaphores.at(this->frameIdx % 8);
+    auto& cmdBufs2 = this->cmdBufs2.at(this->frameIdx % 8);
+    for (size_t i = 0; i < FRAMEGEN_N; i++) {
+        // acquire the next swapchain image
+        auto& acquireSemaphore = acquireSemaphores.at(i);
+        acquireSemaphore = Mini::Semaphore(app.getDevice());
+
+        uint32_t newIdx{};
+        auto res = vkAcquireNextImageKHR(app.getDevice(), this->swapchain, UINT64_MAX,
+            acquireSemaphore.handle(), VK_NULL_HANDLE, &newIdx);
+        if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR)
+            throw LSFG::vulkan_error(res, "Failed to acquire next swapchain image");
+
+        // copy the output image to the swapchain image
+        auto& presentSemaphore = presentSemaphores.at(i);
+        presentSemaphore = Mini::Semaphore(app.getDevice());
+
+        auto& cmdBuf2 = cmdBufs2.at(i);
+        cmdBuf2 = Mini::CommandBuffer(app.getDevice(), this->cmdPool);
+        cmdBuf2.begin();
+
+        auto& srcImage2 = this->outImgs.at(i);
+        auto& dstImage2 = this->images.at(newIdx);
+
+        const VkImageMemoryBarrier srcBarrier2{
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+            .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            .image = srcImage2.handle(),
+            .subresourceRange = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .levelCount = 1,
+                .layerCount = 1
+            }
+        };
+        const VkImageMemoryBarrier dstBarrier2{
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            .image = dstImage2,
+            .subresourceRange = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .levelCount = 1,
+                .layerCount = 1
+            }
+        };
+        const std::vector<VkImageMemoryBarrier> barriers2 = { srcBarrier2, dstBarrier2 };
+        vkCmdPipelineBarrier(cmdBuf2.handle(),
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0, 0, nullptr, 0, nullptr, 2, barriers2.data());
+
+        const VkImageCopy imageCopy2{
+            .srcSubresource = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .layerCount = 1
+            },
+            .dstSubresource = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .layerCount = 1
+            },
+            .extent = {
+                .width = this->extent.width,
+                .height = this->extent.height,
+                .depth = 1
+            }
+        };
+        vkCmdCopyImage(cmdBuf2.handle(),
+            srcImage2.handle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            dstImage2, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1, &imageCopy2);
+
+        const VkImageMemoryBarrier presentBarrier2{
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            .image = dstImage2,
+            .subresourceRange = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .levelCount = 1,
+                .layerCount = 1
+            }
+        };
+        vkCmdPipelineBarrier(cmdBuf2.handle(),
+            VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+            0, 0, nullptr, 0, nullptr, 1, &presentBarrier2);
+
+        cmdBuf2.end();
+
+        std::vector<VkSemaphore> waitSemaphores;
+        waitSemaphores.emplace_back(acquireSemaphore.handle());
+        if (i != 0) // wait for previous present semaphore
+            waitSemaphores.emplace_back(prevPresentSemaphores.at(i - 1).handle());
+        std::vector<VkSemaphore> signalSemaphores;
+        signalSemaphores.emplace_back(presentSemaphore.handle());
+        if (i != FRAMEGEN_N - 1) {
+            // signal next present semaphore
+            prevPresentSemaphores.at(i) = Mini::Semaphore(app.getDevice());
+            signalSemaphores.emplace_back(prevPresentSemaphores.at(i).handle());
+        }
+        cmdBuf2.submit(app.getGraphicsQueue(), waitSemaphores, signalSemaphores);
+
+        // present the swapchain image
+        VkSemaphore presentSemaphoreHandle = presentSemaphore.handle();
+        const VkPresentInfoKHR presentInfo = {
+            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+            .pNext = i == 0 ? pNext : nullptr, // only set on first present
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &presentSemaphoreHandle,
+            .swapchainCount = 1,
+            .pSwapchains = &this->swapchain,
+            .pImageIndices = &newIdx,
+        };
+        res = vkQueuePresentKHR(queue, &presentInfo);
+        if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) // FIXME: somehow return VK_SUBOPTIMAL_KHR
+            throw LSFG::vulkan_error(res, "Failed to present swapchain");
     }
-
-    // acquire the next swapchain image
-    uint32_t newIdx{};
-    auto res = vkAcquireNextImageKHR(app.getDevice(), this->swapchain, UINT64_MAX,
-        acquireSemaphore.handle(), VK_NULL_HANDLE, &newIdx);
-    if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR)
-        throw LSFG::vulkan_error(res, "Failed to acquire next swapchain image");
-
-    // copy the output image to the swapchain image
-    auto& cmdBuf2 = this->cmdBufs2.at((this->frameIdx + 1) % 8);
-    cmdBuf2 = Mini::CommandBuffer(app.getDevice(), this->cmdPool);
-    cmdBuf2.begin();
-
-    auto& srcImage2 = this->out_img;
-    auto& dstImage2 = this->images.at(newIdx);
-
-    const VkImageMemoryBarrier srcBarrier2{
-        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-        .srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
-        .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-        .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        .image = srcImage2.handle(),
-        .subresourceRange = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .levelCount = 1,
-            .layerCount = 1
-        }
-    };
-    const VkImageMemoryBarrier dstBarrier2{
-        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-        .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-        .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-        .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        .image = dstImage2,
-        .subresourceRange = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .levelCount = 1,
-            .layerCount = 1
-        }
-    };
-    const std::vector<VkImageMemoryBarrier> barriers2 = { srcBarrier2, dstBarrier2 };
-    vkCmdPipelineBarrier(cmdBuf2.handle(),
-        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-        0, 0, nullptr, 0, nullptr, 2, barriers2.data());
-
-    const VkImageCopy imageCopy2{
-        .srcSubresource = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .layerCount = 1
-        },
-        .dstSubresource = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .layerCount = 1
-        },
-        .extent = {
-            .width = this->extent.width,
-            .height = this->extent.height,
-            .depth = 1
-        }
-    };
-    vkCmdCopyImage(cmdBuf2.handle(),
-        srcImage2.handle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        dstImage2, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        1, &imageCopy2);
-
-    const VkImageMemoryBarrier presentBarrier2{
-        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-        .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-        .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-        .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        .image = dstImage2,
-        .subresourceRange = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .levelCount = 1,
-            .layerCount = 1
-        }
-    };
-    vkCmdPipelineBarrier(cmdBuf2.handle(),
-        VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-        0, 0, nullptr, 0, nullptr, 1, &presentBarrier2);
-
-    cmdBuf2.end();
-    cmdBuf2.submit(app.getGraphicsQueue(),
-        { acquireSemaphore.handle(), renderSemaphore.handle() },
-        { presentSemaphore.handle() });
-
-    // present the swapchain image
-    VkSemaphore presentSemaphoreHandle = presentSemaphore.handle();
-    const VkPresentInfoKHR presentInfo = {
-        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-        .pNext = pNext,
-        .waitSemaphoreCount = 1,
-        .pWaitSemaphores = &presentSemaphoreHandle,
-        .swapchainCount = 1,
-        .pSwapchains = &this->swapchain,
-        .pImageIndices = &newIdx,
-    };
-    res = vkQueuePresentKHR(queue, &presentInfo);
-    if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) // FIXME: somehow return VK_SUBOPTIMAL_KHR
-        throw LSFG::vulkan_error(res, "Failed to present swapchain");
 
     this->frameIdx++;
 }
