@@ -124,10 +124,10 @@ namespace Loader::DL {
 }
 
 /// Modified version of the dlopen function.
-extern "C" void* dlopen(const char* filename, int flag);
+extern "C" void* dlopen(const char* filename, int flag) noexcept;
 /// Modified version of the dlsym function.
-extern "C" void* dlsym(void* handle, const char* symbol);
+extern "C" void* dlsym(void* handle, const char* symbol) noexcept;
 /// Modified version of the dlclose function.
-extern "C" int dlclose(void* handle);
+extern "C" int dlclose(void* handle) noexcept;
 
 #endif // DL_HPP

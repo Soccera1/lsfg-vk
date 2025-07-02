@@ -75,7 +75,7 @@ void DL::registerFile(const File& file) {
 void DL::disableHooks() { enable_hooks = false; }
 void DL::enableHooks()  { enable_hooks = true; }
 
-extern "C" void* dlopen(const char* filename, int flag) {
+void* dlopen(const char* filename, int flag) noexcept {
     auto& files = overrides();
     auto& loaded = handles();
 
@@ -102,7 +102,7 @@ extern "C" void* dlopen(const char* filename, int flag) {
     return file.getHandle();
 }
 
-extern "C" void* dlsym(void* handle, const char* symbol) {
+void* dlsym(void* handle, const char* symbol) noexcept {
     const auto& files = overrides();
 
     if (!enable_hooks || !handle || !symbol)
@@ -126,7 +126,7 @@ extern "C" void* dlsym(void* handle, const char* symbol) {
     return func;
 }
 
-extern "C" int dlclose(void* handle) {
+int dlclose(void* handle) noexcept {
     auto& files = overrides();
     auto& loaded = handles();
 
