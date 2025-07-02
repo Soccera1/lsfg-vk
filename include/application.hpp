@@ -52,11 +52,12 @@ public:
     /// @param queue The Vulkan queue to present the frame on.
     /// @param semaphores The semaphores to wait on before presenting.
     /// @param idx The index of the swapchain image to present.
+    /// @param pNext Pointer to the next structure in a chain, if any.
     ///
     /// @throws LSFG::vulkan_error if any Vulkan call fails.
     ///
     void presentSwapchain(VkSwapchainKHR handle, VkQueue queue,
-        const std::vector<VkSemaphore>& semaphores, uint32_t idx);
+        const std::vector<VkSemaphore>& semaphores, uint32_t idx, const void* pNext);
 
     ///
     /// Remove a swapchain from the application.
@@ -120,11 +121,12 @@ public:
     /// @param queue The Vulkan queue to present the frame on.
     /// @param semaphores The semaphores to wait on before presenting.
     /// @param idx The index of the swapchain image to present.
+    /// @param pNext Pointer to the next structure in a chain, if any.
     ///
     /// @throws LSFG::vulkan_error if any Vulkan call fails.
     ///
     void present(const Application& app, VkQueue queue,
-        const std::vector<VkSemaphore>& semaphores, uint32_t idx);
+        const std::vector<VkSemaphore>& semaphores, uint32_t idx, const void* pNext);
 
     /// Get the Vulkan swapchain handle.
     [[nodiscard]] VkSwapchainKHR handle() const { return this->swapchain; }

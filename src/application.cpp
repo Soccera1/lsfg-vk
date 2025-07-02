@@ -65,17 +65,16 @@ SwapchainContext::SwapchainContext(const Application& app, VkSwapchainKHR swapch
 }
 
 void Application::presentSwapchain(VkSwapchainKHR handle, VkQueue queue,
-        const std::vector<VkSemaphore>& semaphores, uint32_t idx) {
+        const std::vector<VkSemaphore>& semaphores, uint32_t idx, const void* pNext) {
     auto it = this->swapchains.find(handle);
     if (it == this->swapchains.end())
         throw std::logic_error("Swapchain not found");
 
-    it->second.present(*this, queue, semaphores, idx);
+    it->second.present(*this, queue, semaphores, idx, pNext);
 }
 
 void SwapchainContext::present(const Application& app, VkQueue queue,
-        const std::vector<VkSemaphore>& semaphores, uint32_t idx) {
-
+        const std::vector<VkSemaphore>& semaphores, uint32_t idx, const void* pNext) {
     // present deferred frame if any
     if (this->deferredIdx.has_value()) {
         VkSemaphore deferredSemaphore = this->copySemaphores2.at((this->frameIdx - 1) % 8).handle();
@@ -283,6 +282,7 @@ void SwapchainContext::present(const Application& app, VkQueue queue,
     VkSemaphore presentSemaphoreHandle = presentSemaphore.handle();
     const VkPresentInfoKHR presentInfo = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .pNext = pNext,
         .waitSemaphoreCount = 1,
         .pWaitSemaphores = &presentSemaphoreHandle,
         .swapchainCount = 1,

@@ -179,7 +179,7 @@ namespace {
             std::copy_n(pPresentInfo->pWaitSemaphores, waitSemaphores.size(), waitSemaphores.data());
 
             application->presentSwapchain(*pPresentInfo->pSwapchains,
-                queue, waitSemaphores, *pPresentInfo->pImageIndices);
+                queue, waitSemaphores, *pPresentInfo->pImageIndices, pPresentInfo->pNext);
 
             Log::info("lsfg-vk(hooks): Frame presented successfully");
         } catch (const LSFG::vulkan_error& e) {
