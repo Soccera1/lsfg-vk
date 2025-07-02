@@ -1,7 +1,10 @@
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
+#include "mini/commandpool.hpp"
 #include "mini/image.hpp"
+#include "mini/semaphore.hpp"
+#include <array>
 #include <unordered_map>
 #include <vector>
 
@@ -20,12 +23,12 @@ public:
     /// @param device Vulkan device
     /// @param physicalDevice Vulkan physical device
     /// @param graphicsQueue Vulkan queue for graphics operations
-    /// @param presentQueue Vulkan queue for presentation operations
+    /// @param graphicsQueueFamilyIndex The family index of the graphics queue
     ///
     /// @throws LSFG::vulkan_error if any Vulkan call fails.
     ///
     Application(VkDevice device, VkPhysicalDevice physicalDevice,
-        VkQueue graphicsQueue, VkQueue presentQueue);
+        VkQueue graphicsQueue, uint32_t graphicsQueueFamilyIndex);
 
     ///
     /// Add a swapchain to the application.
@@ -67,8 +70,8 @@ public:
     [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const { return this->physicalDevice; }
     /// Get the Vulkan graphics queue.
     [[nodiscard]] VkQueue getGraphicsQueue() const { return this->graphicsQueue; }
-    /// Get the Vulkan present queue.
-    [[nodiscard]] VkQueue getPresentQueue() const { return this->presentQueue; }
+    /// Get the graphics queue family index.
+    [[nodiscard]] uint32_t getGraphicsQueueFamilyIndex() const { return this->graphicsQueueFamilyIndex; }
 
     // Non-copyable and non-movable
     Application(const Application&) = delete;
@@ -83,7 +86,7 @@ private:
     VkDevice device;
     VkPhysicalDevice physicalDevice;
     VkQueue graphicsQueue;
-    VkQueue presentQueue;
+    uint32_t graphicsQueueFamilyIndex;
 
     // (owned resources)
     std::unordered_map<VkSwapchainKHR, SwapchainContext> swapchains;
@@ -144,8 +147,15 @@ private:
     std::vector<VkImage> images;
 
     // (owned resources)
+    Mini::CommandPool cmdPool;
+    std::array<Mini::Semaphore, 8> copySemaphores; // copy current swap to frame
+    std::array<Mini::Semaphore, 8> acquireSemaphores; // acquire new swapchain image
+    std::array<Mini::Semaphore, 8> renderSemaphores; // fg is done
+    std::array<Mini::Semaphore, 8> presentSemaphores; // copy is done, ready to present
+
     Mini::Image frame_0, frame_1;
     std::shared_ptr<int32_t> lsfgId;
+    uint64_t frameIdx{0};
 };
 
 #endif // APPLICATION_HPP

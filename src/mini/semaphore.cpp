@@ -1,6 +1,5 @@
 #include "mini/semaphore.hpp"
 #include "lsfg.hpp"
-#include <vulkan/vulkan_core.h>
 
 using namespace Mini;
 

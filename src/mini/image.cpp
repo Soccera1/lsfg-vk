@@ -2,7 +2,6 @@
 #include "lsfg.hpp"
 
 #include <optional>
-#include <vulkan/vulkan_core.h>
 
 using namespace Mini;
 

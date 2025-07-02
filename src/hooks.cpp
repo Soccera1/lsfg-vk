@@ -76,7 +76,6 @@ namespace {
         vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, families.data());
 
         std::optional<uint32_t> graphicsFamilyIdx;
-        std::optional<uint32_t> presentFamilyIdx;
         for (uint32_t i = 0; i < families.size(); ++i) {
             auto it = std::ranges::find_if(queueCreateInfos,
                 [i](const VkDeviceQueueCreateInfo& info) {
@@ -86,18 +85,14 @@ namespace {
                 continue; // skip if this family is not used by the device
             if (families.at(i).queueFlags & VK_QUEUE_GRAPHICS_BIT)
                 graphicsFamilyIdx.emplace(i);
-            if (families.at(i).queueFlags & VK_QUEUE_COMPUTE_BIT)
-                presentFamilyIdx.emplace(i);
         }
-        if (!graphicsFamilyIdx.has_value() || !presentFamilyIdx.has_value()) {
+        if (!graphicsFamilyIdx.has_value()) {
             Log::error("No suitable queue family found for graphics or present");
             exit(EXIT_FAILURE);
         }
 
         VkQueue graphicsQueue{};
         vkGetDeviceQueue(*pDevice, *graphicsFamilyIdx, 0, &graphicsQueue);
-        VkQueue presentQueue{};
-        vkGetDeviceQueue(*pDevice, *presentFamilyIdx, 0, &presentQueue);
 
         // create the main application
         if (application.has_value()) {
@@ -106,7 +101,7 @@ namespace {
         }
 
         try {
-            application.emplace(*pDevice, physicalDevice, graphicsQueue, presentQueue);
+            application.emplace(*pDevice, physicalDevice, graphicsQueue, *graphicsFamilyIdx);
             Log::info("lsfg-vk(hooks): Application created successfully");
         } catch (const LSFG::vulkan_error& e) {
             Log::error("Encountered Vulkan error {:x} while creating application: {}",
