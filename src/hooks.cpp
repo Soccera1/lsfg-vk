@@ -4,6 +4,7 @@
 #include "application.hpp"
 #include "log.hpp"
 
+#include <iostream>
 #include <lsfg.hpp>
 
 #include <optional>
@@ -121,9 +122,10 @@ namespace {
             const VkAllocationCallbacks* pAllocator,
             VkSwapchainKHR* pSwapchain) {
         VkSwapchainCreateInfoKHR createInfo = *pCreateInfo;
-        createInfo.minImageCount = 8;
+        createInfo.minImageCount += 3;
         createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
         auto res = vkCreateSwapchainKHR(device, &createInfo, pAllocator, pSwapchain);
 
         // add the swapchain to the application

@@ -9,7 +9,7 @@
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
-const int FRAMEGEN_N = 4; // number of frames to generate
+const int FRAMEGEN_N = 2; // number of frames to generate
 
 Application::Application(VkDevice device, VkPhysicalDevice physicalDevice,
         VkQueue graphicsQueue, uint32_t graphicsQueueFamilyIndex)
@@ -87,6 +87,7 @@ void Application::presentSwapchain(VkSwapchainKHR handle, VkQueue queue,
 void SwapchainContext::present(const Application& app, VkQueue queue,
         const std::vector<VkSemaphore>& semaphores, uint32_t idx, const void* pNext) {
     // present deferred frame if any
+    bool yes = this->deferredIdx.has_value();
     if (this->deferredIdx.has_value()) {
         VkSemaphore deferredSemaphore = this->copySemaphores2.at((this->frameIdx - 1) % 8).handle();
         const uint32_t deferredIdx = this->deferredIdx.value();
@@ -184,8 +185,15 @@ void SwapchainContext::present(const Application& app, VkQueue queue,
         0, 0, nullptr, 0, nullptr, 1, &presentBarrier);
 
     cmdBuf1.end();
+
+    std::vector<VkSemaphore> semaphores2 = semaphores;
+    if (yes) {
+        VkSemaphore prevPresentSemaphore = this->prevPresentSemaphores.at((this->frameIdx - 1) % 8).at(FRAMEGEN_N - 1).handle();
+        semaphores2.emplace_back(prevPresentSemaphore);
+    }
+
     cmdBuf1.submit(app.getGraphicsQueue(),
-        semaphores, { copySemaphore1.handle(), copySemaphore2.handle() });
+        semaphores2, { copySemaphore1.handle(), copySemaphore2.handle() });
 
     // render the intermediary frames
     std::vector<int> renderSems(FRAMEGEN_N);
@@ -280,6 +288,7 @@ void SwapchainContext::present(const Application& app, VkQueue queue,
             .image = dstImage2,
             .subresourceRange = {
                 .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+
                 .levelCount = 1,
                 .layerCount = 1
             }
@@ -290,26 +299,27 @@ void SwapchainContext::present(const Application& app, VkQueue queue,
 
         cmdBuf2.end();
 
-        std::vector<VkSemaphore> waitSemaphores;
-        waitSemaphores.emplace_back(acquireSemaphore.handle());
-        if (i != 0) // wait for previous present semaphore
-            waitSemaphores.emplace_back(prevPresentSemaphores.at(i - 1).handle());
+
         std::vector<VkSemaphore> signalSemaphores;
         signalSemaphores.emplace_back(presentSemaphore.handle());
-        if (i != FRAMEGEN_N - 1) {
-            // signal next present semaphore
-            prevPresentSemaphores.at(i) = Mini::Semaphore(app.getDevice());
-            signalSemaphores.emplace_back(prevPresentSemaphores.at(i).handle());
-        }
-        cmdBuf2.submit(app.getGraphicsQueue(), waitSemaphores, signalSemaphores);
+        // signal next present semaphore
+        prevPresentSemaphores.at(i) = Mini::Semaphore(app.getDevice());
+        signalSemaphores.emplace_back(prevPresentSemaphores.at(i).handle());
+        auto& renderSemaphore = renderSemaphores.at(i);
+        cmdBuf2.submit(app.getGraphicsQueue(),
+            { acquireSemaphore.handle(), renderSemaphore.handle() },
+            signalSemaphores);
 
         // present the swapchain image
-        VkSemaphore presentSemaphoreHandle = presentSemaphore.handle();
+        std::vector<VkSemaphore> waitSemaphores;
+        waitSemaphores.emplace_back(presentSemaphore.handle());
+        if (i != 0) // wait for previous present semaphore
+            waitSemaphores.emplace_back(prevPresentSemaphores.at(i - 1).handle());
         const VkPresentInfoKHR presentInfo = {
             .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
             .pNext = i == 0 ? pNext : nullptr, // only set on first present
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &presentSemaphoreHandle,
+            .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
+            .pWaitSemaphores = waitSemaphores.data(),
             .swapchainCount = 1,
             .pSwapchains = &this->swapchain,
             .pImageIndices = &newIdx,
