@@ -8,7 +8,8 @@ Merge::Merge(const Core::Device& device, const Core::DescriptorPool& pool,
         Core::Image inImg2,
         Core::Image inImg3,
         Core::Image inImg4,
-        Core::Image inImg5)
+        Core::Image inImg5,
+        int outFd)
         : inImg1(std::move(inImg1)),
           inImg2(std::move(inImg2)),
           inImg3(std::move(inImg3)),
@@ -30,7 +31,8 @@ Merge::Merge(const Core::Device& device, const Core::DescriptorPool& pool,
         extent,
         VK_FORMAT_R8G8B8A8_UNORM,
         VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-        VK_IMAGE_ASPECT_COLOR_BIT);
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        outFd);
 
     for (size_t fc = 0; fc < 2; fc++) {
         this->descriptorSets.at(fc).update(device)

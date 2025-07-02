@@ -103,6 +103,6 @@ void Magic::Dispatch(const Core::CommandBuffer& buf, uint64_t fc) {
         .build();
 
     this->pipeline.bind(buf);
-    this->descriptorSets.at(fc).bind(buf, this->pipeline);
+    this->descriptorSets.at(fc % 3).bind(buf, this->pipeline);
     buf.dispatch(threadsX, threadsY, 1);
 }

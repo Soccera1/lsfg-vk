@@ -1,10 +1,12 @@
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
+#include "mini/commandbuffer.hpp"
 #include "mini/commandpool.hpp"
 #include "mini/image.hpp"
 #include "mini/semaphore.hpp"
 #include <array>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -148,14 +150,18 @@ private:
 
     // (owned resources)
     Mini::CommandPool cmdPool;
-    std::array<Mini::Semaphore, 8> copySemaphores; // copy current swap to frame
+    std::array<Mini::CommandBuffer, 8> cmdBufs1;
+    std::array<Mini::CommandBuffer, 8> cmdBufs2;
+    std::array<Mini::Semaphore, 8> copySemaphores1; // copy current swap to frame
+    std::array<Mini::Semaphore, 8> copySemaphores2; // (for present)
     std::array<Mini::Semaphore, 8> acquireSemaphores; // acquire new swapchain image
     std::array<Mini::Semaphore, 8> renderSemaphores; // fg is done
     std::array<Mini::Semaphore, 8> presentSemaphores; // copy is done, ready to present
 
-    Mini::Image frame_0, frame_1;
+    Mini::Image frame_0, frame_1, out_img;
     std::shared_ptr<int32_t> lsfgId;
     uint64_t frameIdx{0};
+    std::optional<uint32_t> deferredIdx; // index of the frame to present next
 };
 
 #endif // APPLICATION_HPP

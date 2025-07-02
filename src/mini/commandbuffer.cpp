@@ -53,32 +53,23 @@ void CommandBuffer::end() {
 }
 
 void CommandBuffer::submit(VkQueue queue,
-        const std::vector<Semaphore>& waitSemaphores,
-        const std::vector<Semaphore>& signalSemaphores) {
+        const std::vector<VkSemaphore>& waitSemaphores,
+        const std::vector<VkSemaphore>& signalSemaphores) {
     if (*this->state != CommandBufferState::Full)
         throw std::logic_error("Command buffer is not in Full state");
 
     const std::vector<VkPipelineStageFlags> waitStages(waitSemaphores.size(),
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
-    std::vector<VkSemaphore> waitSemaphoresHandles;
-    waitSemaphoresHandles.reserve(waitSemaphores.size());
-    for (const auto& semaphore : waitSemaphores)
-        waitSemaphoresHandles.push_back(semaphore.handle());
-    std::vector<VkSemaphore> signalSemaphoresHandles;
-    signalSemaphoresHandles.reserve(signalSemaphores.size());
-    for (const auto& semaphore : signalSemaphores)
-        signalSemaphoresHandles.push_back(semaphore.handle());
-
     const VkSubmitInfo submitInfo{
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
         .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
-        .pWaitSemaphores = waitSemaphoresHandles.data(),
+        .pWaitSemaphores = waitSemaphores.data(),
         .pWaitDstStageMask = waitStages.data(),
         .commandBufferCount = 1,
         .pCommandBuffers = &(*this->commandBuffer),
         .signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size()),
-        .pSignalSemaphores = signalSemaphoresHandles.data()
+        .pSignalSemaphores = signalSemaphores.data()
     };
     auto res = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
     if (res != VK_SUCCESS)

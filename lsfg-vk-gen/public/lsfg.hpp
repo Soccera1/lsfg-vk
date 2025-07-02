@@ -21,11 +21,12 @@ namespace LSFG {
     /// @param height Height of the input images.
     /// @param in0 File descriptor for the first input image.
     /// @param in1 File descriptor for the second input image.
+    /// @param out File descriptor for the output image.
     /// @return A unique identifier for the created context.
     ///
     /// @throws LSFG::vulkan_error if the context cannot be created.
     ///
-    int32_t createContext(uint32_t width, uint32_t height, int in0, int in1);
+    int32_t createContext(uint32_t width, uint32_t height, int in0, int in1, int out);
 
     ///
     /// Present a context.

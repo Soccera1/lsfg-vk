@@ -1,9 +1,11 @@
 #ifndef CONTEXT_HPP
 #define CONTEXT_HPP
 
+#include "core/commandbuffer.hpp"
 #include "core/commandpool.hpp"
 #include "core/descriptorpool.hpp"
 #include "core/image.hpp"
+#include "core/semaphore.hpp"
 #include "shaderchains/alpha.hpp"
 #include "shaderchains/beta.hpp"
 #include "shaderchains/delta.hpp"
@@ -30,10 +32,11 @@ namespace LSFG {
         /// @param height Height of the input images.
         /// @param in0 File descriptor for the first input image.
         /// @param in1 File descriptor for the second input image.
+        /// @param out File descriptor for the output image.
         ///
         /// @throws LSFG::vulkan_error if the generator fails to initialize.
         ///
-        Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1);
+        Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1, int out);
 
         ///
         /// Schedule the next generation.
@@ -57,6 +60,9 @@ namespace LSFG {
         Core::CommandPool cmdPool;
 
         Core::Image inImg_0, inImg_1; // inImg_0 is next (inImg_1 prev) when fc % 2 == 0
+        std::array<Core::Semaphore, 8> inSemaphores;
+        std::array<Core::Semaphore, 8> outSemaphores;
+        std::array<Core::CommandBuffer, 8> cmdBuffers;
         uint64_t fc{0};
 
         Shaderchains::Downsample downsampleChain;

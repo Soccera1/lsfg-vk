@@ -34,6 +34,7 @@ namespace LSFG::Shaderchains {
         /// @param inImg3 The first related input texture
         /// @param inImg4 The second related input texture
         /// @param inImg5 The third related input texture
+        /// @param outFd File descriptor for the output image.
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
@@ -42,7 +43,8 @@ namespace LSFG::Shaderchains {
             Core::Image inImg2,
             Core::Image inImg3,
             Core::Image inImg4,
-            Core::Image inImg5);
+            Core::Image inImg5,
+            int outFd);
 
         ///
         /// Dispatch the shaderchain.

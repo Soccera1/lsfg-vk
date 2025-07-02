@@ -71,8 +71,8 @@ namespace Mini {
         /// @throws LSFG::vulkan_error if submission fails.
         ///
         void submit(VkQueue queue,
-            const std::vector<Semaphore>& waitSemaphores = {},
-            const std::vector<Semaphore>& signalSemaphores = {});
+            const std::vector<VkSemaphore>& waitSemaphores = {},
+            const std::vector<VkSemaphore>& signalSemaphores = {});
 
         /// Get the state of the command buffer.
         [[nodiscard]] CommandBufferState getState() const { return *this->state; }

@@ -8,7 +8,7 @@
 
 using namespace LSFG;
 
-Context::Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1) {
+Context::Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1, int out) {
     // import images
     this->inImg_0 = Core::Image(device, { width, height },
         VK_FORMAT_R8G8B8A8_UNORM,
@@ -90,15 +90,19 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
         this->inImg_0,
         this->zetaChains.at(2).getOutImage(),
         this->epsilonChains.at(2).getOutImage(),
-        this->deltaChains.at(2).getOutImage()
+        this->deltaChains.at(2).getOutImage(),
+        out
     );
 }
 
 void Context::present(const Core::Device& device, int inSem, int outSem) {
-    const Core::Semaphore inSemaphore(device, inSem);
-    const Core::Semaphore outSemaphore(device, outSem);
+    auto& inSemaphore = this->inSemaphores.at(this->fc % 8);
+    inSemaphore = Core::Semaphore(device, inSem);
+    auto& outSemaphore = this->outSemaphores.at(this->fc % 8);
+    outSemaphore = Core::Semaphore(device, outSem);
 
-    Core::CommandBuffer cmdBuffer(device, this->cmdPool);
+    auto& cmdBuffer = this->cmdBuffers.at(this->fc % 8);
+    cmdBuffer = Core::CommandBuffer(device, this->cmdPool);
     cmdBuffer.begin();
 
     this->downsampleChain.Dispatch(cmdBuffer, fc);

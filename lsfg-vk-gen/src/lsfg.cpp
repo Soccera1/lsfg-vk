@@ -28,12 +28,12 @@ void LSFG::initialize() {
     std::srand(static_cast<uint32_t>(std::time(nullptr)));
 }
 
-int32_t LSFG::createContext(uint32_t width, uint32_t height, int in0, int in1) {
+int32_t LSFG::createContext(uint32_t width, uint32_t height, int in0, int in1, int out) {
     if (!instance.has_value() || !device.has_value())
         throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "LSFG not initialized");
 
     auto id = std::rand();
-    contexts.emplace(id, Context(*device, width, height, in0, in1));
+    contexts.emplace(id, Context(*device, width, height, in0, in1, out));
     return id;
 }
 
