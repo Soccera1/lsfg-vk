@@ -9,10 +9,6 @@ const std::vector<const char*> requiredExtensions = {
 
 };
 
-const std::vector<const char*> requiredLayers = {
-    "VK_LAYER_KHRONOS_validation"
-};
-
 Instance::Instance() {
     // create Vulkan instance
     const VkApplicationInfo appInfo{
@@ -26,8 +22,6 @@ Instance::Instance() {
     const VkInstanceCreateInfo createInfo{
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pApplicationInfo = &appInfo,
-        .enabledLayerCount = static_cast<uint32_t>(requiredLayers.size()),
-        .ppEnabledLayerNames = requiredLayers.data(),
         .enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size()),
         .ppEnabledExtensionNames = requiredExtensions.data()
     };
