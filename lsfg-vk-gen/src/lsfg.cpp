@@ -58,15 +58,17 @@ void LSFG::deleteContext(int32_t id) {
     if (it == contexts.end())
         throw LSFG::vulkan_error(VK_ERROR_DEVICE_LOST, "No such context");
 
+    vkDeviceWaitIdle(device->handle());
     contexts.erase(it);
 }
 
 void LSFG::finalize() {
-    if (!instance.has_value() && !device.has_value())
+    if (!instance.has_value() || !device.has_value())
         return;
 
     Globals::uninitializeGlobals();
 
-    instance.reset();
+    vkDeviceWaitIdle(device->handle());
     device.reset();
+    instance.reset();
 }

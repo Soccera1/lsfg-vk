@@ -1,4 +1,5 @@
 #include "context.hpp"
+#include "core/fence.hpp"
 #include "core/semaphore.hpp"
 #include "lsfg.hpp"
 
@@ -28,8 +29,10 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
     this->cmdPool = Core::CommandPool(device);
 
     // prepare vectors
-    for (size_t i = 0; i < 8; i++)
+    for (size_t i = 0; i < 8; i++) {
         this->internalSemaphores.at(i).resize(outN.size());
+        this->doneFences.at(i).resize(outN.size());
+    }
     for (size_t i = 0; i < outN.size(); i++) {
         this->outSemaphores.emplace_back();
         this->cmdBuffers2.emplace_back();
@@ -114,6 +117,14 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
 
 void Context::present(const Core::Device& device, int inSem,
         const std::vector<int>& outSem) {
+    auto& doneFences = this->doneFences.at(this->fc % 8);
+    for (auto& fenceOptional : doneFences) {
+        if (!fenceOptional.has_value())
+            continue;
+        if (!fenceOptional->wait(device, UINT64_MAX))
+            throw vulkan_error(VK_ERROR_DEVICE_LOST, "Fence wait timed out");
+    }
+
     auto& inSemaphore = this->inSemaphores.at(this->fc % 8);
     inSemaphore = Core::Semaphore(device, inSem);
     auto& internalSemaphores = this->internalSemaphores.at(this->fc % 8);
@@ -134,10 +145,11 @@ void Context::present(const Core::Device& device, int inSem,
         { inSemaphore }, std::nullopt,
         internalSemaphores, std::nullopt);
 
-
     for (size_t pass = 0; pass < outSem.size(); pass++) {
         auto& outSemaphore = this->outSemaphores.at(pass).at(this->fc % 8);
         outSemaphore = Core::Semaphore(device, outSem.at(pass));
+        auto& outFenceOptional = this->doneFences.at(fc % 8).at(pass);
+        outFenceOptional.emplace(Core::Fence(device));
 
         auto& cmdBuffer2 = this->cmdBuffers2.at(pass).at(this->fc % 8);
         cmdBuffer2 = Core::CommandBuffer(device, this->cmdPool);
@@ -158,7 +170,7 @@ void Context::present(const Core::Device& device, int inSem,
 
         cmdBuffer2.end();
 
-        cmdBuffer2.submit(device.getComputeQueue(), std::nullopt,
+        cmdBuffer2.submit(device.getComputeQueue(), outFenceOptional,
             { internalSemaphores.at(pass) }, std::nullopt,
             { outSemaphore }, std::nullopt);
     }

@@ -4,6 +4,7 @@
 #include "core/commandbuffer.hpp"
 #include "core/commandpool.hpp"
 #include "core/descriptorpool.hpp"
+#include "core/fence.hpp"
 #include "core/image.hpp"
 #include "core/semaphore.hpp"
 #include "shaderchains/alpha.hpp"
@@ -67,6 +68,7 @@ namespace LSFG {
         std::vector<std::array<Core::Semaphore, 8>> outSemaphores;
         std::array<Core::CommandBuffer, 8> cmdBuffers1;
         std::vector<std::array<Core::CommandBuffer, 8>> cmdBuffers2;
+        std::array<std::vector<std::optional<Core::Fence>>, 8> doneFences;
         uint64_t fc{0};
 
         Shaderchains::Downsample downsampleChain;

@@ -63,7 +63,7 @@ VkResult LsContext::present(const Hooks::DeviceInfo& info, const void* pNext, Vk
     // 1. copy swapchain image to frame_0/frame_1
     int preCopySemaphoreFd{};
     pass.preCopySemaphores.at(0) = Mini::Semaphore(info.device, &preCopySemaphoreFd);
-    // pass.preCopySemaphores.at(1) = Mini::Semaphore(info.device);
+    pass.preCopySemaphores.at(1) = Mini::Semaphore(info.device);
     pass.preCopyBuf = Mini::CommandBuffer(info.device, this->cmdPool);
     pass.preCopyBuf.begin();
 
@@ -75,9 +75,15 @@ VkResult LsContext::present(const Hooks::DeviceInfo& info, const void* pNext, Vk
         true, false);
 
     pass.preCopyBuf.end();
+
+    std::vector<VkSemaphore> gameRenderSemaphores2 = gameRenderSemaphores;
+    if (this->frameIdx > 0)
+        gameRenderSemaphores2.emplace_back(this->passInfos.at((this->frameIdx - 1) % 8)
+            .preCopySemaphores.at(1).handle());
     pass.preCopyBuf.submit(info.queue.second,
-        gameRenderSemaphores,
-        { pass.preCopySemaphores.at(0).handle() });
+        gameRenderSemaphores2,
+        { pass.preCopySemaphores.at(0).handle(),
+          pass.preCopySemaphores.at(1).handle() });
 
     // 2. render intermediary frames
     std::vector<int> renderSemaphoreFds(info.frameGen);
