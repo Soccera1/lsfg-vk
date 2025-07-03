@@ -3,10 +3,10 @@
 #include "core/semaphore.hpp"
 #include "lsfg.hpp"
 
-#include <cassert>
+#include <vulkan/vulkan_core.h>
+
 #include <format>
 #include <optional>
-#include <vulkan/vulkan_core.h>
 
 using namespace LSFG;
 
@@ -24,18 +24,14 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
         VK_IMAGE_ASPECT_COLOR_BIT,
         in1);
 
-    // create pools
+    // prepare render infos
     this->descPool = Core::DescriptorPool(device);
     this->cmdPool = Core::CommandPool(device);
-
-    // prepare vectors
     for (size_t i = 0; i < 8; i++) {
-        this->internalSemaphores.at(i).resize(outN.size());
-        this->doneFences.at(i).resize(outN.size());
-    }
-    for (size_t i = 0; i < outN.size(); i++) {
-        this->outSemaphores.emplace_back();
-        this->cmdBuffers2.emplace_back();
+        auto& info = this->renderInfos.at(i);
+        info.internalSemaphores.resize(outN.size());
+        info.cmdBuffers2.resize(outN.size());
+        info.outSemaphores.resize(outN.size());
     }
 
     // create shader chains
@@ -117,65 +113,62 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
 
 void Context::present(const Core::Device& device, int inSem,
         const std::vector<int>& outSem) {
-    auto& doneFences = this->doneFences.at(this->fc % 8);
-    for (auto& fenceOptional : doneFences) {
-        if (!fenceOptional.has_value())
-            continue;
-        if (!fenceOptional->wait(device, UINT64_MAX))
+    auto& info = this->renderInfos.at(this->frameIdx % 8);
+
+    // 3. wait for completion of previous frame in this slot
+    for (auto& fence : info.completionFences.value_or({}))
+        if (!fence.wait(device, UINT64_MAX)) // should not take any time
             throw vulkan_error(VK_ERROR_DEVICE_LOST, "Fence wait timed out");
-    }
 
-    auto& inSemaphore = this->inSemaphores.at(this->fc % 8);
-    inSemaphore = Core::Semaphore(device, inSem);
-    auto& internalSemaphores = this->internalSemaphores.at(this->fc % 8);
+    // 1. downsample and process input image
+    info.inSemaphore = Core::Semaphore(device, inSem);
     for (size_t i = 0; i < outSem.size(); i++)
-        internalSemaphores.at(i) = Core::Semaphore(device);
+        info.internalSemaphores.at(i) = Core::Semaphore(device);
 
-    auto& cmdBuffer1 = this->cmdBuffers1.at(this->fc % 8);
-    cmdBuffer1 = Core::CommandBuffer(device, this->cmdPool);
-    cmdBuffer1.begin();
+    info.cmdBuffer1 = Core::CommandBuffer(device, this->cmdPool);
+    info.cmdBuffer1.begin();
 
-    this->downsampleChain.Dispatch(cmdBuffer1, fc);
+    this->downsampleChain.Dispatch(info.cmdBuffer1, this->frameIdx);
     for (size_t i = 0; i < 7; i++)
-        this->alphaChains.at(6 - i).Dispatch(cmdBuffer1, fc);
+        this->alphaChains.at(6 - i).Dispatch(info.cmdBuffer1, this->frameIdx);
 
-    cmdBuffer1.end();
+    info.cmdBuffer1.end();
+    info.cmdBuffer1.submit(device.getComputeQueue(), std::nullopt,
+        { info.inSemaphore }, std::nullopt,
+        info.internalSemaphores, std::nullopt);
 
-    cmdBuffer1.submit(device.getComputeQueue(), std::nullopt,
-        { inSemaphore }, std::nullopt,
-        internalSemaphores, std::nullopt);
-
+    // 2. generate intermediary frames
+    info.completionFences.emplace();
     for (size_t pass = 0; pass < outSem.size(); pass++) {
-        auto& outSemaphore = this->outSemaphores.at(pass).at(this->fc % 8);
+        auto& completionFence = info.completionFences->emplace_back(device);
+        auto& outSemaphore = info.outSemaphores.at(pass);
         outSemaphore = Core::Semaphore(device, outSem.at(pass));
-        auto& outFenceOptional = this->doneFences.at(fc % 8).at(pass);
-        outFenceOptional.emplace(Core::Fence(device));
 
-        auto& cmdBuffer2 = this->cmdBuffers2.at(pass).at(this->fc % 8);
+        auto& cmdBuffer2 = info.cmdBuffers2.at(pass);
         cmdBuffer2 = Core::CommandBuffer(device, this->cmdPool);
         cmdBuffer2.begin();
 
-        this->betaChain.Dispatch(cmdBuffer2, fc, pass);
+        this->betaChain.Dispatch(cmdBuffer2, this->frameIdx, pass);
         for (size_t i = 0; i < 4; i++)
-            this->gammaChains.at(i).Dispatch(cmdBuffer2, fc, pass);
+            this->gammaChains.at(i).Dispatch(cmdBuffer2, this->frameIdx, pass);
         for (size_t i = 0; i < 3; i++) {
-            this->magicChains.at(i).Dispatch(cmdBuffer2, fc, pass);
+            this->magicChains.at(i).Dispatch(cmdBuffer2, this->frameIdx, pass);
             this->deltaChains.at(i).Dispatch(cmdBuffer2, pass);
             this->epsilonChains.at(i).Dispatch(cmdBuffer2, pass);
             this->zetaChains.at(i).Dispatch(cmdBuffer2, pass);
             if (i < 2)
                 this->extractChains.at(i).Dispatch(cmdBuffer2, pass);
         }
-        this->mergeChain.Dispatch(cmdBuffer2, fc, pass);
+        this->mergeChain.Dispatch(cmdBuffer2, this->frameIdx, pass);
 
         cmdBuffer2.end();
 
-        cmdBuffer2.submit(device.getComputeQueue(), outFenceOptional,
-            { internalSemaphores.at(pass) }, std::nullopt,
+        cmdBuffer2.submit(device.getComputeQueue(), completionFence,
+            { info.internalSemaphores.at(pass) }, std::nullopt,
             { outSemaphore }, std::nullopt);
     }
 
-    fc++;
+    this->frameIdx++;
 }
 
 vulkan_error::vulkan_error(VkResult result, const std::string& message)

@@ -63,13 +63,17 @@ namespace LSFG {
         Core::CommandPool cmdPool;
 
         Core::Image inImg_0, inImg_1; // inImg_0 is next (inImg_1 prev) when fc % 2 == 0
-        std::array<Core::Semaphore, 8> inSemaphores;
-        std::array<std::vector<Core::Semaphore>, 8> internalSemaphores;
-        std::vector<std::array<Core::Semaphore, 8>> outSemaphores;
-        std::array<Core::CommandBuffer, 8> cmdBuffers1;
-        std::vector<std::array<Core::CommandBuffer, 8>> cmdBuffers2;
-        std::array<std::vector<std::optional<Core::Fence>>, 8> doneFences;
-        uint64_t fc{0};
+        uint64_t frameIdx{0};
+
+        struct RenderInfo {
+            Core::Semaphore inSemaphore; // wait for copy
+            Core::CommandBuffer cmdBuffer1;
+            std::vector<Core::Semaphore> internalSemaphores; // first step output
+            std::vector<Core::CommandBuffer> cmdBuffers2; // second step output
+            std::vector<Core::Semaphore> outSemaphores; // signal when done with each pass
+            std::optional<std::vector<Core::Fence>> completionFences;
+        }; // data for a single render
+        std::array<RenderInfo, 8> renderInfos; // 8 passes, why not
 
         Shaderchains::Downsample downsampleChain;
         std::array<Shaderchains::Alpha, 7> alphaChains;
