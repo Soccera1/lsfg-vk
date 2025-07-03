@@ -5,6 +5,7 @@
 #include <cassert>
 #include <format>
 #include <optional>
+#include <vulkan/vulkan_core.h>
 
 using namespace LSFG;
 

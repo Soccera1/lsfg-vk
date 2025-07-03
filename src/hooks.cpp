@@ -1,39 +1,35 @@
-#include "hooks.hpp"
 #include "loader/dl.hpp"
 #include "loader/vk.hpp"
-#include "application.hpp"
+#include "context.hpp"
+#include "hooks.hpp"
 #include "log.hpp"
+#include "utils.hpp"
 
-#include <iostream>
 #include <lsfg.hpp>
 
-#include <optional>
-#include <vulkan/vulkan_core.h>
+#include <string>
+#include <unordered_map>
 
 using namespace Hooks;
 
 namespace {
-    bool initialized{false};
-    std::optional<Application> application;
+
+    // instance hooks
 
     VkResult myvkCreateInstance(
             const VkInstanceCreateInfo* pCreateInfo,
             const VkAllocationCallbacks* pAllocator,
             VkInstance* pInstance) {
-        // add extensions
-        std::vector<const char*> extensions(pCreateInfo->enabledExtensionCount);
-        std::copy_n(pCreateInfo->ppEnabledExtensionNames, extensions.size(), extensions.data());
+        // create lsfg
+        LSFG::initialize();
 
-        const std::vector<const char*> requiredExtensions = {
-            VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
-            VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
-            VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME
-        };
-        for (const auto& ext : requiredExtensions) {
-            auto it = std::ranges::find(extensions, ext);
-            if (it == extensions.end())
-                extensions.push_back(ext);
-        }
+        // add extensions
+        auto extensions = Utils::addExtensions(pCreateInfo->ppEnabledExtensionNames,
+            pCreateInfo->enabledExtensionCount, {
+                "VK_KHR_get_physical_device_properties2",
+                "VK_KHR_external_memory_capabilities",
+                "VK_KHR_external_semaphore_capabilities"
+            });
 
         VkInstanceCreateInfo createInfo = *pCreateInfo;
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
@@ -41,108 +37,87 @@ namespace {
         return vkCreateInstance(&createInfo, pAllocator, pInstance);
     }
 
+    void myvkDestroyInstance(
+            VkInstance instance,
+            const VkAllocationCallbacks* pAllocator) {
+        LSFG::finalize(); // destroy lsfg
+        vkDestroyInstance(instance, pAllocator);
+    }
+
+    // device hooks
+
+    std::unordered_map<VkDevice, DeviceInfo> devices;
+
     VkResult myvkCreateDevice(
             VkPhysicalDevice physicalDevice,
             const VkDeviceCreateInfo* pCreateInfo,
             const VkAllocationCallbacks* pAllocator,
             VkDevice* pDevice) {
         // add extensions
-        std::vector<const char*> extensions(pCreateInfo->enabledExtensionCount);
-        std::copy_n(pCreateInfo->ppEnabledExtensionNames, extensions.size(), extensions.data());
-
-        const std::vector<const char*> requiredExtensions = {
-            VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
-            VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME,
-            VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
-            VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME
-        };
-        for (const auto& ext : requiredExtensions) {
-            auto it = std::ranges::find(extensions, ext);
-            if (it == extensions.end())
-                extensions.push_back(ext);
-        }
+        auto extensions = Utils::addExtensions(pCreateInfo->ppEnabledExtensionNames,
+            pCreateInfo->enabledExtensionCount, {
+                "VK_KHR_external_memory",
+                "VK_KHR_external_memory_fd",
+                "VK_KHR_external_semaphore",
+                "VK_KHR_external_semaphore_fd"
+            });
 
         VkDeviceCreateInfo createInfo = *pCreateInfo;
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
         createInfo.ppEnabledExtensionNames = extensions.data();
         auto res = vkCreateDevice(physicalDevice, &createInfo, pAllocator, pDevice);
 
-        // extract graphics and present queues
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos(pCreateInfo->queueCreateInfoCount);
-        std::copy_n(pCreateInfo->pQueueCreateInfos, queueCreateInfos.size(), queueCreateInfos.data());
-
-        uint32_t familyCount{};
-        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, nullptr);
-        std::vector<VkQueueFamilyProperties> families(familyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, families.data());
-
-        std::optional<uint32_t> graphicsFamilyIdx;
-        for (uint32_t i = 0; i < families.size(); ++i) {
-            auto it = std::ranges::find_if(queueCreateInfos,
-                [i](const VkDeviceQueueCreateInfo& info) {
-                    return info.queueFamilyIndex == i;
-                }) ;
-            if (it == queueCreateInfos.end())
-                continue; // skip if this family is not used by the device
-            if (families.at(i).queueFlags & VK_QUEUE_GRAPHICS_BIT)
-                graphicsFamilyIdx.emplace(i);
-        }
-        if (!graphicsFamilyIdx.has_value()) {
-            Log::error("No suitable queue family found for graphics or present");
-            exit(EXIT_FAILURE);
-        }
-
-        VkQueue graphicsQueue{};
-        vkGetDeviceQueue(*pDevice, *graphicsFamilyIdx, 0, &graphicsQueue);
-
-        // create the main application
-        if (application.has_value()) {
-            Log::error("Application already initialized, are you trying to create a second device?");
-            exit(EXIT_FAILURE);
-        }
-
+        // store device info
         try {
-            application.emplace(*pDevice, physicalDevice, graphicsQueue, *graphicsFamilyIdx);
-            Log::info("lsfg-vk(hooks): Application created successfully");
-        } catch (const LSFG::vulkan_error& e) {
-            Log::error("Encountered Vulkan error {:x} while creating application: {}",
-                static_cast<uint32_t>(e.error()), e.what());
-            exit(EXIT_FAILURE);
+            const char* frameGen = std::getenv("LSFG_MULTIPLIER");
+            if (!frameGen) frameGen = "1";
+            devices.emplace(*pDevice, DeviceInfo {
+                .device = *pDevice,
+                .physicalDevice = physicalDevice,
+                .queue = Utils::findQueue(*pDevice, physicalDevice, &createInfo,
+                    VK_QUEUE_GRAPHICS_BIT),
+                .frameGen = std::stoul(frameGen)
+            });
         } catch (const std::exception& e) {
-            Log::error("Encountered error while creating application: {}", e.what());
-            exit(EXIT_FAILURE);
+            Log::error("Failed to create device info: {}", e.what());
+            return VK_ERROR_INITIALIZATION_FAILED;
         }
-
         return res;
     }
+
+    void myvkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
+        devices.erase(device); // erase device info
+        vkDestroyDevice(device, pAllocator);
+    }
+
+    // swapchain hooks
+
+    std::unordered_map<VkSwapchainKHR, LsContext> swapchains;
+    std::unordered_map<VkSwapchainKHR, VkDevice> swapchainToDeviceTable;
 
     VkResult myvkCreateSwapchainKHR(
             VkDevice device,
             const VkSwapchainCreateInfoKHR* pCreateInfo,
             const VkAllocationCallbacks* pAllocator,
             VkSwapchainKHR* pSwapchain) {
-        VkSwapchainCreateInfoKHR createInfo = *pCreateInfo;
-        createInfo.minImageCount += 3;
-        createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-        createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-        createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
-        auto res = vkCreateSwapchainKHR(device, &createInfo, pAllocator, pSwapchain);
+        auto& deviceInfo = devices.at(device);
 
-        // add the swapchain to the application
-        if (!application.has_value()) {
-            Log::error("Application not initialized, cannot create swapchain");
-            exit(EXIT_FAILURE);
+        // update swapchain create info
+        VkSwapchainCreateInfoKHR createInfo = *pCreateInfo;
+        createInfo.minImageCount += 1 + deviceInfo.frameGen; // 1 deferred + N framegen, FIXME: check hardware max
+        createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT; // allow copy from/to images
+        createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR; // force vsync
+        auto res = vkCreateSwapchainKHR(device, &createInfo, pAllocator, pSwapchain);
+        if (res != VK_SUCCESS) {
+            Log::error("Failed to create swapchain: {:x}", static_cast<uint32_t>(res));
+            return res;
         }
 
         try {
-            if (pCreateInfo->oldSwapchain) {
-                if (!application->removeSwapchain(pCreateInfo->oldSwapchain))
-                    throw std::runtime_error("Failed to remove old swapchain");
-                Log::info("lsfg-vk(hooks): Swapchain retired successfully");
-            }
-
+            // get swapchain images
             uint32_t imageCount{};
-            auto res = vkGetSwapchainImagesKHR(device, *pSwapchain, &imageCount, nullptr);
+            res = vkGetSwapchainImagesKHR(device, *pSwapchain, &imageCount, nullptr);
             if (res != VK_SUCCESS || imageCount == 0)
                 throw LSFG::vulkan_error(res, "Failed to get swapchain images count");
 
@@ -151,17 +126,20 @@ namespace {
             if (res != VK_SUCCESS)
                 throw LSFG::vulkan_error(res, "Failed to get swapchain images");
 
-            application->addSwapchain(*pSwapchain,
-                pCreateInfo->imageFormat, pCreateInfo->imageExtent, swapchainImages);
-            Log::info("lsfg-vk(hooks): Swapchain created successfully with {} images",
-                swapchainImages.size());
+            // create swapchain context
+            swapchains.emplace(*pSwapchain, LsContext(
+                deviceInfo, *pSwapchain, pCreateInfo->imageExtent,
+                swapchainImages
+            ));
+
+            swapchainToDeviceTable.emplace(*pSwapchain, device);
         } catch (const LSFG::vulkan_error& e) {
             Log::error("Encountered Vulkan error {:x} while creating swapchain: {}",
                 static_cast<uint32_t>(e.error()), e.what());
-            exit(EXIT_FAILURE);
+            return e.error();
         } catch (const std::exception& e) {
             Log::error("Encountered error while creating swapchain: {}", e.what());
-            exit(EXIT_FAILURE);
+            return VK_ERROR_INITIALIZATION_FAILED;
         }
 
         return res;
@@ -170,67 +148,36 @@ namespace {
     VkResult myvkQueuePresentKHR(
             VkQueue queue,
             const VkPresentInfoKHR* pPresentInfo) {
-        if (!application.has_value()) {
-            Log::error("Application not initialized, cannot present frame");
-            return VK_ERROR_INITIALIZATION_FAILED;
-        }
+        auto& deviceInfo = devices.at(swapchainToDeviceTable.at(*pPresentInfo->pSwapchains));
+        auto& swapchain = swapchains.at(*pPresentInfo->pSwapchains);
 
-        // present the next frame
         try {
             std::vector<VkSemaphore> waitSemaphores(pPresentInfo->waitSemaphoreCount);
             std::copy_n(pPresentInfo->pWaitSemaphores, waitSemaphores.size(), waitSemaphores.data());
 
-            application->presentSwapchain(*pPresentInfo->pSwapchains,
-                queue, waitSemaphores, *pPresentInfo->pImageIndices, pPresentInfo->pNext);
-
-            Log::info("lsfg-vk(hooks): Frame presented successfully");
+            // present the next frame
+            return swapchain.present(deviceInfo, pPresentInfo->pNext,
+                queue, waitSemaphores, *pPresentInfo->pImageIndices);
         } catch (const LSFG::vulkan_error& e) {
             Log::error("Encountered Vulkan error {:x} while presenting: {}",
                 static_cast<uint32_t>(e.error()), e.what());
-            return e.error(); // do not exit
+            return e.error();
         } catch (const std::exception& e) {
             Log::error("Encountered error while creating presenting: {}", e.what());
-            exit(EXIT_FAILURE);
+            return VK_ERROR_INITIALIZATION_FAILED;
         }
-
-        return VK_SUCCESS;
     }
 
     void myvkDestroySwapchainKHR(
             VkDevice device,
             VkSwapchainKHR swapchain,
             const VkAllocationCallbacks* pAllocator) {
-        if (!application.has_value()) {
-            Log::error("Application not initialized, cannot destroy swapchain");
-            exit(EXIT_FAILURE);
-        }
-
-        // remove the swapchain from the application
-        try {
-            if (application->removeSwapchain(swapchain))
-                Log::info("lsfg-vk(hooks): Swapchain retired successfully");
-        } catch (const std::exception& e) {
-            Log::error("Encountered error while removing swapchain: {}", e.what());
-            exit(EXIT_FAILURE);
-        }
-
+        swapchains.erase(swapchain); // erase swapchain context
+        swapchainToDeviceTable.erase(swapchain);
         vkDestroySwapchainKHR(device, swapchain, pAllocator);
     }
 
-    void myvkDestroyDevice(
-            VkDevice device,
-            const VkAllocationCallbacks* pAllocator) {
-        // destroy the main application
-        if (application.has_value()) {
-            application.reset();
-            Log::info("lsfg-vk(hooks): Application destroyed successfully");
-        } else {
-            Log::warn("lsfg-vk(hooks): No application to destroy, continuing");
-        }
-
-        vkDestroyDevice(device, pAllocator);
-    }
-
+    bool initialized{false};
 }
 
 void Hooks::initialize() {
@@ -239,49 +186,29 @@ void Hooks::initialize() {
         return;
     }
 
-    // register hooks to vulkan loader
-    Loader::VK::registerSymbol("vkCreateInstance",
-        reinterpret_cast<void*>(myvkCreateInstance));
-    Loader::VK::registerSymbol("vkCreateDevice",
-        reinterpret_cast<void*>(myvkCreateDevice));
-    Loader::VK::registerSymbol("vkDestroyDevice",
-        reinterpret_cast<void*>(myvkDestroyDevice));
-    Loader::VK::registerSymbol("vkCreateSwapchainKHR",
-        reinterpret_cast<void*>(myvkCreateSwapchainKHR));
-    Loader::VK::registerSymbol("vkDestroySwapchainKHR",
-        reinterpret_cast<void*>(myvkDestroySwapchainKHR));
-    Loader::VK::registerSymbol("vkQueuePresentKHR",
-        reinterpret_cast<void*>(myvkQueuePresentKHR));
+    // list of hooks to register
+    const std::vector<std::pair<std::string, void*>> hooks = {
+        { "vkCreateInstance",      reinterpret_cast<void*>(myvkCreateInstance) },
+        { "vkDestroyInstance",     reinterpret_cast<void*>(myvkDestroyInstance) },
+        { "vkCreateDevice",        reinterpret_cast<void*>(myvkCreateDevice) },
+        { "vkDestroyDevice",       reinterpret_cast<void*>(myvkDestroyDevice) },
+        { "vkCreateSwapchainKHR",  reinterpret_cast<void*>(myvkCreateSwapchainKHR) },
+        { "vkQueuePresentKHR",     reinterpret_cast<void*>(myvkQueuePresentKHR) },
+        { "vkDestroySwapchainKHR", reinterpret_cast<void*>(myvkDestroySwapchainKHR) }
+    };
 
-    // register hooks to dynamic loader under libvulkan.so.1
-    Loader::DL::File vk1("libvulkan.so.1");
-    vk1.defineSymbol("vkCreateInstance",
-        reinterpret_cast<void*>(myvkCreateInstance));
-    vk1.defineSymbol("vkCreateDevice",
-        reinterpret_cast<void*>(myvkCreateDevice));
-    vk1.defineSymbol("vkDestroyDevice",
-        reinterpret_cast<void*>(myvkDestroyDevice));
-    vk1.defineSymbol("vkCreateSwapchainKHR",
-        reinterpret_cast<void*>(myvkCreateSwapchainKHR));
-    vk1.defineSymbol("vkDestroySwapchainKHR",
-        reinterpret_cast<void*>(myvkDestroySwapchainKHR));
-    vk1.defineSymbol("vkQueuePresentKHR",
-        reinterpret_cast<void*>(myvkQueuePresentKHR));
-    Loader::DL::registerFile(vk1);
+    // register hooks to Vulkan loader
+    for (const auto& hook : hooks)
+        Loader::VK::registerSymbol(hook.first, hook.second);
 
-    // register hooks to dynamic loader under libvulkan.so
-    Loader::DL::File vk2("libvulkan.so");
-    vk2.defineSymbol("vkCreateInstance",
-        reinterpret_cast<void*>(myvkCreateInstance));
-    vk2.defineSymbol("vkCreateDevice",
-        reinterpret_cast<void*>(myvkCreateDevice));
-    vk2.defineSymbol("vkDestroyDevice",
-        reinterpret_cast<void*>(myvkDestroyDevice));
-    vk2.defineSymbol("vkCreateSwapchainKHR",
-        reinterpret_cast<void*>(myvkCreateSwapchainKHR));
-    vk2.defineSymbol("vkDestroySwapchainKHR",
-        reinterpret_cast<void*>(myvkDestroySwapchainKHR));
-    vk2.defineSymbol("vkQueuePresentKHR",
-        reinterpret_cast<void*>(myvkQueuePresentKHR));
-    Loader::DL::registerFile(vk2);
+    // register hooks to dynamic loader under libvulkan.so.1 and libvulkan.so
+    for (const char* libName : {"libvulkan.so.1", "libvulkan.so"}) {
+        Loader::DL::File vkLib(libName);
+        for (const auto& hook : hooks)
+            vkLib.defineSymbol(hook.first, hook.second);
+        Loader::DL::registerFile(vkLib);
+    }
+
+    initialized = true;
+    Log::info("Vulkan hooks initialized successfully");
 }

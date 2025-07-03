@@ -44,6 +44,7 @@ target_compile_options(lsfg-vk PRIVATE
     -Wno-switch-default # ignore missing default
     -Wno-padded         # ignore automatic padding
     -Wno-exit-time-destructors # allow globals
+    -Wno-global-constructors   # allow globals
     # required for vulkan
     -Wno-cast-function-type-strict
 )

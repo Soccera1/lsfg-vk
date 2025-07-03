@@ -1,5 +1,6 @@
 #include "mini/commandpool.hpp"
-#include "lsfg.hpp"
+
+#include <lsfg.hpp>
 
 using namespace Mini;
 

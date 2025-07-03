@@ -1,5 +1,6 @@
 #include "mini/image.hpp"
-#include "lsfg.hpp"
+
+#include <lsfg.hpp>
 
 #include <optional>
 
@@ -81,30 +82,6 @@ Image::Image(VkDevice device, VkPhysicalDevice physicalDevice,
     if (res != VK_SUCCESS)
         throw LSFG::vulkan_error(res, "Failed to bind memory to Vulkan image");
 
-    // create image view
-    const VkImageViewCreateInfo viewDesc{
-        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-        .image = imageHandle,
-        .viewType = VK_IMAGE_VIEW_TYPE_2D,
-        .format = format,
-        .components = {
-            .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-            .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-            .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-            .a = VK_COMPONENT_SWIZZLE_IDENTITY
-        },
-        .subresourceRange = {
-            .aspectMask = aspectFlags,
-            .levelCount = 1,
-            .layerCount = 1
-        }
-    };
-
-    VkImageView viewHandle{};
-    res = vkCreateImageView(device, &viewDesc, nullptr, &viewHandle);
-    if (res != VK_SUCCESS || viewHandle == VK_NULL_HANDLE)
-        throw LSFG::vulkan_error(res, "Failed to create image view");
-
     // obtain the sharing fd
     auto vkGetMemoryFdKHR =
         reinterpret_cast<PFN_vkGetMemoryFdKHR>(vkGetDeviceProcAddr(device, "vkGetMemoryFdKHR"));
@@ -119,7 +96,6 @@ Image::Image(VkDevice device, VkPhysicalDevice physicalDevice,
         throw LSFG::vulkan_error(res, "Failed to obtain sharing fd for Vulkan image");
 
     // store objects in shared ptr
-    this->layout = std::make_shared<VkImageLayout>(VK_IMAGE_LAYOUT_UNDEFINED);
     this->image = std::shared_ptr<VkImage>(
         new VkImage(imageHandle),
         [dev = device](VkImage* img) {
@@ -130,12 +106,6 @@ Image::Image(VkDevice device, VkPhysicalDevice physicalDevice,
         new VkDeviceMemory(memoryHandle),
         [dev = device](VkDeviceMemory* mem) {
             vkFreeMemory(dev, *mem, nullptr);
-        }
-    );
-    this->view = std::shared_ptr<VkImageView>(
-        new VkImageView(viewHandle),
-        [dev = device](VkImageView* imgView) {
-            vkDestroyImageView(dev, *imgView, nullptr);
         }
     );
 }
