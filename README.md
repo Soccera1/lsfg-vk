@@ -25,7 +25,7 @@ $ cmake --install build
 ```
 (Make sure you change `absolute-install-path-here` to the path you'd like to install this project to)
 
-Next, you'll need to download Lossless Scaling from Steam. Switch to the `legacy_3.1` branch or download the corresponding depot.
+Next, you'll need to download Lossless Scaling from Steam. Switch to the `legacy_2.13` branch or download the corresponding depot.
 Copy or note down the path of "Lossless.dll" from the game files.
 
 Finally, let's actually start a program with frame generation enabled. I'm going to be using `vkcube` for this example:
