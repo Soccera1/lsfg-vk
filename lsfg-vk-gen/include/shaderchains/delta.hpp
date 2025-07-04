@@ -1,6 +1,7 @@
 #ifndef DELTA_HPP
 #define DELTA_HPP
 
+#include "pool/shaderpool.hpp"
 #include "core/buffer.hpp"
 #include "core/commandbuffer.hpp"
 #include "core/descriptorpool.hpp"
@@ -28,6 +29,7 @@ namespace LSFG::Shaderchains {
         /// Initialize the shaderchain.
         ///
         /// @param device The Vulkan device to create the resources on.
+        /// @param shaderpool The shader pool to use for shader modules.
         /// @param pool The descriptor pool to allocate in.
         /// @param inImgs The input images to process.
         /// @param optImg An optional additional input from the previous pass.
@@ -35,7 +37,8 @@ namespace LSFG::Shaderchains {
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Delta(const Core::Device& device, const Core::DescriptorPool& pool,
+        Delta(const Core::Device& device, Pool::ShaderPool& shaderpool,
+            const Core::DescriptorPool& pool,
             std::array<Core::Image, 2> inImgs,
             std::optional<Core::Image> optImg,
             size_t genc);

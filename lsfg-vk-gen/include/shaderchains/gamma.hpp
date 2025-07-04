@@ -1,6 +1,7 @@
 #ifndef GAMMA_HPP
 #define GAMMA_HPP
 
+#include "pool/shaderpool.hpp"
 #include "core/buffer.hpp"
 #include "core/commandbuffer.hpp"
 #include "core/descriptorpool.hpp"
@@ -30,6 +31,7 @@ namespace LSFG::Shaderchains {
         /// Initialize the shaderchain.
         ///
         /// @param device The Vulkan device to create the resources on.
+        /// @param shaderpool The shader pool to use for shader modules.
         /// @param pool The descriptor pool to allocate in.
         /// @param inImgs1_0 The next input images to process (when fc % 3 == 0).
         /// @param inImgs1_1 The prev input images to process (when fc % 3 == 0).
@@ -42,7 +44,8 @@ namespace LSFG::Shaderchains {
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Gamma(const Core::Device& device, const Core::DescriptorPool& pool,
+        Gamma(const Core::Device& device, Pool::ShaderPool& shaderpool,
+            const Core::DescriptorPool& pool,
             std::array<Core::Image, 4> inImgs1_0,
             std::array<Core::Image, 4> inImgs1_1,
             std::array<Core::Image, 4> inImgs1_2,

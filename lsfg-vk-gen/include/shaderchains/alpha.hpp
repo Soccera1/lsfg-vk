@@ -1,6 +1,7 @@
 #ifndef ALPHA_HPP
 #define ALPHA_HPP
 
+#include "pool/shaderpool.hpp"
 #include "core/commandbuffer.hpp"
 #include "core/descriptorpool.hpp"
 #include "core/descriptorset.hpp"
@@ -26,12 +27,14 @@ namespace LSFG::Shaderchains {
         /// Initialize the shaderchain.
         ///
         /// @param device The Vulkan device to create the resources on.
+        /// @param shaderpool The shader pool to use for shader modules.
         /// @param pool The descriptor pool to allocate in.
         /// @param inImg The input image to process
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Alpha(const Core::Device& device, const Core::DescriptorPool& pool,
+        Alpha(const Core::Device& device, Pool::ShaderPool& shaderpool,
+            const Core::DescriptorPool& pool,
             Core::Image inImg);
 
         ///

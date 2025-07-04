@@ -1,26 +1,10 @@
 #include "core/shadermodule.hpp"
 #include "lsfg.hpp"
 
-#include <fstream>
-
 using namespace LSFG::Core;
 
-ShaderModule::ShaderModule(const Core::Device& device, const std::string& path,
+ShaderModule::ShaderModule(const Core::Device& device, const std::vector<uint8_t>& code,
         const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes) {
-    // read shader bytecode
-    std::ifstream file(path, std::ios::ate | std::ios::binary);
-    if (!file)
-        throw std::system_error(errno, std::generic_category(), "Failed to open shader file: " + path);
-
-    const std::streamsize size = file.tellg();
-    std::vector<uint8_t> code(static_cast<size_t>(size));
-
-    file.seekg(0, std::ios::beg);
-    if (!file.read(reinterpret_cast<char*>(code.data()), size))
-        throw std::system_error(errno, std::generic_category(), "Failed to read shader file: " + path);
-
-    file.close();
-
     // create shader module
     const uint8_t* data_ptr = code.data();
     const VkShaderModuleCreateInfo createInfo{

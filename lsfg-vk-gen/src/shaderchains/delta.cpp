@@ -3,26 +3,27 @@
 
 using namespace LSFG::Shaderchains;
 
-Delta::Delta(const Core::Device& device, const Core::DescriptorPool& pool,
+Delta::Delta(const Core::Device& device, Pool::ShaderPool& shaderpool,
+        const Core::DescriptorPool& pool,
         std::array<Core::Image, 2> inImgs,
         std::optional<Core::Image> optImg,
         size_t genc)
         : inImgs(std::move(inImgs)),
           optImg(std::move(optImg)) {
     this->shaderModules = {{
-        Core::ShaderModule(device, "rsc/shaders/delta/0.spv",
+        shaderpool.getShader(device, "delta/0.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/delta/1.spv",
+        shaderpool.getShader(device, "delta/1.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/delta/2.spv",
+        shaderpool.getShader(device, "delta/2.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/delta/3.spv",
+        shaderpool.getShader(device, "delta/3.spv",
             { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },

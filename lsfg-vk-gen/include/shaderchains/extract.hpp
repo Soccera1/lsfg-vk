@@ -1,6 +1,7 @@
 #ifndef EXTRACT_HPP
 #define EXTRACT_HPP
 
+#include "pool/shaderpool.hpp"
 #include "core/buffer.hpp"
 #include "core/commandbuffer.hpp"
 #include "core/descriptorpool.hpp"
@@ -26,6 +27,7 @@ namespace LSFG::Shaderchains {
         /// Initialize the shaderchain.
         ///
         /// @param device The Vulkan device to create the resources on.
+        /// @param shaderpool The shader pool to use for shader modules.
         /// @param pool The descriptor pool to use for descriptor sets.
         /// @param inImg1 The first set of input images to process.
         /// @param inImg2 The second type image to process.
@@ -34,7 +36,8 @@ namespace LSFG::Shaderchains {
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Extract(const Core::Device& device, const Core::DescriptorPool& pool,
+        Extract(const Core::Device& device, Pool::ShaderPool& shaderpool,
+            const Core::DescriptorPool& pool,
             Core::Image inImg1,
             Core::Image inImg2,
             VkExtent2D outExtent,

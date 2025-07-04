@@ -3,7 +3,8 @@
 
 using namespace LSFG::Shaderchains;
 
-Merge::Merge(const Core::Device& device, const Core::DescriptorPool& pool,
+Merge::Merge(const Core::Device& device, Pool::ShaderPool& shaderpool,
+        const Core::DescriptorPool& pool,
         Core::Image inImg1,
         Core::Image inImg2,
         Core::Image inImg3,
@@ -16,7 +17,7 @@ Merge::Merge(const Core::Device& device, const Core::DescriptorPool& pool,
           inImg3(std::move(inImg3)),
           inImg4(std::move(inImg4)),
           inImg5(std::move(inImg5)) {
-    this->shaderModule = Core::ShaderModule(device, "rsc/shaders/merge.spv",
+    this->shaderModule = shaderpool.getShader(device, "merge.spv",
         { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
           { 5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
           { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },

@@ -21,7 +21,9 @@ namespace {
             const VkAllocationCallbacks* pAllocator,
             VkInstance* pInstance) {
         // create lsfg
+        Loader::DL::disableHooks();
         LSFG::initialize();
+        Loader::DL::enableHooks();
 
         // add extensions
         auto extensions = Utils::addExtensions(pCreateInfo->ppEnabledExtensionNames,
@@ -70,13 +72,13 @@ namespace {
         // store device info
         try {
             const char* frameGen = std::getenv("LSFG_MULTIPLIER");
-            if (!frameGen) frameGen = "1";
+            if (!frameGen) frameGen = "2";
             devices.emplace(*pDevice, DeviceInfo {
                 .device = *pDevice,
                 .physicalDevice = physicalDevice,
                 .queue = Utils::findQueue(*pDevice, physicalDevice, &createInfo,
                     VK_QUEUE_GRAPHICS_BIT),
-                .frameGen = std::stoul(frameGen)
+                .frameGen = std::max<size_t>(1, std::stoul(frameGen) - 1)
             });
         } catch (const std::exception& e) {
             Log::error("Failed to create device info: {}", e.what());
@@ -133,6 +135,7 @@ namespace {
             ));
 
             swapchainToDeviceTable.emplace(*pSwapchain, device);
+            Log::debug("Created swapchain with {} images", imageCount);
         } catch (const LSFG::vulkan_error& e) {
             Log::error("Encountered Vulkan error {:x} while creating swapchain: {}",
                 static_cast<uint32_t>(e.error()), e.what());

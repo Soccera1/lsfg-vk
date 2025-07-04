@@ -3,14 +3,15 @@
 
 using namespace LSFG::Shaderchains;
 
-Extract::Extract(const Core::Device& device, const Core::DescriptorPool& pool,
+Extract::Extract(const Core::Device& device, Pool::ShaderPool& shaderpool,
+        const Core::DescriptorPool& pool,
         Core::Image inImg1,
         Core::Image inImg2,
         VkExtent2D outExtent,
         size_t genc)
         : inImg1(std::move(inImg1)),
           inImg2(std::move(inImg2)) {
-    this->shaderModule = Core::ShaderModule(device, "rsc/shaders/extract.spv",
+    this->shaderModule = shaderpool.getShader(device, "extract.spv",
         { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
           { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
           { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },

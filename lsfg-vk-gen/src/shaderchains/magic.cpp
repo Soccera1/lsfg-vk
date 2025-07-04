@@ -3,7 +3,8 @@
 
 using namespace LSFG::Shaderchains;
 
-Magic::Magic(const Core::Device& device, const Core::DescriptorPool& pool,
+Magic::Magic(const Core::Device& device, Pool::ShaderPool& shaderpool,
+        const Core::DescriptorPool& pool,
     std::array<Core::Image, 4> inImgs1_0,
     std::array<Core::Image, 4> inImgs1_1,
     std::array<Core::Image, 4> inImgs1_2,
@@ -16,7 +17,7 @@ Magic::Magic(const Core::Device& device, const Core::DescriptorPool& pool,
           inImgs1_2(std::move(inImgs1_2)),
           inImg2(std::move(inImg2)), inImg3(std::move(inImg3)),
           optImg(std::move(optImg)) {
-    this->shaderModule = Core::ShaderModule(device, "rsc/shaders/magic.spv",
+    this->shaderModule = shaderpool.getShader(device, "magic.spv",
         { { 2,       VK_DESCRIPTOR_TYPE_SAMPLER },
           { 4+4+2+1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
           { 3+3+2,   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },

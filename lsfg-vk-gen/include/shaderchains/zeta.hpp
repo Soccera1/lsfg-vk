@@ -1,6 +1,7 @@
 #ifndef ZETA_HPP
 #define ZETA_HPP
 
+#include "pool/shaderpool.hpp"
 #include "core/buffer.hpp"
 #include "core/commandbuffer.hpp"
 #include "core/descriptorpool.hpp"
@@ -28,6 +29,7 @@ namespace LSFG::Shaderchains {
         /// Initialize the shaderchain.
         ///
         /// @param device The Vulkan device to create the resources on.
+        /// @param shaderpool The shader pool to use for shader modules.
         /// @param pool The descriptor pool to use for descriptor sets.
         /// @param inImgs1 The first set of input images to process.
         /// @param inImg2 The second type image to process.
@@ -36,7 +38,8 @@ namespace LSFG::Shaderchains {
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Zeta(const Core::Device& device, const Core::DescriptorPool& pool,
+        Zeta(const Core::Device& device, Pool::ShaderPool& shaderpool,
+            const Core::DescriptorPool& pool,
             std::array<Core::Image, 3> inImgs1,
             Core::Image inImg2,
             Core::Image inImg3,

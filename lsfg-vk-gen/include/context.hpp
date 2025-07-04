@@ -1,6 +1,7 @@
 #ifndef CONTEXT_HPP
 #define CONTEXT_HPP
 
+#include "pool/shaderpool.hpp"
 #include "core/commandbuffer.hpp"
 #include "core/commandpool.hpp"
 #include "core/descriptorpool.hpp"
@@ -29,6 +30,7 @@ namespace LSFG {
         /// Create a generator instance.
         ///
         /// @param device The Vulkan device to use.
+        /// @param shaderpool The shader pool to use.
         /// @param width Width of the input images.
         /// @param height Height of the input images.
         /// @param in0 File descriptor for the first input image.
@@ -37,7 +39,8 @@ namespace LSFG {
         ///
         /// @throws LSFG::vulkan_error if the generator fails to initialize.
         ///
-        Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1,
+        Context(const Core::Device& device, Pool::ShaderPool& shaderpool,
+            uint32_t width, uint32_t height, int in0, int in1,
             const std::vector<int>& outN);
 
         ///

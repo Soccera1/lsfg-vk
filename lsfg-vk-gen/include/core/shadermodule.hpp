@@ -6,7 +6,6 @@
 #include <vulkan/vulkan_core.h>
 
 #include <utility>
-#include <string>
 #include <vector>
 #include <memory>
 
@@ -25,13 +24,12 @@ namespace LSFG::Core {
         /// Create the shader module.
         ///
         /// @param device Vulkan device
-        /// @param path Path to the shader file.
+        /// @param code SPIR-V bytecode for the shader.
         /// @param descriptorTypes Descriptor types used in the shader.
         ///
-        /// @throws std::system_error if the shader file cannot be opened or read.
         /// @throws LSFG::vulkan_error if object creation fails.
         ///
-        ShaderModule(const Core::Device& device, const std::string& path,
+        ShaderModule(const Core::Device& device, const std::vector<uint8_t>& code,
             const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes);
 
         /// Get the Vulkan handle.

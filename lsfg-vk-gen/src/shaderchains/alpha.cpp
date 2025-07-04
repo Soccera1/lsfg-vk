@@ -3,23 +3,24 @@
 
 using namespace LSFG::Shaderchains;
 
-Alpha::Alpha(const Core::Device& device, const Core::DescriptorPool& pool,
+Alpha::Alpha(const Core::Device& device, Pool::ShaderPool& shaderpool,
+        const Core::DescriptorPool& pool,
         Core::Image inImg)
         : inImg(std::move(inImg)) {
     this->shaderModules = {{
-        Core::ShaderModule(device, "rsc/shaders/alpha/0.spv",
+        shaderpool.getShader(device, "alpha/0.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/alpha/1.spv",
+        shaderpool.getShader(device, "alpha/1.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/alpha/2.spv",
+        shaderpool.getShader(device, "alpha/2.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/alpha/3.spv",
+        shaderpool.getShader(device, "alpha/3.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })

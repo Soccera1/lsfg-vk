@@ -6,6 +6,3 @@
 /.clangd
 /.cache
 /.ccls
-
-# private resources
-/rsc

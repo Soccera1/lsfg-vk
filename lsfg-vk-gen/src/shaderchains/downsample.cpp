@@ -3,12 +3,13 @@
 
 using namespace LSFG::Shaderchains;
 
-Downsample::Downsample(const Core::Device& device, const Core::DescriptorPool& pool,
+Downsample::Downsample(const Core::Device& device, Pool::ShaderPool& shaderpool,
+        const Core::DescriptorPool& pool,
         Core::Image inImg_0, Core::Image inImg_1,
         size_t genc)
         : inImg_0(std::move(inImg_0)),
           inImg_1(std::move(inImg_1)) {
-    this->shaderModule = Core::ShaderModule(device, "rsc/shaders/downsample.spv",
+    this->shaderModule = shaderpool.getShader(device, "downsample.spv",
         { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
           { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
           { 7, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },

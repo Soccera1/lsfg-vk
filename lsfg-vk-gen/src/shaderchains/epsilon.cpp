@@ -3,7 +3,8 @@
 
 using namespace LSFG::Shaderchains;
 
-Epsilon::Epsilon(const Core::Device& device, const Core::DescriptorPool& pool,
+Epsilon::Epsilon(const Core::Device& device, Pool::ShaderPool& shaderpool,
+        const Core::DescriptorPool& pool,
         std::array<Core::Image, 3> inImgs1,
         Core::Image inImg2,
         std::optional<Core::Image> optImg,
@@ -12,19 +13,19 @@ Epsilon::Epsilon(const Core::Device& device, const Core::DescriptorPool& pool,
           inImg2(std::move(inImg2)),
           optImg(std::move(optImg)) {
     this->shaderModules = {{
-        Core::ShaderModule(device, "rsc/shaders/epsilon/0.spv",
+        shaderpool.getShader(device, "epsilon/0.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/epsilon/1.spv",
+        shaderpool.getShader(device, "epsilon/1.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/epsilon/2.spv",
+        shaderpool.getShader(device, "epsilon/2.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/epsilon/3.spv",
+        shaderpool.getShader(device, "epsilon/3.spv",
             { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },

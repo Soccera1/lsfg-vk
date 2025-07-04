@@ -5,7 +5,6 @@ cmake_minimum_required(VERSION 3.29)
 set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_CLANG_TIDY clang-tidy)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -30,6 +29,8 @@ target_include_directories(lsfg-vk
     PRIVATE include)
 target_link_libraries(lsfg-vk
     PRIVATE lsfg-vk-gen vulkan)
+set_target_properties(lsfg-vk
+    PROPERTIES CXX_CLANG_TIDY clang-tidy)
 target_compile_options(lsfg-vk PRIVATE
     -Weverything
     # disable compat c++ flags
@@ -47,4 +48,6 @@ target_compile_options(lsfg-vk PRIVATE
     -Wno-global-constructors   # allow globals
     # required for vulkan
     -Wno-cast-function-type-strict
+    # required for dxvk (yeah don't worry about it)
+    -Qunused-arguments -Wl,--unresolved-symbols=ignore-all
 )

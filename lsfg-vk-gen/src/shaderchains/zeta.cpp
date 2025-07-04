@@ -3,7 +3,8 @@
 
 using namespace LSFG::Shaderchains;
 
-Zeta::Zeta(const Core::Device& device, const Core::DescriptorPool& pool,
+Zeta::Zeta(const Core::Device& device, Pool::ShaderPool& shaderpool,
+        const Core::DescriptorPool& pool,
         std::array<Core::Image, 3> inImgs1,
         Core::Image inImg2,
         Core::Image inImg3,
@@ -12,19 +13,19 @@ Zeta::Zeta(const Core::Device& device, const Core::DescriptorPool& pool,
           inImg2(std::move(inImg2)),
           inImg3(std::move(inImg3)) {
     this->shaderModules = {{
-        Core::ShaderModule(device, "rsc/shaders/zeta/0.spv",
+        shaderpool.getShader(device, "zeta/0.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/zeta/1.spv",
+        shaderpool.getShader(device, "zeta/1.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/zeta/2.spv",
+        shaderpool.getShader(device, "zeta/2.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        Core::ShaderModule(device, "rsc/shaders/zeta/3.spv",
+        shaderpool.getShader(device, "zeta/3.spv",
             { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },

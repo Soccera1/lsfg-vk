@@ -1,6 +1,7 @@
 #include "context.hpp"
 #include "core/fence.hpp"
 #include "core/semaphore.hpp"
+#include "pool/shaderpool.hpp"
 #include "lsfg.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -10,7 +11,8 @@
 
 using namespace LSFG;
 
-Context::Context(const Core::Device& device, uint32_t width, uint32_t height, int in0, int in1,
+Context::Context(const Core::Device& device, Pool::ShaderPool& shaderpool,
+        uint32_t width, uint32_t height, int in0, int in1,
         const std::vector<int>& outN) {
     // import images
     this->inImg_0 = Core::Image(device, { width, height },
@@ -35,18 +37,18 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
     }
 
     // create shader chains
-    this->downsampleChain = Shaderchains::Downsample(device, this->descPool,
+    this->downsampleChain = Shaderchains::Downsample(device, shaderpool, this->descPool,
         this->inImg_0, this->inImg_1, outN.size());
     for (size_t i = 0; i < 7; i++)
-        this->alphaChains.at(i) = Shaderchains::Alpha(device, this->descPool,
+        this->alphaChains.at(i) = Shaderchains::Alpha(device, shaderpool, this->descPool,
             this->downsampleChain.getOutImages().at(i));
-    this->betaChain = Shaderchains::Beta(device, this->descPool,
+    this->betaChain = Shaderchains::Beta(device, shaderpool, this->descPool,
         this->alphaChains.at(0).getOutImages0(),
         this->alphaChains.at(0).getOutImages1(),
         this->alphaChains.at(0).getOutImages2(), outN.size());
     for (size_t i = 0; i < 7; i++) {
         if (i < 4) {
-            this->gammaChains.at(i) = Shaderchains::Gamma(device, this->descPool,
+            this->gammaChains.at(i) = Shaderchains::Gamma(device, shaderpool, this->descPool,
                 this->alphaChains.at(6 - i).getOutImages0(),
                 this->alphaChains.at(6 - i).getOutImages1(),
                 this->alphaChains.at(6 - i).getOutImages2(),
@@ -59,7 +61,7 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
                 outN.size()
             );
         } else {
-            this->magicChains.at(i - 4) = Shaderchains::Magic(device, this->descPool,
+            this->magicChains.at(i - 4) = Shaderchains::Magic(device, shaderpool, this->descPool,
                 this->alphaChains.at(6 - i).getOutImages0(),
                 this->alphaChains.at(6 - i).getOutImages1(),
                 this->alphaChains.at(6 - i).getOutImages2(),
@@ -70,20 +72,20 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
                 i == 4 ? std::nullopt : std::optional{this->epsilonChains.at(i - 5).getOutImage()},
                 outN.size()
             );
-            this->deltaChains.at(i - 4) = Shaderchains::Delta(device, this->descPool,
+            this->deltaChains.at(i - 4) = Shaderchains::Delta(device, shaderpool, this->descPool,
                 this->magicChains.at(i - 4).getOutImages1(),
                 i == 4 ? std::nullopt
                        : std::optional{this->deltaChains.at(i - 5).getOutImage()},
                        outN.size()
             );
-            this->epsilonChains.at(i - 4) = Shaderchains::Epsilon(device, this->descPool,
+            this->epsilonChains.at(i - 4) = Shaderchains::Epsilon(device, shaderpool, this->descPool,
                 this->magicChains.at(i - 4).getOutImages2(),
                 this->betaChain.getOutImages().at(6 - i),
                 i == 4 ? std::nullopt
                        : std::optional{this->epsilonChains.at(i - 5).getOutImage()},
                        outN.size()
             );
-            this->zetaChains.at(i - 4) = Shaderchains::Zeta(device, this->descPool,
+            this->zetaChains.at(i - 4) = Shaderchains::Zeta(device, shaderpool, this->descPool,
                 this->magicChains.at(i - 4).getOutImages3(),
                 i == 4 ? this->gammaChains.at(i - 1).getOutImage1()
                        : this->zetaChains.at(i - 5).getOutImage(),
@@ -92,7 +94,7 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
             );
             if (i >= 6)
                 continue; // no extract for i >= 6
-            this->extractChains.at(i - 4) = Shaderchains::Extract(device, this->descPool,
+            this->extractChains.at(i - 4) = Shaderchains::Extract(device, shaderpool, this->descPool,
                 this->zetaChains.at(i - 4).getOutImage(),
                 this->epsilonChains.at(i - 4).getOutImage(),
                 this->alphaChains.at(6 - i - 1).getOutImages0().at(0).getExtent(),
@@ -100,7 +102,7 @@ Context::Context(const Core::Device& device, uint32_t width, uint32_t height, in
             );
         }
     }
-    this->mergeChain = Shaderchains::Merge(device, this->descPool,
+    this->mergeChain = Shaderchains::Merge(device, shaderpool, this->descPool,
         this->inImg_1,
         this->inImg_0,
         this->zetaChains.at(2).getOutImage(),

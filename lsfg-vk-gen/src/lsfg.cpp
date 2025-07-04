@@ -2,10 +2,13 @@
 #include "core/device.hpp"
 #include "core/instance.hpp"
 #include "context.hpp"
+#include "pool/shaderpool.hpp"
 #include "utils.hpp"
 
+#include <cstdlib>
 #include <ctime>
 #include <optional>
+#include <string>
 #include <unordered_map>
 
 using namespace LSFG;
@@ -13,6 +16,7 @@ using namespace LSFG;
 namespace {
     std::optional<Core::Instance> instance;
     std::optional<Core::Device> device;
+    std::optional<Pool::ShaderPool> pool;
     std::unordered_map<int32_t, Context> contexts;
 }
 
@@ -20,8 +24,12 @@ void LSFG::initialize() {
     if (instance.has_value() || device.has_value())
         return;
 
+    char* dllPath = getenv("LSFG_DLL_PATH");
+    const std::string dllPathStr = dllPath ? std::string(dllPath) : "Lossless.dll";
+
     instance.emplace();
     device.emplace(*instance);
+    pool.emplace(dllPathStr);
 
     Globals::initializeGlobals(*device);
 
@@ -30,16 +38,16 @@ void LSFG::initialize() {
 
 int32_t LSFG::createContext(uint32_t width, uint32_t height, int in0, int in1,
         const std::vector<int>& outN) {
-    if (!instance.has_value() || !device.has_value())
+    if (!instance.has_value() || !device.has_value() || !pool.has_value())
         throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "LSFG not initialized");
 
     auto id = std::rand();
-    contexts.emplace(id, Context(*device, width, height, in0, in1, outN));
+    contexts.emplace(id, Context(*device, *pool, width, height, in0, in1, outN));
     return id;
 }
 
 void LSFG::presentContext(int32_t id, int inSem, const std::vector<int>& outSem) {
-    if (!instance.has_value() || !device.has_value())
+    if (!instance.has_value() || !device.has_value() || !pool.has_value())
         throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "LSFG not initialized");
 
     auto it = contexts.find(id);
@@ -51,7 +59,7 @@ void LSFG::presentContext(int32_t id, int inSem, const std::vector<int>& outSem)
 }
 
 void LSFG::deleteContext(int32_t id) {
-    if (!instance.has_value() || !device.has_value())
+    if (!instance.has_value() || !device.has_value() || !pool.has_value())
         throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "LSFG not initialized");
 
     auto it = contexts.find(id);
@@ -63,12 +71,13 @@ void LSFG::deleteContext(int32_t id) {
 }
 
 void LSFG::finalize() {
-    if (!instance.has_value() || !device.has_value())
+    if (!instance.has_value() || !device.has_value() || !pool.has_value())
         return;
 
     Globals::uninitializeGlobals();
 
     vkDeviceWaitIdle(device->handle());
+    pool.reset();
     device.reset();
     instance.reset();
 }
