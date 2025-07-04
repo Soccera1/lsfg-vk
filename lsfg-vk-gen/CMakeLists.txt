@@ -44,20 +44,32 @@ target_link_libraries(dxvk INTERFACE
 
 # pe-parse subproject
 
-include(FetchContent)
-FetchContent_Declare(peparse_git
+ExternalProject_Add(peparse_git
+    PREFIX ${CMAKE_BINARY_DIR}/peparse
     GIT_REPOSITORY "https://github.com/trailofbits/pe-parse"
     GIT_TAG "v2.1.1"
+    UPDATE_DISCONNECTED true
+    USES_TERMINAL_CONFIGURE true
+    USES_TERMINAL_BUILD true
+    CONFIGURE_COMMAND
+        cd ${CMAKE_BINARY_DIR}/peparse/src/peparse_git/pe-parser-library &&
+        CC=clang CXX=clang++ CXXFLAGS=-Wno-deprecated-declarations
+        cmake -B build -G Ninja
+            -DCMAKE_BUILD_TYPE=Release
+            -DBUILD_SHARED_LIBS=1
+    BUILD_COMMAND
+        cd ${CMAKE_BINARY_DIR}/peparse/src/peparse_git/pe-parser-library &&
+        ninja -C build
+    INSTALL_COMMAND ""
 )
-FetchContent_MakeAvailable(peparse_git)
 
 add_library(peparse INTERFACE)
 add_dependencies(peparse peparse_git)
 
 target_link_directories(peparse
-    INTERFACE ${peparse_SOURCE_DIR}/pe-parser-library/include)
+    INTERFACE ${CMAKE_BINARY_DIR}/peparse/src/peparse_git/pe-parser-library/build)
 target_include_directories(peparse SYSTEM
-    INTERFACE ${peparse_BUILD_DIR})
+    INTERFACE ${CMAKE_BINARY_DIR}/peparse/src/peparse_git/pe-parser-library/include)
 target_link_libraries(peparse
     INTERFACE pe-parse)
 
@@ -104,5 +116,5 @@ target_compile_options(lsfg-vk-gen PRIVATE
     # required for peparse
     -Wno-unused-template
     # required for dxvk (yeah don't worry about it)
-    -Qunused-arguments -Wl,--unresolved-symbols=ignore-all
+    -Qunused-arguments -Wl,--unresolved-symbols=ignore-all1
 )

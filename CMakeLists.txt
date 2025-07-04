@@ -6,6 +6,10 @@ set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # main project
@@ -51,3 +55,10 @@ target_compile_options(lsfg-vk PRIVATE
     # required for dxvk (yeah don't worry about it)
     -Qunused-arguments -Wl,--unresolved-symbols=ignore-all
 )
+
+install(FILES "${CMAKE_BINARY_DIR}/peparse/src/peparse_git/pe-parser-library/build/libpe-parse.so" DESTINATION lib)
+install(FILES "${CMAKE_BINARY_DIR}/dxvk/native/usr/lib/libdxvk_d3d11.so.0.20602" DESTINATION lib RENAME libdxvk_d3d11.so.0)
+install(FILES "${CMAKE_BINARY_DIR}/dxvk/native/usr/lib/libdxvk_dxgi.so.0.20602" DESTINATION lib RENAME libdxvk_dxgi.so.0)
+install(FILES "${CMAKE_BINARY_DIR}/dxvk/libdxvkinternals.so" DESTINATION lib)
+install(FILES "${CMAKE_BINARY_DIR}/liblsfg-vk.so" DESTINATION lib)
+install(FILES "${CMAKE_BINARY_DIR}/lsfg-vk-gen/liblsfg-vk-gen.so" DESTINATION lib)
