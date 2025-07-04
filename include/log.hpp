@@ -9,7 +9,7 @@ namespace Log {
     const std::string_view WHITE = "\033[1;37m";
     const std::string_view YELLOW = "\033[1;33m";
     const std::string_view RED = "\033[1;31m";
-    const std::string_view GRAY = "\033[1;30m";
+    const std::string_view GRAY = "\033[1;90m";
     const std::string_view RESET = "\033[0m";
 
     template<typename... Args>
