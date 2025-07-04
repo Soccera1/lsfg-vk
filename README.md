@@ -13,7 +13,6 @@ In order to compile LSFG, make sure you have the following components installed 
 - CMake build system
 - Meson build system (for DXVK)
 - Ninja build system (backend for CMake)
-- openssl's libcrypto
 
 Compiling lsfg-vk is relatively straight forward, as everything is neatly integrated into CMake:
 ```bash

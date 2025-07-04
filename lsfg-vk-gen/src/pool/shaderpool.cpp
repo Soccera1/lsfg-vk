@@ -1,43 +1,40 @@
 #include "pool/shaderpool.hpp"
 
-#include "pool/extract.hpp"
-
 using namespace LSFG;
 using namespace LSFG::Pool;
 
-const std::unordered_map<std::string, std::string> SHADERS = {
-    { "alpha/0.spv", "lilEUr7nBgA8P6VSqCms09t9b+DZH6dVlcefVuFHlc8=" },
-    { "alpha/1.spv", "2TRNidol3BNs/aeLl2/Om7z8bAlpehkOPVtmMao1q84=" },
-    { "alpha/2.spv", "tP6qIJZhd4pGr1pop1e9ztW1gwp97ufQa2GaBZBYZJE=" },
-    { "alpha/3.spv", "gA4ZejNp+RwtqjtTzGdGf5D/CjSGlwFB2nOgDAIv91k=" },
-    { "beta/0.spv", "uQ/xsBMKRuJhbxstBukWMhXYuppPAYygxkb/3kNu4vI=" },
-    { "beta/1.spv", "BUbrL9fZREXLlg1lmlTYD6n8DwpzHkho5bI3RLbfNJg=" },
-    { "beta/2.spv", "bz0lxQjMYp6HLqw12X3jfV7H0SOZKrqUhgtw17WgTx4=" },
-    { "beta/3.spv", "JA5/8p7yiiiCxmuiTsOR9Fb/z1qp8KlyU2wo9Wfpbcc=" },
-    { "beta/4.spv", "/I+iYEwzOFylXZJWWNQ/oUT6SeLVnpotNXGV8y/FUVk=" },
-    { "delta/0.spv", "gtBWy1WtP8NO+Z1sSPMgOJ75NaPEKvthc7imNGzJkGI=" },
-    { "delta/1.spv", "JiqZZIoHay/uS1ptzlz3EWKUPct/jQHoFtN0qlEtVUU=" },
-    { "delta/2.spv", "zkBa37GvAG8izeIv4o/3OowpxiobfOdNmPyVWl2BSWY=" },
-    { "delta/3.spv", "neIMl/PCPonXqjtZykMb9tR4yW7JkZfMTqZPGOmJQUg=" },
-    { "downsample.spv", "F9BppS+ytDjO3aoMEY7deMzLaSUhX8EuI+eH8654Fpw=" },
-    { "epsilon/0.spv", "YHECg9LrgTCM8lABFOXkC5qTKoHsIMWnZ6ST3dexD08=" },
-    { "epsilon/1.spv", "Uv7CfTi6x69c9Exuc16UqA7fvLTUGicHZVi5jhHKo0w=" },
-    { "epsilon/2.spv", "0vmxxGRa6gbl5dqmKTBO9x/ZM2oEUJ5JtGfqcHhvouQ=" },
-    { "epsilon/3.spv", "Sa/gkbCCDyCyUh8BSOa882t4qDc51oeP6+Kj3O3EaxM=" },
-    { "extract.spv", "xKUdoEwFJDsc/kX/aY1FyzlMlOaJX4iHQLlthe2MvBs=" },
-    { "gamma/0.spv", "AJuuF/X9NnypgBd89GbXMKcXC2meysYayiZQZwu3WhU=" },
-    { "gamma/1.spv", "LLr/3D+whLd6XuKkBS7rlaNN+r8qB/Khr4ii+M7KSxY=" },
-    { "gamma/2.spv", "KjHXdawBR8AMK7Kud/vXJmJTddXFKppREEpsykjwZDc=" },
-    { "gamma/3.spv", "zAnAC73i76AJjv0o1To3bBu2jnIWXzX3NlSMvU3Lgxw=" },
-    { "gamma/4.spv", "ivQ7ltprazBOXb46yxul9HJ5ByJk2LbG034cC6NkEpk=" },
-    { "gamma/5.spv", "lHYgyCpWnMIB74HL22BKQyoqUGvUjgR79W4vXFXzXe4=" },
-    { "magic.spv", "ZdoTjEhrlbAxq0MtaJyk6jQ5+hrySEsnvn+jseukAuI=" },
-    { "merge.spv", "dnluf4IHKNaqz6WvH7qodn+fZ56ORx+w3MUOwH7huok=" },
-    { "zeta/0.spv", "LLr/3D+whLd6XuKkBS7rlaNN+r8qB/Khr4ii+M7KSxY=" },
-    { "zeta/1.spv", "KjHXdawBR8AMK7Kud/vXJmJTddXFKppREEpsykjwZDc=" },
-    { "zeta/2.spv", "zAnAC73i76AJjv0o1To3bBu2jnIWXzX3NlSMvU3Lgxw=" },
-    { "zeta/3.spv", "ivQ7ltprazBOXb46yxul9HJ5ByJk2LbG034cC6NkEpk=" },
-    { "zeta/4.spv", "lHYgyCpWnMIB74HL22BKQyoqUGvUjgR79W4vXFXzXe4=" }
+const std::unordered_map<std::string, uint32_t> SHADERS = {
+    { "downsample.spv", 0xe365474d },
+    { "alpha/0.spv",    0x35f63c83 },
+    { "alpha/1.spv",    0x83e5240d },
+    { "alpha/2.spv",    0x5d64d9f1 },
+    { "alpha/3.spv",    0xad77afe1 },
+    { "beta/0.spv",     0xa986ccbb },
+    { "beta/1.spv",     0x60944cf5 },
+    { "beta/2.spv",     0xb1c8f69b },
+    { "beta/3.spv",     0x87cbe880 },
+    { "beta/4.spv",     0xc2c5507d },
+    { "gamma/0.spv",    0xccce9dab },
+    { "gamma/1.spv",    0x7719e229 },
+    { "gamma/2.spv",    0xfb1a7643 },
+    { "gamma/3.spv",    0xe0553cd8 },
+    { "gamma/4.spv",    0xf73c136f },
+    { "gamma/5.spv",    0xa34959c },
+    { "magic.spv",      0x443ea7a1 },
+    { "delta/0.spv",    0x141daaac },
+    { "delta/1.spv",    0x2a0ed691 },
+    { "delta/2.spv",    0x23bdc583 },
+    { "delta/3.spv",    0x52bc5e0f },
+    { "epsilon/0.spv",  0x128eb7d7 },
+    { "epsilon/1.spv",  0xbab811ad },
+    { "epsilon/2.spv",  0x1d4b902d },
+    { "epsilon/3.spv",  0x91236549 },
+    { "zeta/0.spv",     0x7719e229 },
+    { "zeta/1.spv",     0xfb1a7643 },
+    { "zeta/2.spv",     0xe0553cd8 },
+    { "zeta/3.spv",     0xf73c136f },
+    { "extract.spv",    0xb6cb084a },
+    { "merge.spv",      0xfc0aedfa }
 };
 
 Core::ShaderModule ShaderPool::getShader(

@@ -35,7 +35,7 @@ namespace LSFG::Pool {
         ///
         /// @throws std::runtime_error if the resource is not found.
         ///
-        [[nodiscard]] std::vector<uint8_t> getResource(const std::string& hash) const;
+        [[nodiscard]] std::vector<uint8_t> getResource(uint32_t hash) const;
 
         // Trivially copyable, moveable and destructible
         Extractor(const Extractor&) = delete;
@@ -44,7 +44,7 @@ namespace LSFG::Pool {
         Extractor& operator=(Extractor&&) = default;
         ~Extractor() = default;
     private:
-        std::unordered_map<std::string, std::vector<uint8_t>> resources;
+        std::unordered_map<uint32_t, std::vector<uint8_t>> resources;
     };
 
     ///
