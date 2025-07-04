@@ -29,11 +29,10 @@ Device::Device(const Instance& instance) {
     for (const auto& device : devices) {
         VkPhysicalDeviceProperties properties;
         vkGetPhysicalDeviceProperties(device, &properties);
+        physicalDevice = device;
 
-        if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-            physicalDevice = device;
-            break;
-        }
+        if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+            break; // dedicated will always work
     }
     if (!physicalDevice)
         throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "No discrete GPU found");
