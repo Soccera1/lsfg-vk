@@ -118,9 +118,10 @@ void Context::present(const Core::Device& device, int inSem,
     auto& info = this->renderInfos.at(this->frameIdx % 8);
 
     // 3. wait for completion of previous frame in this slot
-    for (auto& fence : info.completionFences.value_or({}))
-        if (!fence.wait(device, UINT64_MAX)) // should not take any time
-            throw vulkan_error(VK_ERROR_DEVICE_LOST, "Fence wait timed out");
+    if (info.completionFences.has_value())
+        for (auto& fence : *info.completionFences)
+            if (!fence.wait(device, UINT64_MAX)) // should not take any time
+                throw vulkan_error(VK_ERROR_DEVICE_LOST, "Fence wait timed out");
 
     // 1. downsample and process input image
     info.inSemaphore = Core::Semaphore(device, inSem);
