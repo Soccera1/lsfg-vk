@@ -3,6 +3,7 @@
 
 #include "core/device.hpp"
 #include "core/shadermodule.hpp"
+#include "pool/extract.hpp"
 
 #include <string>
 #include <unordered_map>
@@ -23,7 +24,7 @@ namespace LSFG::Pool {
         ///
         /// @throws std::runtime_error if the shader pool cannot be created.
         ///
-        ShaderPool(const std::string& path);
+        ShaderPool(const std::string& path) : extractor(path) {}
 
         ///
         /// Retrieve a shader module by name or create it.
@@ -39,7 +40,7 @@ namespace LSFG::Pool {
             const Core::Device& device, const std::string& name,
             const std::vector<std::pair<size_t, VkDescriptorType>>& types);
     private:
-        std::unordered_map<std::string, std::vector<uint8_t>> shaderBytecodes;
+        Extractor extractor;
         std::unordered_map<std::string, Core::ShaderModule> shaders;
     };
 

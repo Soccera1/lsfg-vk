@@ -11,8 +11,8 @@ ExternalProject_Add(dxvk_git
     USES_TERMINAL_BUILD true
     CONFIGURE_COMMAND
         cd ${CMAKE_BINARY_DIR}/dxvk/src/dxvk_git &&
-        sed -i s/private://
-            src/dxvk/dxvk_device.h &&
+        sed -i s/private://g
+            src/dxvk/dxvk_shader.h &&
         CFLAGS=-w CXXFLAGS=-w CC=clang CXX=clang++ meson setup
             --buildtype "release"
             --prefix "${CMAKE_BINARY_DIR}/dxvk/native/usr"
@@ -24,7 +24,7 @@ ExternalProject_Add(dxvk_git
     BUILD_COMMAND
         cd ${CMAKE_BINARY_DIR}/dxvk &&
         ninja -C build install && # sorry cursed lol
-        echo "clang -shared -o libdxvkinternals.so $(find build/src/{dxbc,wsi,vulkan,dxvk,dxgi,spirv,util}/*.p -type f -name \\*.o)" > archive.sh &&
+        echo "clang -shared -o libdxbc.so $(find build/src/{dxbc,dxvk,dxgi,spirv,util}/*.p -type f -name \\*.o)" > archive.sh &&
         bash archive.sh
     INSTALL_COMMAND ""
 )
@@ -33,14 +33,13 @@ add_library(dxvk INTERFACE)
 add_dependencies(dxvk dxvk_git)
 
 target_link_directories(dxvk
-    INTERFACE ${CMAKE_BINARY_DIR}/dxvk/native/usr/lib
     INTERFACE ${CMAKE_BINARY_DIR}/dxvk)
 target_include_directories(dxvk SYSTEM
     INTERFACE ${CMAKE_BINARY_DIR}/dxvk/native/usr/include/dxvk
     INTERFACE ${CMAKE_BINARY_DIR}/dxvk/src/dxvk_git/src
     INTERFACE ${CMAKE_BINARY_DIR}/dxvk/src/dxvk_git/include/spirv/include)
 target_link_libraries(dxvk INTERFACE
-    dxvk_d3d11 dxvk_dxgi display-info dxvkinternals)
+    dxbc)
 
 # pe-parse subproject
 
@@ -115,6 +114,4 @@ target_compile_options(lsfg-vk-gen PRIVATE
     -Wno-cast-function-type-strict
     # required for peparse
     -Wno-unused-template
-    # required for dxvk (yeah don't worry about it)
-    -Qunused-arguments -Wl,--unresolved-symbols=ignore-all1
 )

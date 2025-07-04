@@ -26,10 +26,10 @@ Epsilon::Epsilon(const Core::Device& device, Pool::ShaderPool& shaderpool,
               { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         shaderpool.getShader(device, "epsilon/3.spv",
-            { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
+            { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
+              { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } })
+              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
     }};
     for (size_t i = 0; i < 4; i++) {
         this->pipelines.at(i) = Core::Pipeline(device,
@@ -85,13 +85,13 @@ Epsilon::Epsilon(const Core::Device& device, Pool::ShaderPool& shaderpool,
         .build();
     for (size_t i = 0; i < genc; i++) {
         this->nDescriptorSets.at(i).update(device)
+            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg)
-            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
             .build();
     }
 }

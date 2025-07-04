@@ -40,23 +40,6 @@ const std::unordered_map<std::string, std::string> SHADERS = {
     { "zeta/4.spv", "lHYgyCpWnMIB74HL22BKQyoqUGvUjgR79W4vXFXzXe4=" }
 };
 
-ShaderPool::ShaderPool(const std::string& path) {
-    const Extractor extractor(path);
-    const Translator translator;
-
-    for (const auto& [name, hash] : SHADERS) {
-        auto data = extractor.getResource(hash);
-        if (data.empty())
-            throw std::runtime_error("Shader code is empty: " + name);
-
-        auto code = translator.translate(data);
-        if (code.empty())
-            throw std::runtime_error("Shader code translation failed: " + name);
-
-        shaderBytecodes[name] = std::move(code);
-    }
-}
-
 Core::ShaderModule ShaderPool::getShader(
         const Core::Device& device, const std::string& name,
         const std::vector<std::pair<size_t, VkDescriptorType>>& types) {
@@ -64,13 +47,22 @@ Core::ShaderModule ShaderPool::getShader(
     if (it != shaders.end())
         return it->second;
 
-    // create the shader module
-    auto cit = shaderBytecodes.find(name);
-    if (cit == shaderBytecodes.end())
-        throw std::runtime_error("Shader code translation failed: " + name);
-    auto code = cit->second;
+    // grab the shader
+    auto hit = SHADERS.find(name);
+    if (hit == SHADERS.end())
+        throw std::runtime_error("Shader not found: " + name);
+    auto hash = hit->second;
 
-    Core::ShaderModule shader(device, code, types);
+    auto dxbc = this->extractor.getResource(hash);
+    if (dxbc.empty())
+        throw std::runtime_error("Shader code is empty: " + name);
+
+    // create the translated shader module
+    auto spirv = dxbcToSpirv(dxbc);
+    if (spirv.empty())
+        throw std::runtime_error("Shader code translation failed: " + name);
+
+    Core::ShaderModule shader(device, spirv, types);
     shaders[name] = shader;
     return shader;
 }

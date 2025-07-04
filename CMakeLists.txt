@@ -52,13 +52,11 @@ target_compile_options(lsfg-vk PRIVATE
     -Wno-global-constructors   # allow globals
     # required for vulkan
     -Wno-cast-function-type-strict
-    # required for dxvk (yeah don't worry about it)
-    -Qunused-arguments -Wl,--unresolved-symbols=ignore-all
 )
 
 install(FILES "${CMAKE_BINARY_DIR}/peparse/src/peparse_git/pe-parser-library/build/libpe-parse.so" DESTINATION lib)
 install(FILES "${CMAKE_BINARY_DIR}/dxvk/native/usr/lib/libdxvk_d3d11.so.0.20602" DESTINATION lib RENAME libdxvk_d3d11.so.0)
 install(FILES "${CMAKE_BINARY_DIR}/dxvk/native/usr/lib/libdxvk_dxgi.so.0.20602" DESTINATION lib RENAME libdxvk_dxgi.so.0)
-install(FILES "${CMAKE_BINARY_DIR}/dxvk/libdxvkinternals.so" DESTINATION lib)
+install(FILES "${CMAKE_BINARY_DIR}/dxvk/libdxbc.so" DESTINATION lib)
 install(FILES "${CMAKE_BINARY_DIR}/liblsfg-vk.so" DESTINATION lib)
 install(FILES "${CMAKE_BINARY_DIR}/lsfg-vk-gen/liblsfg-vk-gen.so" DESTINATION lib)

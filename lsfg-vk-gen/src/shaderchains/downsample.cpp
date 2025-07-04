@@ -10,10 +10,10 @@ Downsample::Downsample(const Core::Device& device, Pool::ShaderPool& shaderpool,
         : inImg_0(std::move(inImg_0)),
           inImg_1(std::move(inImg_1)) {
     this->shaderModule = shaderpool.getShader(device, "downsample.spv",
-        { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
+        { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
+          { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
           { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-          { 7, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-          { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } });
+          { 7, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } });
     this->pipeline = Core::Pipeline(device, this->shaderModule);
     for (size_t i = 0; i < 2; i++)
         this->descriptorSets.at(i) = Core::DescriptorSet(device, pool, this->shaderModule);
@@ -33,10 +33,10 @@ Downsample::Downsample(const Core::Device& device, Pool::ShaderPool& shaderpool,
     for (size_t fc = 0; fc < 2; fc++) {
         auto& inImg = (fc % 2 == 0) ? this->inImg_0 : this->inImg_1;
         this->descriptorSets.at(fc).update(device)
+            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, inImg)
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs)
-            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffer)
             .build();
     }
 }

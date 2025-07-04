@@ -20,10 +20,10 @@ Gamma::Gamma(const Core::Device& device, Pool::ShaderPool& shaderpool,
           optImg2(std::move(optImg2)) {
     this->shaderModules = {{
         shaderpool.getShader(device, "gamma/0.spv",
-            { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
+            { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
+              { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 10, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         shaderpool.getShader(device, "gamma/1.spv",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
@@ -37,15 +37,15 @@ Gamma::Gamma(const Core::Device& device, Pool::ShaderPool& shaderpool,
               { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         shaderpool.getShader(device, "gamma/4.spv",
-            { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
+            { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
+              { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } }),
+              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         shaderpool.getShader(device, "gamma/5.spv",
-            { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
+            { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
+              { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } })
+              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
     }};
     for (size_t i = 0; i < 6; i++) {
         this->pipelines.at(i) = Core::Pipeline(device,
@@ -122,6 +122,7 @@ Gamma::Gamma(const Core::Device& device, Pool::ShaderPool& shaderpool,
         }
         for (size_t i = 0; i < genc; i++) {
             this->nSpecialDescriptorSets.at(i).at(fc).update(device)
+                .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
                 .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
                 .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, *prevImgs1)
@@ -131,7 +132,6 @@ Gamma::Gamma(const Core::Device& device, Pool::ShaderPool& shaderpool,
                 .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(0))
                 .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(1))
                 .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(2))
-                .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
                 .build();
         }
     }
@@ -154,21 +154,21 @@ Gamma::Gamma(const Core::Device& device, Pool::ShaderPool& shaderpool,
         .build();
     for (size_t i = 0; i < genc; i++) {
         this->n1DescriptorSets.at(i).update(device)
+            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg2)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg1)
-            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
             .build();
         this->n2DescriptorSets.at(i).update(device)
+            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->whiteImg)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->outImg1)
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg2)
-            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
             .build();
     }
 

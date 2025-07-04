@@ -30,10 +30,10 @@ Beta::Beta(const Core::Device& device, Pool::ShaderPool& shaderpool,
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         shaderpool.getShader(device, "beta/4.spv",
-            { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
+            { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
+              { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 6, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-              { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } })
+              { 6, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
     }};
     for (size_t i = 0; i < 5; i++) {
         this->pipelines.at(i) = Core::Pipeline(device,
@@ -115,10 +115,10 @@ Beta::Beta(const Core::Device& device, Pool::ShaderPool& shaderpool,
         .build();
     for (size_t i = 0; i < genc; i++) {
         this->nDescriptorSets.at(i).update(device)
+            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs)
-            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
             .build();
     }
 }

@@ -18,10 +18,10 @@ Merge::Merge(const Core::Device& device, Pool::ShaderPool& shaderpool,
           inImg4(std::move(inImg4)),
           inImg5(std::move(inImg5)) {
     this->shaderModule = shaderpool.getShader(device, "merge.spv",
-        { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
+        { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
+          { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
           { 5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-          { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-          { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } });
+          { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } });
     this->pipeline = Core::Pipeline(device, this->shaderModule);
     for (size_t i = 0; i < genc; i++) {
         this->nDescriptorSets.emplace_back();
@@ -47,6 +47,7 @@ Merge::Merge(const Core::Device& device, Pool::ShaderPool& shaderpool,
     for (size_t fc = 0; fc < 2; fc++) {
         for (size_t i = 0; i < genc; i++) {
             this->nDescriptorSets.at(i).at(fc).update(device)
+                .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
                 .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
                 .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, (fc % 2 == 0) ? this->inImg1 : this->inImg2)
@@ -55,7 +56,6 @@ Merge::Merge(const Core::Device& device, Pool::ShaderPool& shaderpool,
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg4)
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg5)
                 .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImgs.at(i))
-                .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
                 .build();
         }
     }

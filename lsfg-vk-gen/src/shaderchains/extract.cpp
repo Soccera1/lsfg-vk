@@ -12,10 +12,10 @@ Extract::Extract(const Core::Device& device, Pool::ShaderPool& shaderpool,
         : inImg1(std::move(inImg1)),
           inImg2(std::move(inImg2)) {
     this->shaderModule = shaderpool.getShader(device, "extract.spv",
-        { { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
+        { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
+          { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
           { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-          { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
-          { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER } });
+          { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } });
     this->pipeline = Core::Pipeline(device, this->shaderModule);
     for (size_t i = 0; i < genc; i++)
         this->nDescriptorSets.emplace_back(device, pool,
@@ -40,13 +40,13 @@ Extract::Extract(const Core::Device& device, Pool::ShaderPool& shaderpool,
 
     for (size_t i = 0; i < genc; i++) {
         this->nDescriptorSets.at(i).update(device)
+            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampBorder)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, Globals::samplerClampEdge)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->whiteImg)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg1)
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg2)
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg)
-            .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this->buffers.at(i))
             .build();
     }
 
