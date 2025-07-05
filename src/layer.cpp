@@ -47,7 +47,28 @@ namespace {
     PFN_vkCmdPipelineBarrier2 next_vkCmdPipelineBarrier2{};
     PFN_vkCmdCopyImage next_vkCmdCopyImage{};
     PFN_vkAcquireNextImageKHR next_vkAcquireNextImageKHR{};
+
+    template<typename T>
+    bool initInstanceFunc(VkInstance instance, const char* name, T* func) {
+        *func = reinterpret_cast<T>(next_vkGetInstanceProcAddr(instance, name));
+        if (!*func) {
+            Log::error("lsfg-vk(layer): Failed to get instance function pointer for {}", name);
+            return false;
+        }
+        return true;
+    }
+
+    template<typename T>
+    bool initDeviceFunc(VkDevice device, const char* name, T* func) {
+        *func = reinterpret_cast<T>(next_vkGetDeviceProcAddr(device, name));
+        if (!*func) {
+            Log::error("lsfg-vk(layer): Failed to get device function pointer for {}", name);
+            return false;
+        }
+        return true;
+    }
 }
+
 
 namespace {
     VkResult layer_vkCreateInstance( // NOLINTBEGIN
@@ -74,12 +95,8 @@ namespace {
         layerDesc->u.pLayerInfo = layerDesc->u.pLayerInfo->pNext;
 
         // create instance
-        next_vkCreateInstance = reinterpret_cast<PFN_vkCreateInstance>(
-            next_vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkCreateInstance"));
-        if (!next_vkCreateInstance) {
-            Log::error("lsfg-vk(layer): Failed to get vkCreateInstance function pointer");
-            return VK_ERROR_INITIALIZATION_FAILED;
-        }
+        auto success = initInstanceFunc(nullptr, "vkCreateInstance", &next_vkCreateInstance);
+        if (!success) return VK_ERROR_INITIALIZATION_FAILED;
 
         auto* layer_vkCreateInstance2 = reinterpret_cast<PFN_vkCreateInstance>(
             Hooks::hooks["vkCreateInstance"]);
@@ -91,19 +108,11 @@ namespace {
         }
 
         // get relevant function pointers from the next layer
-        next_vkDestroyInstance = reinterpret_cast<PFN_vkDestroyInstance>(
-            next_vkGetInstanceProcAddr(*pInstance, "vkDestroyInstance"));
-        next_vkGetInstanceProcAddr = reinterpret_cast<PFN_vkGetInstanceProcAddr>(
-            next_vkGetInstanceProcAddr(*pInstance, "vkGetInstanceProcAddr"));
-        next_vkGetPhysicalDeviceQueueFamilyProperties =
-            reinterpret_cast<PFN_vkGetPhysicalDeviceQueueFamilyProperties>(
-                next_vkGetInstanceProcAddr(*pInstance, "vkGetPhysicalDeviceQueueFamilyProperties"));
-        next_vkGetPhysicalDeviceMemoryProperties =
-            reinterpret_cast<PFN_vkGetPhysicalDeviceMemoryProperties>(
-                next_vkGetInstanceProcAddr(*pInstance, "vkGetPhysicalDeviceMemoryProperties"));
-        if (!next_vkDestroyInstance || !next_vkGetInstanceProcAddr ||
-            !next_vkGetPhysicalDeviceQueueFamilyProperties ||
-            !next_vkGetPhysicalDeviceMemoryProperties) {
+        success = true;
+        success &= initInstanceFunc(*pInstance, "vkDestroyInstance", &next_vkDestroyInstance);
+        success &= initInstanceFunc(*pInstance, "vkGetPhysicalDeviceQueueFamilyProperties", &next_vkGetPhysicalDeviceQueueFamilyProperties);
+        success &= initInstanceFunc(*pInstance, "vkGetPhysicalDeviceMemoryProperties", &next_vkGetPhysicalDeviceMemoryProperties);
+        if (!success) {
             Log::error("lsfg-vk(layer): Failed to get instance function pointers");
             return VK_ERROR_INITIALIZATION_FAILED;
         }
@@ -137,12 +146,9 @@ namespace {
         layerDesc->u.pLayerInfo = layerDesc->u.pLayerInfo->pNext;
 
         // create device
-        next_vkCreateDevice = reinterpret_cast<PFN_vkCreateDevice>(
-            next_vkGetInstanceProcAddr(VK_NULL_HANDLE, "vkCreateDevice"));
-        if (!next_vkCreateDevice) {
-            Log::error("lsfg-vk(layer): Failed to get vkCreateDevice function pointer");
-            return VK_ERROR_INITIALIZATION_FAILED;
-        }
+        auto success = initInstanceFunc(nullptr, "vkCreateDevice",
+            &next_vkCreateDevice);
+        if (!success) return VK_ERROR_INITIALIZATION_FAILED;
 
         auto* layer_vkCreateDevice2 = reinterpret_cast<PFN_vkCreateDevice>(
             Hooks::hooks["vkCreateDevicePre"]);
@@ -154,74 +160,35 @@ namespace {
         }
 
         // get relevant function pointers from the next layer
-        next_vkDestroyDevice = reinterpret_cast<PFN_vkDestroyDevice>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkDestroyDevice"));
-        next_vkCreateSwapchainKHR = reinterpret_cast<PFN_vkCreateSwapchainKHR>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkCreateSwapchainKHR"));
-        next_vkQueuePresentKHR = reinterpret_cast<PFN_vkQueuePresentKHR>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkQueuePresentKHR"));
-        next_vkDestroySwapchainKHR = reinterpret_cast<PFN_vkDestroySwapchainKHR>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkDestroySwapchainKHR"));
-        next_vkGetSwapchainImagesKHR = reinterpret_cast<PFN_vkGetSwapchainImagesKHR>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkGetSwapchainImagesKHR"));
-        next_vkAllocateCommandBuffers = reinterpret_cast<PFN_vkAllocateCommandBuffers>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkAllocateCommandBuffers"));
-        next_vkFreeCommandBuffers = reinterpret_cast<PFN_vkFreeCommandBuffers>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkFreeCommandBuffers"));
-        next_vkBeginCommandBuffer = reinterpret_cast<PFN_vkBeginCommandBuffer>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkBeginCommandBuffer"));
-        next_vkEndCommandBuffer = reinterpret_cast<PFN_vkEndCommandBuffer>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkEndCommandBuffer"));
-        next_vkCreateCommandPool = reinterpret_cast<PFN_vkCreateCommandPool>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkCreateCommandPool"));
-        next_vkDestroyCommandPool = reinterpret_cast<PFN_vkDestroyCommandPool>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkDestroyCommandPool"));
-        next_vkCreateImage = reinterpret_cast<PFN_vkCreateImage>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkCreateImage"));
-        next_vkDestroyImage = reinterpret_cast<PFN_vkDestroyImage>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkDestroyImage"));
-        next_vkGetImageMemoryRequirements = reinterpret_cast<PFN_vkGetImageMemoryRequirements>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkGetImageMemoryRequirements"));
-        next_vkBindImageMemory = reinterpret_cast<PFN_vkBindImageMemory>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkBindImageMemory"));
-        next_vkGetMemoryFdKHR = reinterpret_cast<PFN_vkGetMemoryFdKHR>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkGetMemoryFdKHR"));
-        next_vkAllocateMemory = reinterpret_cast<PFN_vkAllocateMemory>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkAllocateMemory"));
-        next_vkFreeMemory = reinterpret_cast<PFN_vkFreeMemory>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkFreeMemory"));
-        next_vkCreateSemaphore = reinterpret_cast<PFN_vkCreateSemaphore>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkCreateSemaphore"));
-        next_vkDestroySemaphore = reinterpret_cast<PFN_vkDestroySemaphore>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkDestroySemaphore"));
-        next_vkGetSemaphoreFdKHR = reinterpret_cast<PFN_vkGetSemaphoreFdKHR>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkGetSemaphoreFdKHR"));
-        next_vkGetDeviceQueue = reinterpret_cast<PFN_vkGetDeviceQueue>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkGetDeviceQueue"));
-        next_vkQueueSubmit = reinterpret_cast<PFN_vkQueueSubmit>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkQueueSubmit"));
-        next_vkCmdPipelineBarrier = reinterpret_cast<PFN_vkCmdPipelineBarrier>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkCmdPipelineBarrier"));
-        next_vkCmdPipelineBarrier2 = reinterpret_cast<PFN_vkCmdPipelineBarrier2>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkCmdPipelineBarrier2"));
-        next_vkCmdCopyImage = reinterpret_cast<PFN_vkCmdCopyImage>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkCmdCopyImage"));
-        next_vkAcquireNextImageKHR = reinterpret_cast<PFN_vkAcquireNextImageKHR>(
-            next_vkGetDeviceProcAddr(*pDevice, "vkAcquireNextImageKHR"));
-        if (!next_vkDestroyDevice || !next_vkCreateSwapchainKHR ||
-            !next_vkQueuePresentKHR || !next_vkDestroySwapchainKHR ||
-            !next_vkGetSwapchainImagesKHR || !next_vkAllocateCommandBuffers ||
-            !next_vkFreeCommandBuffers || !next_vkBeginCommandBuffer ||
-            !next_vkEndCommandBuffer || !next_vkCreateCommandPool ||
-            !next_vkDestroyCommandPool || !next_vkCreateImage ||
-            !next_vkDestroyImage || !next_vkGetImageMemoryRequirements ||
-            !next_vkBindImageMemory || !next_vkGetMemoryFdKHR ||
-            !next_vkAllocateMemory || !next_vkFreeMemory ||
-            !next_vkCreateSemaphore || !next_vkDestroySemaphore ||
-            !next_vkGetSemaphoreFdKHR || !next_vkGetDeviceQueue ||
-            !next_vkQueueSubmit || !next_vkCmdPipelineBarrier ||
-            !next_vkCmdPipelineBarrier2 || !next_vkCmdCopyImage ||
-            !next_vkAcquireNextImageKHR) {
+        success = true;
+        success &= initDeviceFunc(*pDevice, "vkDestroyDevice", &next_vkDestroyDevice);
+        success &= initDeviceFunc(*pDevice, "vkCreateSwapchainKHR", &next_vkCreateSwapchainKHR);
+        success &= initDeviceFunc(*pDevice, "vkQueuePresentKHR", &next_vkQueuePresentKHR);
+        success &= initDeviceFunc(*pDevice, "vkDestroySwapchainKHR", &next_vkDestroySwapchainKHR);
+        success &= initDeviceFunc(*pDevice, "vkGetSwapchainImagesKHR", &next_vkGetSwapchainImagesKHR);
+        success &= initDeviceFunc(*pDevice, "vkAllocateCommandBuffers", &next_vkAllocateCommandBuffers);
+        success &= initDeviceFunc(*pDevice, "vkFreeCommandBuffers", &next_vkFreeCommandBuffers);
+        success &= initDeviceFunc(*pDevice, "vkBeginCommandBuffer", &next_vkBeginCommandBuffer);
+        success &= initDeviceFunc(*pDevice, "vkEndCommandBuffer", &next_vkEndCommandBuffer);
+        success &= initDeviceFunc(*pDevice, "vkCreateCommandPool", &next_vkCreateCommandPool);
+        success &= initDeviceFunc(*pDevice, "vkDestroyCommandPool", &next_vkDestroyCommandPool);
+        success &= initDeviceFunc(*pDevice, "vkCreateImage", &next_vkCreateImage);
+        success &= initDeviceFunc(*pDevice, "vkDestroyImage", &next_vkDestroyImage);
+        success &= initDeviceFunc(*pDevice, "vkGetImageMemoryRequirements", &next_vkGetImageMemoryRequirements);
+        success &= initDeviceFunc(*pDevice, "vkBindImageMemory", &next_vkBindImageMemory);
+        success &= initDeviceFunc(*pDevice, "vkGetMemoryFdKHR", &next_vkGetMemoryFdKHR);
+        success &= initDeviceFunc(*pDevice, "vkAllocateMemory", &next_vkAllocateMemory);
+        success &= initDeviceFunc(*pDevice, "vkFreeMemory", &next_vkFreeMemory);
+        success &= initDeviceFunc(*pDevice, "vkCreateSemaphore", &next_vkCreateSemaphore);
+        success &= initDeviceFunc(*pDevice, "vkDestroySemaphore", &next_vkDestroySemaphore);
+        success &= initDeviceFunc(*pDevice, "vkGetSemaphoreFdKHR", &next_vkGetSemaphoreFdKHR);
+        success &= initDeviceFunc(*pDevice, "vkGetDeviceQueue", &next_vkGetDeviceQueue);
+        success &= initDeviceFunc(*pDevice, "vkQueueSubmit", &next_vkQueueSubmit);
+        success &= initDeviceFunc(*pDevice, "vkCmdPipelineBarrier", &next_vkCmdPipelineBarrier);
+        success &= initDeviceFunc(*pDevice, "vkCmdPipelineBarrier2", &next_vkCmdPipelineBarrier2);
+        success &= initDeviceFunc(*pDevice, "vkCmdCopyImage", &next_vkCmdCopyImage);
+        success &= initDeviceFunc(*pDevice, "vkAcquireNextImageKHR", &next_vkAcquireNextImageKHR);
+        if (!success) {
             Log::error("lsfg-vk(layer): Failed to get device function pointers");
             return VK_ERROR_INITIALIZATION_FAILED;
         }

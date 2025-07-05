@@ -38,7 +38,6 @@ namespace {
     void myvkDestroyInstance(
             VkInstance instance,
             const VkAllocationCallbacks* pAllocator) {
-        LSFG::finalize(); // destroy lsfg
         Log::info("lsfg-vk: Destroyed Vulkan instance");
         Layer::ovkDestroyInstance(instance, pAllocator);
     }
