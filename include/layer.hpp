@@ -182,10 +182,6 @@ namespace Layer {
         const VkBufferMemoryBarrier* pBufferMemoryBarriers,
         uint32_t imageMemoryBarrierCount,
         const VkImageMemoryBarrier* pImageMemoryBarriers);
-    /// Call to the original vkCmdPipelineBarrier2 function.
-    void ovkCmdPipelineBarrier2(
-        VkCommandBuffer commandBuffer,
-        const VkDependencyInfo* pDependencyInfo);
     /// Call to the original vkCmdCopyImage function.
     void ovkCmdCopyImage(
         VkCommandBuffer commandBuffer,

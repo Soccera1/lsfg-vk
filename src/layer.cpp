@@ -44,7 +44,6 @@ namespace {
     PFN_vkGetDeviceQueue next_vkGetDeviceQueue{};
     PFN_vkQueueSubmit next_vkQueueSubmit{};
     PFN_vkCmdPipelineBarrier next_vkCmdPipelineBarrier{};
-    PFN_vkCmdPipelineBarrier2 next_vkCmdPipelineBarrier2{};
     PFN_vkCmdCopyImage next_vkCmdCopyImage{};
     PFN_vkAcquireNextImageKHR next_vkAcquireNextImageKHR{};
 
@@ -185,7 +184,6 @@ namespace {
         success &= initDeviceFunc(*pDevice, "vkGetDeviceQueue", &next_vkGetDeviceQueue);
         success &= initDeviceFunc(*pDevice, "vkQueueSubmit", &next_vkQueueSubmit);
         success &= initDeviceFunc(*pDevice, "vkCmdPipelineBarrier", &next_vkCmdPipelineBarrier);
-        success &= initDeviceFunc(*pDevice, "vkCmdPipelineBarrier2", &next_vkCmdPipelineBarrier2);
         success &= initDeviceFunc(*pDevice, "vkCmdCopyImage", &next_vkCmdCopyImage);
         success &= initDeviceFunc(*pDevice, "vkAcquireNextImageKHR", &next_vkAcquireNextImageKHR);
         if (!success) {
@@ -466,11 +464,6 @@ void Layer::ovkCmdPipelineBarrier(
         memoryBarrierCount, pMemoryBarriers,
         bufferMemoryBarrierCount, pBufferMemoryBarriers,
         imageMemoryBarrierCount, pImageMemoryBarriers);
-}
-void Layer::ovkCmdPipelineBarrier2(
-        VkCommandBuffer commandBuffer,
-        const VkDependencyInfo* pDependencyInfo) {
-    next_vkCmdPipelineBarrier2(commandBuffer, pDependencyInfo);
 }
 void Layer::ovkCmdCopyImage(
         VkCommandBuffer commandBuffer,
