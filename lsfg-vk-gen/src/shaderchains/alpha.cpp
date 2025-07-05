@@ -1,5 +1,5 @@
 #include "shaderchains/alpha.hpp"
-#include "utils.hpp"
+#include "utils/utils.hpp"
 
 using namespace LSFG::Shaderchains;
 

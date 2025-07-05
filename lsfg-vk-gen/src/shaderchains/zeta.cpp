@@ -1,5 +1,5 @@
 #include "shaderchains/zeta.hpp"
-#include "utils.hpp"
+#include "utils/utils.hpp"
 
 using namespace LSFG::Shaderchains;
 

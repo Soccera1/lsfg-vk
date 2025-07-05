@@ -3,7 +3,7 @@
 #include "core/instance.hpp"
 #include "context.hpp"
 #include "pool/shaderpool.hpp"
-#include "utils.hpp"
+#include "utils/utils.hpp"
 
 #include <cstdlib>
 #include <ctime>

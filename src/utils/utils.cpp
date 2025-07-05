@@ -1,4 +1,4 @@
-#include "utils.hpp"
+#include "utils/utils.hpp"
 
 #include <lsfg.hpp>
 
@@ -15,7 +15,8 @@ std::pair<uint32_t, VkQueue> Utils::findQueue(VkDevice device, VkPhysicalDevice 
     uint32_t familyCount{};
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, nullptr);
     std::vector<VkQueueFamilyProperties> families(familyCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, families.data());
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount,
+        families.data());
 
     std::optional<uint32_t> idx;
     for (const auto& queueInfo : enabledQueues) {

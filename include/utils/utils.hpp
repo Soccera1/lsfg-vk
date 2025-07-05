@@ -1,9 +1,9 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <vector>
 #include <vulkan/vulkan_core.h>
 
+#include <vector>
 #include <utility>
 
 namespace Utils {

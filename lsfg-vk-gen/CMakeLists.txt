@@ -4,6 +4,7 @@ file(GLOB BACKEND_SOURCES
     "src/core/*.cpp"
     "src/pool/*.cpp"
     "src/shaderchains/*.cpp"
+    "src/utils/*.cpp"
     "src/*.cpp"
 )
 

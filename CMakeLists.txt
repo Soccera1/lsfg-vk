@@ -23,7 +23,7 @@ project(lsfg-vk
     LANGUAGES CXX)
 
 file(GLOB SOURCES
-    "src/loader/*.cpp"
+    "src/utils/*.cpp"
     "src/mini/*.cpp"
     "src/*.cpp"
 )
