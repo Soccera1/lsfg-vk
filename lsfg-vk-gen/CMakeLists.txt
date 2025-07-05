@@ -14,8 +14,6 @@ target_include_directories(lsfg-vk-gen
     PUBLIC public)
 target_link_libraries(lsfg-vk-gen
     PUBLIC vulkan peparse dxvk)
-set_target_properties(lsfg-vk-gen
-    PROPERTIES CXX_CLANG_TIDY clang-tidy)
 target_compile_options(lsfg-vk-gen PRIVATE
     -Weverything -fPIC
     # disable compat c++ flags

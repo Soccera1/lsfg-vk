@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.29)
 
 # cmake options
 set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_CXX_CLANG_TIDY clang-tidy)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_SKIP_RPATH ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # subprojects
@@ -31,8 +34,6 @@ target_include_directories(lsfg-vk
     PRIVATE include)
 target_link_libraries(lsfg-vk
     PRIVATE lsfg-vk-gen vulkan)
-set_target_properties(lsfg-vk
-    PROPERTIES CXX_CLANG_TIDY clang-tidy)
 target_compile_options(lsfg-vk PRIVATE
     -Weverything
     # disable compat c++ flags

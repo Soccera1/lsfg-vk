@@ -31,26 +31,9 @@ ExternalProject_Add(dxvk_git
         ninja -C build install &&
         mv build/src/dxvk/libdxvk.a build/src/dxvk/libldxvk.a &&
         cd build/src/dxgi/libdxvk_dxgi.so.0.20602.p &&
-        ar rcs -o ../libdxgi.a
-            dxgi_adapter.cpp.o dxgi_enums.cpp.o dxgi_factory.cpp.o
-            dxgi_format.cpp.o dxgi_main.cpp.o dxgi_monitor.cpp.o
-            dxgi_options.cpp.o dxgi_output.cpp.o dxgi_surface.cpp.o
-            dxgi_swapchain.cpp.o &&
+        bash -c "ar rcs -o ../libdxgi.a *.o" &&
         cd ../../d3d11/libdxvk_d3d11.so.0.20602.p &&
-        ar rcs -o ../libd3d11.a
-            d3d11_annotation.cpp.o d3d11_blend.cpp.o d3d11_buffer.cpp.o
-            d3d11_class_linkage.cpp.o d3d11_cmdlist.cpp.o d3d11_context.cpp.o
-            d3d11_context_def.cpp.o d3d11_context_ext.cpp.o d3d11_context_imm.cpp.o
-            d3d11_cuda.cpp.o d3d11_depth_stencil.cpp.o d3d11_device.cpp.o
-            d3d11_enums.cpp.o d3d11_features.cpp.o d3d11_fence.cpp.o
-            d3d11_gdi.cpp.o d3d11_initializer.cpp.o d3d11_input_layout.cpp.o
-            d3d11_interop.cpp.o d3d11_main.cpp.o d3d11_on_12.cpp.o
-            d3d11_options.cpp.o d3d11_query.cpp.o d3d11_rasterizer.cpp.o
-            d3d11_resource.cpp.o d3d11_sampler.cpp.o d3d11_shader.cpp.o
-            d3d11_state.cpp.o d3d11_state_object.cpp.o d3d11_swapchain.cpp.o
-            d3d11_texture.cpp.o d3d11_util.cpp.o d3d11_video.cpp.o
-            d3d11_view_dsv.cpp.o d3d11_view_rtv.cpp.o d3d11_view_srv.cpp.o
-            d3d11_view_uav.cpp.o
+        bash -c "ar rcs -o ../libd3d11.a *.o .*.o"
     INSTALL_COMMAND ""
 )
 
