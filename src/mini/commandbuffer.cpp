@@ -1,4 +1,5 @@
 #include "mini/commandbuffer.hpp"
+#include "layer.hpp"
 
 #include <lsfg.hpp>
 
@@ -13,7 +14,7 @@ CommandBuffer::CommandBuffer(VkDevice device, const CommandPool& pool) {
         .commandBufferCount = 1
     };
     VkCommandBuffer commandBufferHandle{};
-    auto res = vkAllocateCommandBuffers(device, &desc, &commandBufferHandle);
+    auto res = Layer::ovkAllocateCommandBuffers(device, &desc, &commandBufferHandle);
     if (res != VK_SUCCESS || commandBufferHandle == VK_NULL_HANDLE)
         throw LSFG::vulkan_error(res, "Unable to allocate command buffer");
 
@@ -22,7 +23,7 @@ CommandBuffer::CommandBuffer(VkDevice device, const CommandPool& pool) {
     this->commandBuffer = std::shared_ptr<VkCommandBuffer>(
         new VkCommandBuffer(commandBufferHandle),
         [dev = device, pool = pool.handle()](VkCommandBuffer* cmdBuffer) {
-            vkFreeCommandBuffers(dev, pool, 1, cmdBuffer);
+            Layer::ovkFreeCommandBuffers(dev, pool, 1, cmdBuffer);
         }
     );
 }
@@ -35,7 +36,7 @@ void CommandBuffer::begin() {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
     };
-    auto res = vkBeginCommandBuffer(*this->commandBuffer, &beginInfo);
+    auto res = Layer::ovkBeginCommandBuffer(*this->commandBuffer, &beginInfo);
     if (res != VK_SUCCESS)
         throw LSFG::vulkan_error(res, "Unable to begin command buffer");
 
@@ -46,7 +47,7 @@ void CommandBuffer::end() {
     if (*this->state != CommandBufferState::Recording)
         throw std::logic_error("Command buffer is not in Recording state");
 
-    auto res = vkEndCommandBuffer(*this->commandBuffer);
+    auto res = Layer::ovkEndCommandBuffer(*this->commandBuffer);
     if (res != VK_SUCCESS)
         throw LSFG::vulkan_error(res, "Unable to end command buffer");
 
@@ -72,7 +73,7 @@ void CommandBuffer::submit(VkQueue queue,
         .signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size()),
         .pSignalSemaphores = signalSemaphores.data()
     };
-    auto res = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+    auto res = Layer::ovkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
     if (res != VK_SUCCESS)
         throw LSFG::vulkan_error(res, "Unable to submit command buffer");
 

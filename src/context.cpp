@@ -1,5 +1,6 @@
 #include "context.hpp"
-#include "utils.hpp"
+#include "layer.hpp"
+#include "utils/utils.hpp"
 
 #include <lsfg.hpp>
 
@@ -35,6 +36,10 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
             VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT,
             &out_n_fds.at(i));
+
+    Utils::storeLayerEnv();
+    LSFG::initialize();
+    Utils::restoreLayerEnv();
 
     this->lsfgCtxId = std::shared_ptr<int32_t>(
         new int32_t(LSFG::createContext(extent.width, extent.height,
@@ -98,7 +103,7 @@ VkResult LsContext::present(const Hooks::DeviceInfo& info, const void* pNext, Vk
         // 3. acquire next swapchain image
         pass.acquireSemaphores.at(i) = Mini::Semaphore(info.device);
         uint32_t imageIdx{};
-        auto res = vkAcquireNextImageKHR(info.device, this->swapchain, UINT64_MAX,
+        auto res = Layer::ovkAcquireNextImageKHR(info.device, this->swapchain, UINT64_MAX,
             pass.acquireSemaphores.at(i).handle(), VK_NULL_HANDLE, &imageIdx);
         if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR)
             throw LSFG::vulkan_error(res, "Failed to acquire next swapchain image");
@@ -136,7 +141,7 @@ VkResult LsContext::present(const Hooks::DeviceInfo& info, const void* pNext, Vk
             .pSwapchains = &this->swapchain,
             .pImageIndices = &imageIdx,
         };
-        res = vkQueuePresentKHR(queue, &presentInfo);
+        res = Layer::ovkQueuePresentKHR(queue, &presentInfo);
         if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR)
             throw LSFG::vulkan_error(res, "Failed to present swapchain image");
     }
@@ -152,7 +157,7 @@ VkResult LsContext::present(const Hooks::DeviceInfo& info, const void* pNext, Vk
         .pSwapchains = &this->swapchain,
         .pImageIndices = &presentIdx,
     };
-    auto res = vkQueuePresentKHR(queue, &presentInfo);
+    auto res = Layer::ovkQueuePresentKHR(queue, &presentInfo);
     if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR)
         throw LSFG::vulkan_error(res, "Failed to present swapchain image");
 

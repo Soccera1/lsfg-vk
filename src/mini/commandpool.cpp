@@ -1,4 +1,5 @@
 #include "mini/commandpool.hpp"
+#include "layer.hpp"
 
 #include <lsfg.hpp>
 
@@ -11,7 +12,7 @@ CommandPool::CommandPool(VkDevice device, uint32_t graphicsFamilyIdx) {
         .queueFamilyIndex = graphicsFamilyIdx
     };
     VkCommandPool commandPoolHandle{};
-    auto res = vkCreateCommandPool(device, &desc, nullptr, &commandPoolHandle);
+    auto res = Layer::ovkCreateCommandPool(device, &desc, nullptr, &commandPoolHandle);
     if (res != VK_SUCCESS || commandPoolHandle == VK_NULL_HANDLE)
         throw LSFG::vulkan_error(res, "Unable to create command pool");
 
@@ -19,7 +20,7 @@ CommandPool::CommandPool(VkDevice device, uint32_t graphicsFamilyIdx) {
     this->commandPool = std::shared_ptr<VkCommandPool>(
         new VkCommandPool(commandPoolHandle),
         [dev = device](VkCommandPool* commandPoolHandle) {
-            vkDestroyCommandPool(dev, *commandPoolHandle, nullptr);
+            Layer::ovkDestroyCommandPool(dev, *commandPoolHandle, nullptr);
         }
     );
 }

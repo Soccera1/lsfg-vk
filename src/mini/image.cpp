@@ -1,4 +1,5 @@
 #include "mini/image.hpp"
+#include "layer.hpp"
 
 #include <lsfg.hpp>
 
@@ -32,16 +33,16 @@ Image::Image(VkDevice device, VkPhysicalDevice physicalDevice,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE
     };
     VkImage imageHandle{};
-    auto res = vkCreateImage(device, &desc, nullptr, &imageHandle);
+    auto res = Layer::ovkCreateImage(device, &desc, nullptr, &imageHandle);
     if (res != VK_SUCCESS || imageHandle == VK_NULL_HANDLE)
         throw LSFG::vulkan_error(res, "Failed to create Vulkan image");
 
     // find memory type
     VkPhysicalDeviceMemoryProperties memProps;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProps);
+    Layer::ovkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProps);
 
     VkMemoryRequirements memReqs;
-    vkGetImageMemoryRequirements(device, imageHandle, &memReqs);
+    Layer::ovkGetImageMemoryRequirements(device, imageHandle, &memReqs);
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
@@ -74,24 +75,21 @@ Image::Image(VkDevice device, VkPhysicalDevice physicalDevice,
         .memoryTypeIndex = memType.value()
     };
     VkDeviceMemory memoryHandle{};
-    res = vkAllocateMemory(device, &allocInfo, nullptr, &memoryHandle);
+    res = Layer::ovkAllocateMemory(device, &allocInfo, nullptr, &memoryHandle);
     if (res != VK_SUCCESS || memoryHandle == VK_NULL_HANDLE)
         throw LSFG::vulkan_error(res, "Failed to allocate memory for Vulkan image");
 
-    res = vkBindImageMemory(device, imageHandle, memoryHandle, 0);
+    res = Layer::ovkBindImageMemory(device, imageHandle, memoryHandle, 0);
     if (res != VK_SUCCESS)
         throw LSFG::vulkan_error(res, "Failed to bind memory to Vulkan image");
 
     // obtain the sharing fd
-    auto vkGetMemoryFdKHR =
-        reinterpret_cast<PFN_vkGetMemoryFdKHR>(vkGetDeviceProcAddr(device, "vkGetMemoryFdKHR"));
-
     const VkMemoryGetFdInfoKHR fdInfo{
         .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
         .memory = memoryHandle,
         .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR,
     };
-    res = vkGetMemoryFdKHR(device, &fdInfo, fd);
+    res = Layer::ovkGetMemoryFdKHR(device, &fdInfo, fd);
     if (res != VK_SUCCESS || *fd < 0)
         throw LSFG::vulkan_error(res, "Failed to obtain sharing fd for Vulkan image");
 
@@ -99,13 +97,13 @@ Image::Image(VkDevice device, VkPhysicalDevice physicalDevice,
     this->image = std::shared_ptr<VkImage>(
         new VkImage(imageHandle),
         [dev = device](VkImage* img) {
-            vkDestroyImage(dev, *img, nullptr);
+            Layer::ovkDestroyImage(dev, *img, nullptr);
         }
     );
     this->memory = std::shared_ptr<VkDeviceMemory>(
         new VkDeviceMemory(memoryHandle),
         [dev = device](VkDeviceMemory* mem) {
-            vkFreeMemory(dev, *mem, nullptr);
+            Layer::ovkFreeMemory(dev, *mem, nullptr);
         }
     );
 }

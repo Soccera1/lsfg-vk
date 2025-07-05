@@ -1,4 +1,5 @@
 #include "mini/semaphore.hpp"
+#include "layer.hpp"
 
 #include <lsfg.hpp>
 
@@ -10,7 +11,7 @@ Semaphore::Semaphore(VkDevice device) {
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
     };
     VkSemaphore semaphoreHandle{};
-    auto res = vkCreateSemaphore(device, &desc, nullptr, &semaphoreHandle);
+    auto res = Layer::ovkCreateSemaphore(device, &desc, nullptr, &semaphoreHandle);
     if (res != VK_SUCCESS || semaphoreHandle == VK_NULL_HANDLE)
         throw LSFG::vulkan_error(res, "Unable to create semaphore");
 
@@ -18,7 +19,7 @@ Semaphore::Semaphore(VkDevice device) {
     this->semaphore = std::shared_ptr<VkSemaphore>(
         new VkSemaphore(semaphoreHandle),
         [dev = device](VkSemaphore* semaphoreHandle) {
-            vkDestroySemaphore(dev, *semaphoreHandle, nullptr);
+            Layer::ovkDestroySemaphore(dev, *semaphoreHandle, nullptr);
         }
     );
 }
@@ -34,20 +35,17 @@ Semaphore::Semaphore(VkDevice device, int* fd) {
         .pNext = &exportInfo
     };
     VkSemaphore semaphoreHandle{};
-    auto res = vkCreateSemaphore(device, &desc, nullptr, &semaphoreHandle);
+    auto res = Layer::ovkCreateSemaphore(device, &desc, nullptr, &semaphoreHandle);
     if (res != VK_SUCCESS || semaphoreHandle == VK_NULL_HANDLE)
         throw LSFG::vulkan_error(res, "Unable to create semaphore");
 
     // export semaphore to fd
-    auto vkGetSemaphoreFdKHR = reinterpret_cast<PFN_vkGetSemaphoreFdKHR>(
-        vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR"));
-
     const VkSemaphoreGetFdInfoKHR fdInfo{
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
         .semaphore = semaphoreHandle,
         .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT
     };
-    res = vkGetSemaphoreFdKHR(device, &fdInfo, fd);
+    res = Layer::ovkGetSemaphoreFdKHR(device, &fdInfo, fd);
     if (res != VK_SUCCESS || *fd < 0)
         throw LSFG::vulkan_error(res, "Unable to export semaphore to fd");
 
@@ -55,7 +53,7 @@ Semaphore::Semaphore(VkDevice device, int* fd) {
     this->semaphore = std::shared_ptr<VkSemaphore>(
         new VkSemaphore(semaphoreHandle),
         [dev = device](VkSemaphore* semaphoreHandle) {
-            vkDestroySemaphore(dev, *semaphoreHandle, nullptr);
+            Layer::ovkDestroySemaphore(dev, *semaphoreHandle, nullptr);
         }
     );
 }

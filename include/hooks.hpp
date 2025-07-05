@@ -3,7 +3,9 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <unordered_map>
 #include <utility>
+#include <string>
 
 namespace Hooks {
 
@@ -15,10 +17,8 @@ namespace Hooks {
         uint64_t frameGen; // amount of frames to generate
     };
 
-    ///
-    /// Install overrides for hooked Vulkan functions.
-    ///
-    void initialize();
+    /// Map of hooked Vulkan functions.
+    extern std::unordered_map<std::string, PFN_vkVoidFunction> hooks;
 
 }
 

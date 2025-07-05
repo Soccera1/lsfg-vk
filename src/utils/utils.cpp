@@ -1,9 +1,11 @@
 #include "utils/utils.hpp"
+#include "layer.hpp"
 
 #include <lsfg.hpp>
 
 #include <algorithm>
 #include <optional>
+#include <string>
 
 using namespace Utils;
 
@@ -13,9 +15,9 @@ std::pair<uint32_t, VkQueue> Utils::findQueue(VkDevice device, VkPhysicalDevice 
     std::copy_n(desc->pQueueCreateInfos, enabledQueues.size(), enabledQueues.data());
 
     uint32_t familyCount{};
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, nullptr);
+    Layer::ovkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, nullptr);
     std::vector<VkQueueFamilyProperties> families(familyCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount,
+    Layer::ovkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount,
         families.data());
 
     std::optional<uint32_t> idx;
@@ -30,7 +32,7 @@ std::pair<uint32_t, VkQueue> Utils::findQueue(VkDevice device, VkPhysicalDevice 
         throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "No suitable queue found");
 
     VkQueue queue{};
-    vkGetDeviceQueue(device, *idx, 0, &queue);
+    Layer::ovkGetDeviceQueue(device, *idx, 0, &queue);
 
     return { *idx, queue };
 }
@@ -78,7 +80,7 @@ void Utils::copyImage(VkCommandBuffer buf,
         }
     };
     const std::vector<VkImageMemoryBarrier> barriers = { srcBarrier, dstBarrier };
-    vkCmdPipelineBarrier(buf,
+    Layer::ovkCmdPipelineBarrier(buf,
         pre, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
         0, nullptr, 0, nullptr,
         static_cast<uint32_t>(barriers.size()), barriers.data());
@@ -98,7 +100,7 @@ void Utils::copyImage(VkCommandBuffer buf,
             .depth = 1
         }
     };
-    vkCmdCopyImage(buf,
+    Layer::ovkCmdCopyImage(buf,
         src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
         dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1, &imageCopy);
@@ -115,7 +117,7 @@ void Utils::copyImage(VkCommandBuffer buf,
                 .layerCount = 1
             }
         };
-        vkCmdPipelineBarrier(buf,
+        Layer::ovkCmdPipelineBarrier(buf,
             VK_PIPELINE_STAGE_TRANSFER_BIT, post, 0,
             0, nullptr, 0, nullptr,
             1, &presentBarrier);
@@ -135,10 +137,29 @@ void Utils::copyImage(VkCommandBuffer buf,
                 .layerCount = 1
             }
         };
-        vkCmdPipelineBarrier(buf,
+        Layer::ovkCmdPipelineBarrier(buf,
             VK_PIPELINE_STAGE_TRANSFER_BIT, post, 0,
             0, nullptr, 0, nullptr,
             1, &presentBarrier);
     }
+}
 
+namespace {
+    std::optional<std::string> layersEnvironment;
+}
+
+void Utils::storeLayerEnv() {
+    const char* env = std::getenv("VK_INSTANCE_LAYERS");
+    if (env)
+        layersEnvironment = env;
+    else
+        layersEnvironment.reset();
+    unsetenv("VK_INSTANCE_LAYERS");
+}
+
+void Utils::restoreLayerEnv() {
+    if (layersEnvironment.has_value())
+        setenv("VK_INSTANCE_LAYERS", layersEnvironment->c_str(), 1);
+    else
+        unsetenv("VK_INSTANCE_LAYERS");
 }
