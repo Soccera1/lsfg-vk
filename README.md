@@ -9,7 +9,7 @@ By specifying an `LD_PRELOAD`, lsfg-vk can place itself inbetween your game and 
 In order to compile LSFG, make sure you have the following components installed on your system:
 - Traditional build tools (+ bash, sed, git)
 - Clang compiler (this project does NOT compile easily with GCC)
-- Vulkan and SPIR-V header files
+- Vulkan header files
 - CMake build system
 - Meson build system (for DXVK)
 - Ninja build system (backend for CMake)
