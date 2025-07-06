@@ -25,21 +25,23 @@ void LSFG::initialize() {
         return;
 
     char* dllPath = getenv("LSFG_DLL_PATH");
-    std::string dllPathStr;
+    std::string dllPathStr; // (absolutely beautiful code)
     if (dllPath && *dllPath != '\0') {
         dllPathStr = std::string(dllPath);
     } else {
-        std::string baseDirStr;
-
-        const char* baseDir = getenv("XDG_DATA_HOME");
-        if (!baseDir || *baseDir == '\0')
-            baseDir = getenv("HOME");
-        if (!baseDir || *baseDir == '\0')
-            baseDir = "";
-        baseDirStr = std::string(baseDir);
-
-        dllPathStr = baseDirStr +
-            "/.local/share/Steam/steamapps/common/Lossless Scaling/Lossless.dll";
+        const char* dataDir = getenv("XDG_DATA_HOME");
+        if (dataDir && *dataDir != '\0') {
+            dllPathStr = std::string(dataDir) +
+                "Steam/steamapps/common/Lossless Scaling/Lossless.dll";
+        } else {
+            const char* homeDir = getenv("HOME");
+            if (homeDir && *homeDir != '\0') {
+                dllPathStr = std::string(homeDir) +
+                    "/.local/share/Steam/steamapps/common/Lossless Scaling/Lossless.dll";
+            } else {
+                dllPathStr = "Lossless.dll";
+            }
+        }
     }
 
     instance.emplace();
