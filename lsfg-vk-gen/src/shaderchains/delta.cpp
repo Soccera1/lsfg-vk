@@ -29,13 +29,15 @@ Delta::Delta(const Core::Device& device, Pool::ShaderPool& shaderpool,
               { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
     }};
-    for (size_t i = 0; i < 4; i++) {
-        this->pipelines.at(i) = Core::Pipeline(device,
-            this->shaderModules.at(i));
-        if (i == 3) continue;
+    this->pipelines = {{
+        shaderpool.getPipeline(device, "delta/0.spv"),
+        shaderpool.getPipeline(device, "delta/1.spv"),
+        shaderpool.getPipeline(device, "delta/2.spv"),
+        shaderpool.getPipeline(device, "delta/3.spv")
+    }};
+    for (size_t i = 0; i < 3; i++)
         this->descriptorSets.at(i) = Core::DescriptorSet(device, pool,
             this->shaderModules.at(i));
-    }
     for (size_t i = 0; i < genc; i++)
         this->nDescriptorSets.emplace_back(device, pool,
             this->shaderModules.at(3));

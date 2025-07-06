@@ -14,7 +14,7 @@ Downsample::Downsample(const Core::Device& device, Pool::ShaderPool& shaderpool,
           { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
           { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
           { 7, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } });
-    this->pipeline = Core::Pipeline(device, this->shaderModule);
+    this->pipeline = shaderpool.getPipeline(device, "downsample.spv");
     for (size_t i = 0; i < 2; i++)
         this->descriptorSets.at(i) = Core::DescriptorSet(device, pool, this->shaderModule);
 

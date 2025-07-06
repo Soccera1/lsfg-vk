@@ -47,13 +47,17 @@ Gamma::Gamma(const Core::Device& device, Pool::ShaderPool& shaderpool,
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
     }};
-    for (size_t i = 0; i < 6; i++) {
-        this->pipelines.at(i) = Core::Pipeline(device,
-            this->shaderModules.at(i));
-        if (i == 0 || i >= 4) continue; // first shader has special logic
+    this->pipelines = {{
+        shaderpool.getPipeline(device, "gamma/0.spv"),
+        shaderpool.getPipeline(device, "gamma/1.spv"),
+        shaderpool.getPipeline(device, "gamma/2.spv"),
+        shaderpool.getPipeline(device, "gamma/3.spv"),
+        shaderpool.getPipeline(device, "gamma/4.spv"),
+        shaderpool.getPipeline(device, "gamma/5.spv")
+    }};
+    for (size_t i = 1; i < 4; i++)
         this->descriptorSets.at(i - 1) = Core::DescriptorSet(device, pool,
             this->shaderModules.at(i));
-    }
     for (size_t i = 0; i < genc; i++)
         this->n1DescriptorSets.emplace_back(device, pool,
             this->shaderModules.at(4));

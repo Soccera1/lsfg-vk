@@ -63,3 +63,18 @@ Core::ShaderModule ShaderPool::getShader(
     shaders[name] = shader;
     return shader;
 }
+
+Core::Pipeline ShaderPool::getPipeline(
+        const Core::Device& device, const std::string& name) {
+    auto it = pipelines.find(name);
+    if (it != pipelines.end())
+        return it->second;
+
+    // grab the shader module
+    auto shader = this->getShader(device, name, {});
+
+    // create the pipeline
+    Core::Pipeline pipeline(device, shader);
+    pipelines[name] = pipeline;
+    return pipeline;
+}

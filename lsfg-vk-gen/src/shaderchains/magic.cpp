@@ -22,7 +22,7 @@ Magic::Magic(const Core::Device& device, Pool::ShaderPool& shaderpool,
           { 2,       VK_DESCRIPTOR_TYPE_SAMPLER },
           { 4+4+2+1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
           { 3+3+2,   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } });
-    this->pipeline = Core::Pipeline(device, this->shaderModule);
+    this->pipeline = shaderpool.getPipeline(device, "magic.spv");
     for (size_t i = 0; i < genc; i++) {
         this->nDescriptorSets.emplace_back();
         for (size_t j = 0; j < 3; j++)

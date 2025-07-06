@@ -25,13 +25,15 @@ Alpha::Alpha(const Core::Device& device, Pool::ShaderPool& shaderpool,
               { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
     }};
-    for (size_t i = 0; i < 4; i++) {
-        this->pipelines.at(i) = Core::Pipeline(device,
-            this->shaderModules.at(i));
-        if (i == 3) continue; // last shader is special
+    this->pipelines = {{
+        shaderpool.getPipeline(device, "alpha/0.spv"),
+        shaderpool.getPipeline(device, "alpha/1.spv"),
+        shaderpool.getPipeline(device, "alpha/2.spv"),
+        shaderpool.getPipeline(device, "alpha/3.spv")
+    }};
+    for (size_t i = 0; i < 3; i++)
         this->descriptorSets.at(i) = Core::DescriptorSet(device, pool,
             this->shaderModules.at(i));
-    }
     for (size_t i = 0; i < 3; i++)
         this->specialDescriptorSets.at(i) = Core::DescriptorSet(device, pool,
             this->shaderModules.at(3));
