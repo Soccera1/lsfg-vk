@@ -46,7 +46,7 @@ namespace {
     PFN_vkGetDeviceQueue next_vkGetDeviceQueue{};
     PFN_vkQueueSubmit next_vkQueueSubmit{};
     PFN_vkCmdPipelineBarrier next_vkCmdPipelineBarrier{};
-    PFN_vkCmdCopyImage next_vkCmdCopyImage{};
+    PFN_vkCmdBlitImage next_vkCmdBlitImage{};
     PFN_vkAcquireNextImageKHR next_vkAcquireNextImageKHR{};
 
     template<typename T>
@@ -195,7 +195,7 @@ namespace {
         success &= initDeviceFunc(*pDevice, "vkGetDeviceQueue", &next_vkGetDeviceQueue);
         success &= initDeviceFunc(*pDevice, "vkQueueSubmit", &next_vkQueueSubmit);
         success &= initDeviceFunc(*pDevice, "vkCmdPipelineBarrier", &next_vkCmdPipelineBarrier);
-        success &= initDeviceFunc(*pDevice, "vkCmdCopyImage", &next_vkCmdCopyImage);
+        success &= initDeviceFunc(*pDevice, "vkCmdBlitImage", &next_vkCmdBlitImage);
         success &= initDeviceFunc(*pDevice, "vkAcquireNextImageKHR", &next_vkAcquireNextImageKHR);
         if (!success) {
             Log::error("layer", "Failed to get device function pointers");
@@ -635,19 +635,20 @@ void Layer::ovkCmdPipelineBarrier(
         bufferMemoryBarrierCount, pBufferMemoryBarriers,
         imageMemoryBarrierCount, pImageMemoryBarriers);
 }
-void Layer::ovkCmdCopyImage(
+void Layer::ovkCmdBlitImage(
         VkCommandBuffer commandBuffer,
         VkImage srcImage,
         VkImageLayout srcImageLayout,
         VkImage dstImage,
         VkImageLayout dstImageLayout,
         uint32_t regionCount,
-        const VkImageCopy* pRegions) {
-    Log::debug("vulkan2", "vkCmdCopyImage called for command buffer {:x}, src image {:x}, dst image {:x}",
+        const VkImageBlit* pRegions,
+        VkFilter filter) {
+    Log::debug("vulkan2", "vkCmdBlitImage called for command buffer {:x}, src image {:x}, dst image {:x}",
         reinterpret_cast<uintptr_t>(commandBuffer),
         reinterpret_cast<uintptr_t>(srcImage),
         reinterpret_cast<uintptr_t>(dstImage));
-    next_vkCmdCopyImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
+    next_vkCmdBlitImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions, filter);
 }
 
 VkResult Layer::ovkAcquireNextImageKHR(

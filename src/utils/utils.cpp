@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <optional>
+#include <vulkan/vulkan_core.h>
 
 using namespace Utils;
 
@@ -96,25 +97,31 @@ void Utils::copyImage(VkCommandBuffer buf,
         0, nullptr, 0, nullptr,
         static_cast<uint32_t>(barriers.size()), barriers.data());
 
-    const VkImageCopy imageCopy{
+    const VkImageBlit imageBlit{
         .srcSubresource = {
             .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
             .layerCount = 1
+        },
+        .srcOffsets = {
+            { 0, 0, 0 },
+            { static_cast<int32_t>(width), static_cast<int32_t>(height), 1 }
         },
         .dstSubresource = {
             .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
             .layerCount = 1
         },
-        .extent = {
-            .width = width,
-            .height = height,
-            .depth = 1
+        .dstOffsets = {
+            { 0, 0, 0 },
+            { static_cast<int32_t>(width), static_cast<int32_t>(height), 1 }
         }
     };
-    Layer::ovkCmdCopyImage(buf,
+    Layer::ovkCmdBlitImage(
+        buf,
         src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
         dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        1, &imageCopy);
+        1, &imageBlit,
+        VK_FILTER_NEAREST
+    );
 
     if (makeSrcPresentable) {
         const VkImageMemoryBarrier presentBarrier{

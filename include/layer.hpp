@@ -186,15 +186,16 @@ namespace Layer {
         const VkBufferMemoryBarrier* pBufferMemoryBarriers,
         uint32_t imageMemoryBarrierCount,
         const VkImageMemoryBarrier* pImageMemoryBarriers);
-    /// Call to the original vkCmdCopyImage function.
-    void ovkCmdCopyImage(
+    /// Call to the original vkCmdBlitImage function.
+    void ovkCmdBlitImage(
         VkCommandBuffer commandBuffer,
         VkImage srcImage,
         VkImageLayout srcImageLayout,
         VkImage dstImage,
         VkImageLayout dstImageLayout,
         uint32_t regionCount,
-        const VkImageCopy* pRegions);
+        const VkImageBlit* pRegions,
+        VkFilter filter);
 
     /// Call to the original vkAcquireNextImageKHR function.
     VkResult ovkAcquireNextImageKHR(
