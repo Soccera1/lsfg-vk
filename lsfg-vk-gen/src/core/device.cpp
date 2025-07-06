@@ -24,18 +24,28 @@ Device::Device(const Instance& instance) {
     if (res != VK_SUCCESS)
         throw LSFG::vulkan_error(res, "Failed to get physical devices");
 
+    // get uuid env vars
+    const char* deviceUUIDEnv = std::getenv("LSFG_DEVICE_UUID");
+    if (!deviceUUIDEnv)
+        throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED,
+            "LSFG_DEVICE_UUID environment variable not set");
+    const uint64_t deviceUUID = std::stoull(deviceUUIDEnv);
+
     // find first discrete GPU
     std::optional<VkPhysicalDevice> physicalDevice;
     for (const auto& device : devices) {
         VkPhysicalDeviceProperties properties;
         vkGetPhysicalDeviceProperties(device, &properties);
-        physicalDevice = device;
 
-        if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-            break; // dedicated will always work
+        const uint64_t uuid = static_cast<uint64_t>(properties.vendorID) << 32 | properties.deviceID;
+        if (deviceUUID == uuid) {
+            physicalDevice = device;
+            break;
+        }
     }
     if (!physicalDevice)
-        throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED, "No discrete GPU found");
+        throw LSFG::vulkan_error(VK_ERROR_INITIALIZATION_FAILED,
+            "Could not find physical device with UUID");
 
     // find queue family indices
     uint32_t familyCount{};

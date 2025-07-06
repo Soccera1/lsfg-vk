@@ -19,6 +19,10 @@ namespace {
     PFN_vkGetInstanceProcAddr next_vkGetInstanceProcAddr{};
     PFN_vkGetDeviceProcAddr   next_vkGetDeviceProcAddr{};
 
+    PFN_vkGetPhysicalDeviceQueueFamilyProperties next_vkGetPhysicalDeviceQueueFamilyProperties{};
+    PFN_vkGetPhysicalDeviceMemoryProperties next_vkGetPhysicalDeviceMemoryProperties{};
+    PFN_vkGetPhysicalDeviceProperties next_vkGetPhysicalDeviceProperties{};
+
     PFN_vkCreateSwapchainKHR  next_vkCreateSwapchainKHR{};
     PFN_vkQueuePresentKHR     next_vkQueuePresentKHR{};
     PFN_vkDestroySwapchainKHR next_vkDestroySwapchainKHR{};
@@ -39,8 +43,6 @@ namespace {
     PFN_vkDestroySemaphore next_vkDestroySemaphore{};
     PFN_vkGetMemoryFdKHR next_vkGetMemoryFdKHR{};
     PFN_vkGetSemaphoreFdKHR next_vkGetSemaphoreFdKHR{};
-    PFN_vkGetPhysicalDeviceQueueFamilyProperties next_vkGetPhysicalDeviceQueueFamilyProperties{};
-    PFN_vkGetPhysicalDeviceMemoryProperties next_vkGetPhysicalDeviceMemoryProperties{};
     PFN_vkGetDeviceQueue next_vkGetDeviceQueue{};
     PFN_vkQueueSubmit next_vkQueueSubmit{};
     PFN_vkCmdPipelineBarrier next_vkCmdPipelineBarrier{};
@@ -112,8 +114,12 @@ namespace {
         // get relevant function pointers from the next layer
         success = true;
         success &= initInstanceFunc(*pInstance, "vkDestroyInstance", &next_vkDestroyInstance);
-        success &= initInstanceFunc(*pInstance, "vkGetPhysicalDeviceQueueFamilyProperties", &next_vkGetPhysicalDeviceQueueFamilyProperties);
-        success &= initInstanceFunc(*pInstance, "vkGetPhysicalDeviceMemoryProperties", &next_vkGetPhysicalDeviceMemoryProperties);
+        success &= initInstanceFunc(*pInstance,
+            "vkGetPhysicalDeviceQueueFamilyProperties", &next_vkGetPhysicalDeviceQueueFamilyProperties);
+        success &= initInstanceFunc(*pInstance,
+            "vkGetPhysicalDeviceMemoryProperties", &next_vkGetPhysicalDeviceMemoryProperties);
+        success &= initInstanceFunc(*pInstance,
+            "vkGetPhysicalDeviceProperties", &next_vkGetPhysicalDeviceProperties);
         if (!success) {
             Log::error("layer", "Failed to get instance function pointers");
             return VK_ERROR_INITIALIZATION_FAILED;
@@ -317,6 +323,29 @@ PFN_vkVoidFunction Layer::ovkGetDeviceProcAddr(
         VkDevice device,
         const char* pName) {
     return next_vkGetDeviceProcAddr(device, pName);
+}
+
+void Layer::ovkGetPhysicalDeviceQueueFamilyProperties(
+        VkPhysicalDevice physicalDevice,
+        uint32_t* pQueueFamilyPropertyCount,
+        VkQueueFamilyProperties* pQueueFamilyProperties) {
+    Log::debug("vulkan", "vkGetPhysicalDeviceQueueFamilyProperties called for physical device {:x}",
+        reinterpret_cast<uintptr_t>(physicalDevice));
+    next_vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
+}
+void Layer::ovkGetPhysicalDeviceMemoryProperties(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceMemoryProperties* pMemoryProperties) {
+    Log::debug("vulkan", "vkGetPhysicalDeviceMemoryProperties called for physical device {:x}",
+        reinterpret_cast<uintptr_t>(physicalDevice));
+    next_vkGetPhysicalDeviceMemoryProperties(physicalDevice, pMemoryProperties);
+}
+void Layer::ovkGetPhysicalDeviceProperties(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceProperties* pProperties) {
+    Log::debug("vulkan", "vkGetPhysicalDeviceProperties called for physical device {:x}",
+        reinterpret_cast<uintptr_t>(physicalDevice));
+    next_vkGetPhysicalDeviceProperties(physicalDevice, pProperties);
 }
 
 VkResult Layer::ovkCreateSwapchainKHR(
@@ -545,22 +574,6 @@ VkResult Layer::ovkGetSemaphoreFdKHR(
     Log::debug("vulkan2", "vkGetSemaphoreFdKHR({}) returned fd: {}",
         static_cast<uint32_t>(res), *pFd);
     return res;
-}
-
-void Layer::ovkGetPhysicalDeviceQueueFamilyProperties(
-        VkPhysicalDevice physicalDevice,
-        uint32_t* pQueueFamilyPropertyCount,
-        VkQueueFamilyProperties* pQueueFamilyProperties) {
-    Log::debug("vulkan", "vkGetPhysicalDeviceQueueFamilyProperties called for physical device {:x}",
-        reinterpret_cast<uintptr_t>(physicalDevice));
-    next_vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
-}
-void Layer::ovkGetPhysicalDeviceMemoryProperties(
-        VkPhysicalDevice physicalDevice,
-        VkPhysicalDeviceMemoryProperties* pMemoryProperties) {
-    Log::debug("vulkan", "vkGetPhysicalDeviceMemoryProperties called for physical device {:x}",
-        reinterpret_cast<uintptr_t>(physicalDevice));
-    next_vkGetPhysicalDeviceMemoryProperties(physicalDevice, pMemoryProperties);
 }
 
 void Layer::ovkGetDeviceQueue(

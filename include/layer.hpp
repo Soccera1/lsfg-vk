@@ -34,6 +34,20 @@ namespace Layer {
         VkDevice device,
         const char* pName);
 
+    /// Call to the original vkGetPhysicalDeviceQueueFamilyProperties function.
+    void ovkGetPhysicalDeviceQueueFamilyProperties(
+        VkPhysicalDevice physicalDevice,
+        uint32_t* pQueueFamilyPropertyCount,
+        VkQueueFamilyProperties* pQueueFamilyProperties);
+    /// Call to the original vkGetPhysicalDeviceMemoryProperties function.
+    void ovkGetPhysicalDeviceMemoryProperties(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceMemoryProperties* pMemoryProperties);
+    /// Call to the original vkGetPhysicalDeviceProperties function.
+    void ovkGetPhysicalDeviceProperties(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceProperties* pProperties);
+
     /// Call to the original vkCreateSwapchainKHR function.
     VkResult ovkCreateSwapchainKHR(
         VkDevice device,
@@ -146,16 +160,6 @@ namespace Layer {
         VkDevice device,
         const VkSemaphoreGetFdInfoKHR* pGetFdInfo,
         int* pFd);
-
-    /// Call to the original vkGetPhysicalDeviceQueueFamilyProperties function.
-    void ovkGetPhysicalDeviceQueueFamilyProperties(
-        VkPhysicalDevice physicalDevice,
-        uint32_t* pQueueFamilyPropertyCount,
-        VkQueueFamilyProperties* pQueueFamilyProperties);
-    /// Call to the original vkGetPhysicalDeviceMemoryProperties function.
-    void ovkGetPhysicalDeviceMemoryProperties(
-        VkPhysicalDevice physicalDevice,
-        VkPhysicalDeviceMemoryProperties* pMemoryProperties);
 
     /// Call to the original vkGetDeviceQueue function.
     void ovkGetDeviceQueue(

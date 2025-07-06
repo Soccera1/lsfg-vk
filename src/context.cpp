@@ -3,6 +3,7 @@
 #include "utils/log.hpp"
 #include "utils/utils.hpp"
 
+#include <cstdlib>
 #include <lsfg.hpp>
 
 #include <vector>
@@ -46,6 +47,9 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     }
 
     // initialize lsfg
+    const uint64_t deviceUUID = Utils::getDeviceUUID(info.physicalDevice);
+    setenv("LSFG_DEVICE_UUID", std::to_string(deviceUUID).c_str(), 1);
+
     Log::debug("context", "(entering LSFG initialization)");
     Utils::storeLayerEnv();
     LSFG::initialize();

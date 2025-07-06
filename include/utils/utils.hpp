@@ -23,6 +23,14 @@ namespace Utils {
         VkDeviceCreateInfo* desc, VkQueueFlags flags);
 
     ///
+    /// Get the UUID of the physical device.
+    ///
+    /// @param physicalDevice The physical device to get the UUID from.
+    /// @return The UUID of the physical device.
+    ///
+    uint64_t getDeviceUUID(VkPhysicalDevice physicalDevice);
+
+    ///
     /// Ensure a list of extensions is present in the given array.
     ///
     /// @param extensions The array of extensions to check.

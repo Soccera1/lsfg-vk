@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <optional>
-#include <string>
 
 using namespace Utils;
 
@@ -36,6 +35,13 @@ std::pair<uint32_t, VkQueue> Utils::findQueue(VkDevice device, VkPhysicalDevice 
     Layer::ovkGetDeviceQueue(device, *idx, 0, &queue);
 
     return { *idx, queue };
+}
+
+uint64_t Utils::getDeviceUUID(VkPhysicalDevice physicalDevice) {
+    VkPhysicalDeviceProperties properties{};
+    Layer::ovkGetPhysicalDeviceProperties(physicalDevice, &properties);
+
+    return static_cast<uint64_t>(properties.vendorID) << 32 | properties.deviceID;
 }
 
 std::vector<const char*> Utils::addExtensions(const char* const* extensions, size_t count,
