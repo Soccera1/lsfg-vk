@@ -24,6 +24,9 @@ ExternalProject_Add(dxvk_git
             --prefix <SOURCE_DIR>/build-native
             ${STRIP_FLAG}
             -Dbuild_id=false
+            -Denable_d3d8=false
+            -Denable_d3d9=false
+            -Denable_d3d10=false
             --force-fallback-for=libdisplay-info
             --wipe
             build
