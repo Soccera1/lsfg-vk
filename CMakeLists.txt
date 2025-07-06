@@ -60,4 +60,4 @@ target_compile_options(lsfg-vk PRIVATE
 install(FILES "${CMAKE_BINARY_DIR}/liblsfg-vk.so"
     DESTINATION lib)
 install(FILES "${CMAKE_SOURCE_DIR}/VkLayer_LS_frame_generation.json"
-    DESTINATION share/vulkan/explicit_layer.d)
+    DESTINATION share/vulkan/implicit_layer.d)

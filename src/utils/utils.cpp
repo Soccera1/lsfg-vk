@@ -161,25 +161,3 @@ void Utils::copyImage(VkCommandBuffer buf,
             1, &presentBarrier);
     }
 }
-
-namespace {
-    std::optional<std::string> layersEnvironment;
-}
-
-// TODO: more environment variables? what about explicit disable?
-
-void Utils::storeLayerEnv() {
-    const char* env = std::getenv("VK_INSTANCE_LAYERS");
-    if (env)
-        layersEnvironment = env;
-    else
-        layersEnvironment.reset();
-    unsetenv("VK_INSTANCE_LAYERS");
-}
-
-void Utils::restoreLayerEnv() {
-    if (layersEnvironment.has_value())
-        setenv("VK_INSTANCE_LAYERS", layersEnvironment->c_str(), 1);
-    else
-        unsetenv("VK_INSTANCE_LAYERS");
-}

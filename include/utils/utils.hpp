@@ -58,16 +58,6 @@ namespace Utils {
             VkPipelineStageFlags pre, VkPipelineStageFlags post,
             bool makeSrcPresentable, bool makeDstPresentable);
 
-    ///
-    /// Store the current layer environment.
-    ///
-    void storeLayerEnv();
-
-    ///
-    /// Restore the layer environment to the previously stored value.
-    ///
-    void restoreLayerEnv();
-
 }
 
 #endif // UTILS_HPP

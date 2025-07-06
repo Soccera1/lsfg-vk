@@ -3,11 +3,10 @@
 #include "utils/log.hpp"
 #include "utils/utils.hpp"
 
-#include <cstdlib>
 #include <lsfg.hpp>
 
+#include <cstdlib>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
         VkExtent2D extent, const std::vector<VkImage>& swapchainImages)
@@ -51,9 +50,7 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     setenv("LSFG_DEVICE_UUID", std::to_string(deviceUUID).c_str(), 1);
 
     Log::debug("context", "(entering LSFG initialization)");
-    Utils::storeLayerEnv();
     LSFG::initialize();
-    Utils::restoreLayerEnv();
     Log::debug("context", "(exiting LSFG initialization)");
 
     Log::debug("context", "(entering LSFG context creation)");
