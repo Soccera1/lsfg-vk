@@ -10,6 +10,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_SKIP_RPATH ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_definitions("-DLSFG_NO_DEBUG")
+endif()
+
 # subprojects
 include(cmake/FetchDXVK.cmake)
 include(cmake/FetchPeParse.cmake)

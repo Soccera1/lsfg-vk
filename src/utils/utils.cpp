@@ -1,4 +1,5 @@
 #include "utils/utils.hpp"
+#include "utils/log.hpp"
 #include "layer.hpp"
 
 #include <lsfg.hpp>
@@ -44,8 +45,12 @@ std::vector<const char*> Utils::addExtensions(const char* const* extensions, siz
 
     for (const auto& e : requiredExtensions) {
         auto it = std::ranges::find(ext, e);
-        if (it == ext.end())
+        if (it == ext.end()) {
+            Log::debug("hooks-init", "Adding extension: {}", e);
             ext.push_back(e);
+        } else {
+            Log::debug("hooks-init", "Extension {} already present", e);
+        }
     }
 
     return ext;
@@ -147,6 +152,8 @@ void Utils::copyImage(VkCommandBuffer buf,
 namespace {
     std::optional<std::string> layersEnvironment;
 }
+
+// TODO: more environment variables? what about explicit disable?
 
 void Utils::storeLayerEnv() {
     const char* env = std::getenv("VK_INSTANCE_LAYERS");
