@@ -50,7 +50,9 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     setenv("LSFG_DEVICE_UUID", std::to_string(deviceUUID).c_str(), 1);
 
     Log::debug("context", "(entering LSFG initialization)");
+    setenv("DISABLE_LSFG", "1", 1);
     LSFG::initialize();
+    unsetenv("DISABLE_LSFG");
     Log::debug("context", "(exiting LSFG initialization)");
 
     Log::debug("context", "(entering LSFG context creation)");

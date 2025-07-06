@@ -77,7 +77,6 @@ namespace {
             const VkAllocationCallbacks* pAllocator,
             VkInstance* pInstance) {
         Log::debug("layer", "Initializing lsfg-vk instance layer...");
-        setenv("DISABLE_LSFG", "1", 1); // mustn't load further
 
         // find layer creation info
         auto* layerDesc = const_cast<VkLayerInstanceCreateInfo*>(
