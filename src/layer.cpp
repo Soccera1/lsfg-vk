@@ -72,6 +72,7 @@ namespace {
 
 
 namespace {
+    VkInstance gInstance;
     VkResult layer_vkCreateInstance( // NOLINTBEGIN
             const VkInstanceCreateInfo* pCreateInfo,
             const VkAllocationCallbacks* pAllocator,
@@ -125,6 +126,8 @@ namespace {
             return VK_ERROR_INITIALIZATION_FAILED;
         }
 
+        gInstance = *pInstance; // workaround mesa bug
+
         Log::debug("layer", "Successfully initialized lsfg-vk instance layer");
         return res;
     } // NOLINTEND
@@ -157,7 +160,7 @@ namespace {
         layerDesc->u.pLayerInfo = layerDesc->u.pLayerInfo->pNext;
 
         // create device
-        auto success = initInstanceFunc(nullptr, "vkCreateDevice", &next_vkCreateDevice);
+        auto success = initInstanceFunc(gInstance, "vkCreateDevice", &next_vkCreateDevice);
         if (!success) return VK_ERROR_INITIALIZATION_FAILED;
 
         auto* layer_vkCreateDevice2 = reinterpret_cast<PFN_vkCreateDevice>(
