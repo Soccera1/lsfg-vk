@@ -14,14 +14,18 @@ using namespace LSFG;
 Context::Context(const Core::Device& device, Pool::ShaderPool& shaderpool,
         uint32_t width, uint32_t height, int in0, int in1,
         const std::vector<int>& outN) {
+    const VkFormat format = getenv("LSFG_HDR") == nullptr
+        ? VK_FORMAT_R8G8B8A8_UNORM
+        : VK_FORMAT_R16G16B16A16_SFLOAT;
+
     // import images
     this->inImg_0 = Core::Image(device, { width, height },
-        VK_FORMAT_R8G8B8A8_UNORM,
+        format,
         VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT,
         in0);
     this->inImg_1 = Core::Image(device, { width, height },
-        VK_FORMAT_R8G8B8A8_UNORM,
+        format,
         VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT,
         in1);

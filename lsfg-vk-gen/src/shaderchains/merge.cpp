@@ -36,10 +36,12 @@ Merge::Merge(const Core::Device& device, Pool::ShaderPool& shaderpool,
 
     auto extent = this->inImg1.getExtent();
 
+    const VkFormat format = getenv("LSFG_HDR") == nullptr
+        ? VK_FORMAT_R8G8B8A8_UNORM
+        : VK_FORMAT_R16G16B16A16_SFLOAT;
     for (size_t i = 0; i < genc; i++)
         this->outImgs.emplace_back(device,
-            extent,
-            VK_FORMAT_R8G8B8A8_UNORM,
+            extent, format,
             VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT,
             outFds.at(i));

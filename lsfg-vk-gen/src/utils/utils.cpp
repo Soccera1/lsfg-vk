@@ -2,6 +2,7 @@
 #include "core/buffer.hpp"
 #include "lsfg.hpp"
 
+#include <cstdlib>
 #include <fstream>
 
 using namespace LSFG;
@@ -188,6 +189,8 @@ void Globals::initializeGlobals(const Core::Device& device) {
     // initialize global constant buffer
     fgBuffer = {
         .inputOffset = { 0, 29 },
+        .advancedColorKind = getenv("LSFG_HDR") == nullptr ? 0U : 2U,
+        .hdrSupport = getenv("LSFG_HDR") != nullptr,
         .resolutionInvScale = 1.0F,
         .timestamp = 0.5F,
         .uiThreshold = 0.1F,

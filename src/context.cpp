@@ -12,11 +12,18 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
         VkExtent2D extent, const std::vector<VkImage>& swapchainImages)
         : swapchain(swapchain), swapchainImages(swapchainImages),
           extent(extent) {
+
+    // we could take the format from the swapchain,
+    // but honestly this is safer.
+    const VkFormat format = getenv("LSFG_HDR") == nullptr
+        ? VK_FORMAT_R8G8B8A8_UNORM
+        : VK_FORMAT_R16G16B16A16_SFLOAT;
+
     // prepare textures for lsfg
     int frame_0_fd{};
     this->frame_0 = Mini::Image(
         info.device, info.physicalDevice,
-        extent, VK_FORMAT_R8G8B8A8_UNORM,
+        extent, format,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT,
         &frame_0_fd);
@@ -26,7 +33,7 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     int frame_1_fd{};
     this->frame_1 = Mini::Image(
         info.device, info.physicalDevice,
-        extent, VK_FORMAT_R8G8B8A8_UNORM,
+        extent, format,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT,
         &frame_1_fd);
@@ -37,7 +44,7 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     for (size_t i = 0; i < info.frameGen; ++i) {
         this->out_n.emplace_back(
             info.device, info.physicalDevice,
-            extent, VK_FORMAT_R8G8B8A8_UNORM,
+            extent, format,
             VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT,
             &out_n_fds.at(i));
