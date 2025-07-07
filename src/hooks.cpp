@@ -93,8 +93,8 @@ namespace {
             reinterpret_cast<uintptr_t>(*pDevice));
         try {
             const char* frameGenEnv = std::getenv("LSFG_MULTIPLIER");
-            const uint64_t frameGen = std::max<uint64_t>(1,
-                std::stoul(frameGenEnv ? frameGenEnv : "2") - 1);
+            const uint64_t frameGen = static_cast<uint64_t>(
+                std::max<int64_t>(1, std::stol(frameGenEnv ? frameGenEnv : "2") - 1));
             Log::debug("hooks", "Using {}x frame generation",
                 frameGen + 1);
 
