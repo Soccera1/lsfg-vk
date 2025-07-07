@@ -64,6 +64,7 @@ void debug(std::string_view, std::format_string<Args...>, Args&&...) {} // NOLIN
 #else
     template<typename... Args>
     void debug(std::string_view module, std::format_string<Args...> fmt, Args&&... args) {
+        Internal::setup();
         if (Internal::debugAllModules || Internal::debugModules.contains(std::string(module)))
             log(GRAY, module, fmt, std::forward<Args>(args)...);
     }
