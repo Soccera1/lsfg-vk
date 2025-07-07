@@ -2,6 +2,7 @@
 #include "utils/log.hpp"
 #include "layer.hpp"
 
+#include <cstring>
 #include <lsfg.hpp>
 
 #include <algorithm>
@@ -51,7 +52,10 @@ std::vector<const char*> Utils::addExtensions(const char* const* extensions, siz
     std::copy_n(extensions, count, ext.data());
 
     for (const auto& e : requiredExtensions) {
-        auto it = std::ranges::find(ext, e);
+        auto it = std::ranges::find_if(ext,
+            [e](const char* extName) {
+                return std::strcmp(extName, e) == 0;
+            });
         if (it == ext.end()) {
             Log::debug("hooks-init", "Adding extension: {}", e);
             ext.push_back(e);
