@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace {
-    void __attribute__((constructor)) init() {
+    void __attribute__((constructor)) benchmark_init() {
         // continue if preloaded
         const char* preload = std::getenv("LD_PRELOAD");
         if (!preload || *preload == '\0')
@@ -74,8 +74,14 @@ namespace {
         // run the benchmark (run 8*n + 1 so the fences are waited on)
         const auto now = std::chrono::high_resolution_clock::now();
         const uint64_t iterations = (8 * 500) + 1;
-        for (uint64_t count = 0; count < iterations; count++)
+        for (uint64_t count = 0; count < iterations; count++) {
             LSFG::presentContext(ctx, -1, {});
+
+            if (count % 500 == 0)
+                Log::info("bench", "{:.2f}% done ({}/{})",
+                    static_cast<float>(count) / static_cast<float>(iterations) * 100.0F,
+                    count + 1, iterations);
+        }
         const auto then = std::chrono::high_resolution_clock::now();
 
         // print results

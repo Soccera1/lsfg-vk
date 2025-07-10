@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.29)
 
+set(CMAKE_C_COMPILER clang)
+set(CMAKE_CXX_COMPILER clang++)
+
+set(CMAKE_SKIP_RPATH ON)
+
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions("-DLSFG_NO_DEBUG")
 endif()
 
 # subprojects
-set(CMAKE_SKIP_RPATH ON)
 
 include(cmake/FetchDXVK.cmake)
 include(cmake/FetchPeParse.cmake)

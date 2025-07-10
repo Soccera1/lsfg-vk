@@ -42,7 +42,10 @@ const std::unordered_map<std::string, uint32_t> nameHashTable = {{
 }};
 
 namespace {
-    std::unordered_map<uint32_t, std::vector<uint8_t>> shaderData;
+    auto& shaders() {
+        static std::unordered_map<uint32_t, std::vector<uint8_t>> shaderData;
+        return shaderData;
+    }
 
     uint32_t fnv1a_hash(const std::vector<uint8_t>& data) {
         uint32_t hash = 0x811C9DC5;
@@ -60,13 +63,13 @@ namespace {
         std::copy_n(res.buf->buf, res.buf->bufLen, resource_data.data());
 
         const uint32_t hash = fnv1a_hash(resource_data);
-        shaderData[hash] = resource_data;
+        shaders()[hash] = resource_data;
         return 0;
     }
 }
 
 void Extract::extractShaders() {
-    if (!shaderData.empty())
+    if (!shaders().empty())
         return;
 
     // find path to dll (absolutely beautiful code)
@@ -99,15 +102,15 @@ void Extract::extractShaders() {
 }
 
 std::vector<uint8_t> Extract::getShader(const std::string& name) {
-    if (shaderData.empty())
+    if (shaders().empty())
         throw std::runtime_error("Shaders are not loaded.");
 
     auto hit = nameHashTable.find(name);
     if (hit == nameHashTable.end())
-        throw std::runtime_error("Shader not found: " + name);
+        throw std::runtime_error("Shader hash not found: " + name);
 
-    auto sit = shaderData.find(hit->second);
-    if (sit == shaderData.end())
+    auto sit = shaders().find(hit->second);
+    if (sit == shaders().end())
         throw std::runtime_error("Shader not found: " + name);
 
     return sit->second;
