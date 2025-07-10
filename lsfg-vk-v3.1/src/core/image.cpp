@@ -181,7 +181,7 @@ Image::Image(const Core::Device& device, VkExtent2D extent, VkFormat format,
     };
     const VkMemoryAllocateInfo allocInfo{
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        .pNext = &importInfo,
+        .pNext = fd == -1 ? nullptr : &importInfo,
         .allocationSize = memReqs.size,
         .memoryTypeIndex = memType.value()
     };

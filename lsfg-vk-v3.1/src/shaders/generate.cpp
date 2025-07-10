@@ -35,7 +35,7 @@ Generate::Generate(Vulkan& vk,
     for (size_t i = 0; i < vk.generationCount; i++)
         this->outImgs.emplace_back(vk.device, extent, format,
             VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT, fds.at(i));
+            VK_IMAGE_ASPECT_COLOR_BIT, fds.empty() ? -1 : fds.at(i));
 
     // hook up shaders
     for (size_t i = 0; i < vk.generationCount; i++) {

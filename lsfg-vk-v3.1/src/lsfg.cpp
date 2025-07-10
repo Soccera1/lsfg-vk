@@ -40,6 +40,7 @@ void LSFG::initialize(uint64_t deviceUUID,
         .flowScale = flowScale,
         .isHdr = isHdr
     });
+    contexts = std::unordered_map<int32_t, Context>();
 
     device->commandPool = Core::CommandPool(device->device);
     device->descriptorPool = Core::DescriptorPool(device->device);

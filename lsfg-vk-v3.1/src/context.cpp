@@ -71,7 +71,7 @@ void Context::present(Vulkan& vk,
     data.shouldWait = true;
 
     // 1. create mipmaps and process input image
-    data.inSemaphore = Core::Semaphore(vk.device, inSem);
+    if (inSem >= 0) data.inSemaphore = Core::Semaphore(vk.device, inSem);
     for (size_t i = 0; i < vk.generationCount; i++)
         data.internalSemaphores.at(i) = Core::Semaphore(vk.device);
 
@@ -84,15 +84,17 @@ void Context::present(Vulkan& vk,
     this->beta.Dispatch(data.cmdBuffer1, this->frameIdx);
 
     data.cmdBuffer1.end();
+    std::vector<Core::Semaphore> waits = { data.inSemaphore };
+    if (inSem < 0) waits.clear();
     data.cmdBuffer1.submit(vk.device.getComputeQueue(), std::nullopt,
-        { data.inSemaphore }, std::nullopt,
+        waits, std::nullopt,
         data.internalSemaphores, std::nullopt);
 
     // 2. generate intermediary frames
     for (size_t pass = 0; pass < vk.generationCount; pass++) {
         auto& internalSemaphore = data.internalSemaphores.at(pass);
         auto& outSemaphore = data.outSemaphores.at(pass);
-        outSemaphore = Core::Semaphore(vk.device, outSem.at(pass));
+        if (inSem >= 0) outSemaphore = Core::Semaphore(vk.device, outSem.empty() ? -1 : outSem.at(pass));
         auto& completionFence = data.completionFences.at(pass);
         completionFence = Core::Fence(vk.device);
 
@@ -108,9 +110,11 @@ void Context::present(Vulkan& vk,
         this->generate.Dispatch(buf2, this->frameIdx, pass);
 
         buf2.end();
+        std::vector<Core::Semaphore> signals = { outSemaphore };
+        if (inSem < 0) signals.clear();
         buf2.submit(vk.device.getComputeQueue(), completionFence,
             { internalSemaphore }, std::nullopt,
-            { outSemaphore }, std::nullopt);
+            signals, std::nullopt);
     }
 
     this->frameIdx++;

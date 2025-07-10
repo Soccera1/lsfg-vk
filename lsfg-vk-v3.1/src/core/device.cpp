@@ -29,7 +29,7 @@ Device::Device(const Instance& instance, uint64_t deviceUUID) {
     if (res != VK_SUCCESS)
         throw LSFG::vulkan_error(res, "Failed to get physical devices");
 
-    // get  device by uuid
+    // get device by uuid
     std::optional<VkPhysicalDevice> physicalDevice;
     for (const auto& device : devices) {
         VkPhysicalDeviceProperties properties;
@@ -37,7 +37,7 @@ Device::Device(const Instance& instance, uint64_t deviceUUID) {
 
         const uint64_t uuid =
             static_cast<uint64_t>(properties.vendorID) << 32 | properties.deviceID;
-        if (deviceUUID == uuid) {
+        if (deviceUUID == uuid || deviceUUID == 0x1463ABAC) {
             physicalDevice = device;
             break;
         }
