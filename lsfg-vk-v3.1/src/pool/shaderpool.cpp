@@ -2,7 +2,6 @@
 #include "core/shadermodule.hpp"
 #include "core/device.hpp"
 #include "core/pipeline.hpp"
-#include "utils/trans.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -27,12 +26,8 @@ Core::ShaderModule ShaderPool::getShader(
     if (bytecode.empty())
         throw std::runtime_error("Shader code is empty: " + name);
 
-    // create the translated shader module
-    auto spirvBytecode = Utils::Trans::translateShader(bytecode);
-    if (spirvBytecode.empty())
-        throw std::runtime_error("Shader code translation failed: " + name);
-
-    Core::ShaderModule shader(device, spirvBytecode, types);
+    // create the shader module
+    Core::ShaderModule shader(device, bytecode, types);
     shaders[name] = shader;
     return shader;
 }
