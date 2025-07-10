@@ -154,7 +154,7 @@ namespace {
             return VK_ERROR_INITIALIZATION_FAILED;
         }
 
-        next_vkGetDeviceProcAddr = layerDesc->u.pLayerInfo->pfnNextGetDeviceProcAddr;;
+        next_vkGetDeviceProcAddr = layerDesc->u.pLayerInfo->pfnNextGetDeviceProcAddr;
         Log::debug("layer", "Next device proc addr: {:x}",
             reinterpret_cast<uintptr_t>(next_vkGetDeviceProcAddr));
 

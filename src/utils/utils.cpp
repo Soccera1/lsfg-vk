@@ -58,7 +58,7 @@ std::vector<const char*> Utils::addExtensions(const char* const* extensions, siz
     for (const auto& e : requiredExtensions) {
         auto it = std::ranges::find_if(ext,
             [e](const char* extName) {
-                return std::strcmp(extName, e) == 0;
+                return std::string(extName) == std::string(e);
             });
         if (it == ext.end()) {
             Log::debug("hooks-init", "Adding extension: {}", e);

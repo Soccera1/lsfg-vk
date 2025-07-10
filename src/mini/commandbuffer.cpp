@@ -18,6 +18,8 @@ CommandBuffer::CommandBuffer(VkDevice device, const CommandPool& pool) {
     if (res != VK_SUCCESS || commandBufferHandle == VK_NULL_HANDLE)
         throw LSFG::vulkan_error(res, "Unable to allocate command buffer");
     res = Layer::ovkSetDeviceLoaderData(device, commandBufferHandle);
+    if (res != VK_SUCCESS)
+        throw LSFG::vulkan_error(res, "Unable to set device loader data for command buffer");
 
     // store command buffer in shared ptr
     this->state = std::make_shared<CommandBufferState>(CommandBufferState::Empty);

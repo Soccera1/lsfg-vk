@@ -53,7 +53,7 @@ namespace {
         return hash;
     }
 
-    int on_resource(void* data, const peparse::resource& res) { // NOLINT
+    int on_resource(void*, const peparse::resource& res) { // NOLINT
         if (res.type != peparse::RT_RCDATA || res.buf == nullptr || res.buf->bufLen <= 0)
             return 0;
         std::vector<uint8_t> resource_data(res.buf->bufLen);
@@ -66,7 +66,7 @@ namespace {
 }
 
 void Extract::extractShaders() {
-    if (shaderData.size() > 0)
+    if (!shaderData.empty())
         return;
 
     // find path to dll (absolutely beautiful code)
