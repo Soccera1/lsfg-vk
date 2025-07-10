@@ -36,7 +36,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 if(LSFGVK_EXCESS_DEBUG)
-    message(STATUS "LSFGVK_EXCESS_DEBUG is only compatible with clang")
     target_compile_options(lsfg-vk-v3.1 PRIVATE
         -Weverything
         # disable compat c++ flags

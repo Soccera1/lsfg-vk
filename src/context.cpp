@@ -1,4 +1,6 @@
 #include "context.hpp"
+#include "extract/extract.hpp"
+#include "extract/trans.hpp"
 #include "layer.hpp"
 #include "utils/log.hpp"
 #include "utils/utils.hpp"
@@ -12,10 +14,20 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
         VkExtent2D extent, const std::vector<VkImage>& swapchainImages)
         : swapchain(swapchain), swapchainImages(swapchainImages),
           extent(extent) {
+    // read environment variables
+    const char* lsfgFlowScaleStr = getenv("LSFG_FLOW_SCALE");
+    const float flowScale = lsfgFlowScaleStr
+        ? std::stof(lsfgFlowScaleStr)
+        : 1.0F;
+
+    const char* lsfgHdrStr = getenv("LSFG_HDR");
+    const bool isHdr = lsfgHdrStr
+        ? *lsfgHdrStr == '1'
+        : false;
 
     // we could take the format from the swapchain,
     // but honestly this is safer.
-    const VkFormat format = getenv("LSFG_HDR") == nullptr
+    const VkFormat format = isHdr
         ? VK_FORMAT_R8G8B8A8_UNORM
         : VK_FORMAT_R16G16B16A16_SFLOAT;
 
@@ -53,19 +65,26 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     }
 
     // initialize lsfg
-    const uint64_t deviceUUID = Utils::getDeviceUUID(info.physicalDevice);
-    setenv("LSFG_DEVICE_UUID", std::to_string(deviceUUID).c_str(), 1);
-
     Log::debug("context", "(entering LSFG initialization)");
     setenv("DISABLE_LSFG", "1", 1);
-    LSFG::initialize();
+    Extract::extractShaders();
+    LSFG::initialize(
+        Utils::getDeviceUUID(info.physicalDevice),
+        isHdr, 1.0F / flowScale, info.frameGen,
+        [](const std::string& name) {
+            auto dxbc = Extract::getShader(name);
+            auto spirv = Extract::translateShader(dxbc);
+            return spirv;
+        }
+    );
     unsetenv("DISABLE_LSFG");
     Log::debug("context", "(exiting LSFG initialization)");
 
+    // create lsfg context
     Log::debug("context", "(entering LSFG context creation)");
     this->lsfgCtxId = std::shared_ptr<int32_t>(
-        new int32_t(LSFG::createContext(extent.width, extent.height,
-            frame_0_fd, frame_1_fd, out_n_fds)),
+        new int32_t(LSFG::createContext(frame_0_fd, frame_1_fd, out_n_fds,
+            extent, format)),
         [](const int32_t* id) {
             Log::info("context",
                 "(entering LSFG context deletion with id: {})", *id);
