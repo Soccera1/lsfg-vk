@@ -42,14 +42,14 @@ Generate::Generate(Vulkan& vk,
         auto& pass = this->passes.emplace_back();
         pass.buffer = vk.resources.getBuffer(vk.device,
             static_cast<float>(i + 1) / static_cast<float>(vk.generationCount + 1));
-        for (size_t i = 0; i < 2; i++) {
-            pass.descriptorSet.at(i) = Core::DescriptorSet(vk.device, vk.descriptorPool,
+        for (size_t j = 0; j < 2; j++) {
+            pass.descriptorSet.at(j) = Core::DescriptorSet(vk.device, vk.descriptorPool,
                 this->shaderModule);
-            pass.descriptorSet.at(i).update(vk.device)
+            pass.descriptorSet.at(j).update(vk.device)
                 .add(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, pass.buffer)
                 .add(VK_DESCRIPTOR_TYPE_SAMPLER, this->samplers)
-                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, i == 0 ? this->inImg1 : this->inImg2)
-                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, i == 0 ? this->inImg2 : this->inImg1)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, j == 0 ? this->inImg2 : this->inImg1)
+                .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, j == 0 ? this->inImg1 : this->inImg2)
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg3)
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg4)
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImg5)
