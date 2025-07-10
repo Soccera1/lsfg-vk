@@ -36,6 +36,11 @@ target_include_directories(lsfg-vk
 target_link_libraries(lsfg-vk
     PRIVATE lsfg-vk-v3.1 peparse dxvk vulkan)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_target_properties(lsfg-vk PROPERTIES
+        INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
+
 # diagnostics
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set_target_properties(lsfg-vk PROPERTIES

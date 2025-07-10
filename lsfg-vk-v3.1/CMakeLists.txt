@@ -29,6 +29,11 @@ target_link_libraries(lsfg-vk-v3.1
 target_compile_options(lsfg-vk-v3.1 PRIVATE
     -fPIC)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_target_properties(lsfg-vk-v3.1 PROPERTIES
+        INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
+
 # diagnostics
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set_target_properties(lsfg-vk-v3.1 PROPERTIES
