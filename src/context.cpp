@@ -16,9 +16,10 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
           extent(extent) {
     // read environment variables
     const char* lsfgFlowScaleStr = getenv("LSFG_FLOW_SCALE");
-    const float flowScale = lsfgFlowScaleStr
+    float flowScale = lsfgFlowScaleStr
         ? std::stof(lsfgFlowScaleStr)
         : 1.0F;
+    flowScale = std::max(0.3F, std::min(flowScale, 1.0F));
 
     const char* lsfgHdrStr = getenv("LSFG_HDR");
     const bool isHdr = lsfgHdrStr
