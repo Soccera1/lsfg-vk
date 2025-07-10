@@ -1,5 +1,18 @@
 #include "core/descriptorset.hpp"
+#include "core/device.hpp"
+#include "core/descriptorpool.hpp"
+#include "core/shadermodule.hpp"
+#include "core/commandbuffer.hpp"
+#include "core/pipeline.hpp"
+#include "core/image.hpp"
+#include "core/sampler.hpp"
+#include "core/buffer.hpp"
 #include "lsfg.hpp"
+
+#include <vulkan/vulkan_core.h>
+
+#include <memory>
+#include <cstdint>
 
 using namespace LSFG::Core;
 

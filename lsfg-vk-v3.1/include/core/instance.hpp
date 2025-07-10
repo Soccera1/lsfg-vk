@@ -1,5 +1,4 @@
-#ifndef INSTANCE_HPP
-#define INSTANCE_HPP
+#pragma once
 
 #include <vulkan/vulkan_core.h>
 
@@ -35,5 +34,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // INSTANCE_HPP

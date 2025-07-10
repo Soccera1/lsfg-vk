@@ -1,5 +1,13 @@
 #include "core/semaphore.hpp"
+#include "core/device.hpp"
 #include "lsfg.hpp"
+
+#include <vulkan/vulkan_core.h>
+
+#include <optional>
+#include <cstdint>
+#include <memory>
+#include <stdexcept>
 
 using namespace LSFG::Core;
 

@@ -1,13 +1,17 @@
-#ifndef SHADERPOOL_HPP
-#define SHADERPOOL_HPP
+#pragma once
 
 #include "core/device.hpp"
 #include "core/pipeline.hpp"
 #include "core/shadermodule.hpp"
 
+#include <vulkan/vulkan_core.h>
+
+#include <cstdint>
+#include <cstddef>
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace LSFG::Pool {
@@ -59,5 +63,3 @@ namespace LSFG::Pool {
     };
 
 }
-
-#endif // SHADERPOOL_HPP

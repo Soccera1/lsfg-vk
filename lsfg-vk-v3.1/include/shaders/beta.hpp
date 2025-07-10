@@ -1,14 +1,16 @@
-#ifndef BETA_HPP
-#define BETA_HPP
+#pragma once
 
+#include "core/buffer.hpp"
 #include "core/commandbuffer.hpp"
 #include "core/descriptorset.hpp"
 #include "core/image.hpp"
 #include "core/pipeline.hpp"
+#include "core/sampler.hpp"
 #include "core/shadermodule.hpp"
 #include "utils/utils.hpp"
 
 #include <array>
+#include <cstdint>
 
 namespace LSFG::Shaders {
 
@@ -57,5 +59,3 @@ namespace LSFG::Shaders {
     };
 
 }
-
-#endif // BETA_HPP

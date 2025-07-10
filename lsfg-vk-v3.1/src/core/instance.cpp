@@ -1,7 +1,10 @@
 #include "core/instance.hpp"
 #include "lsfg.hpp"
 
+#include <cstdint>
+#include <memory>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 using namespace LSFG::Core;
 

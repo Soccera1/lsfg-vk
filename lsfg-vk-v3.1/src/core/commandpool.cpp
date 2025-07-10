@@ -1,5 +1,10 @@
 #include "core/commandpool.hpp"
+#include "core/device.hpp"
 #include "lsfg.hpp"
+
+#include <vulkan/vulkan_core.h>
+
+#include <memory>
 
 using namespace LSFG::Core;
 

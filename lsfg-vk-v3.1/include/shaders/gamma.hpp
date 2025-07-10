@@ -1,15 +1,18 @@
-#ifndef GAMMA_HPP
-#define GAMMA_HPP
+#pragma once
 
+#include "core/buffer.hpp"
 #include "core/commandbuffer.hpp"
 #include "core/descriptorset.hpp"
 #include "core/image.hpp"
 #include "core/pipeline.hpp"
+#include "core/sampler.hpp"
 #include "core/shadermodule.hpp"
 #include "utils/utils.hpp"
 
 #include <array>
+#include <cstdint>
 #include <optional>
+#include <vector>
 
 namespace LSFG::Shaders {
 
@@ -66,5 +69,3 @@ namespace LSFG::Shaders {
     };
 
 }
-
-#endif // GAMMA_HPP

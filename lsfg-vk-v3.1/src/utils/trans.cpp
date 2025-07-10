@@ -1,5 +1,8 @@
 #include "utils/trans.hpp"
 
+#include <vector>
+#include <cstdint>
+
 using namespace LSFG::Utils;
 
 std::vector<uint8_t> Trans::translateShader(std::vector<uint8_t> bytecode) {

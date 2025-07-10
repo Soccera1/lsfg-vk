@@ -1,5 +1,11 @@
 #include "core/fence.hpp"
+#include "core/device.hpp"
 #include "lsfg.hpp"
+
+#include <vulkan/vulkan_core.h>
+
+#include <memory>
+#include <cstdint>
 
 using namespace LSFG::Core;
 

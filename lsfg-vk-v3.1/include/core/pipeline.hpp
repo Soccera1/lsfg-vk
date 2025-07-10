@@ -1,5 +1,4 @@
-#ifndef PIPELINE_HPP
-#define PIPELINE_HPP
+#pragma once
 
 #include "core/commandbuffer.hpp"
 #include "core/shadermodule.hpp"
@@ -54,5 +53,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // PIPELINE_HPP

@@ -1,5 +1,4 @@
-#ifndef COMMANDPOOL_HPP
-#define COMMANDPOOL_HPP
+#pragma once
 
 #include "core/device.hpp"
 
@@ -41,5 +40,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // COMMANDPOOL_HPP

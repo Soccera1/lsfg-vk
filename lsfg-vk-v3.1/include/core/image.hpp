@@ -1,5 +1,4 @@
-#ifndef IMAGE_HPP
-#define IMAGE_HPP
+#pragma once
 
 #include "core/device.hpp"
 
@@ -86,5 +85,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // IMAGE_HPP

@@ -1,5 +1,12 @@
 #include "core/pipeline.hpp"
+#include "core/device.hpp"
+#include "core/shadermodule.hpp"
+#include "core/commandbuffer.hpp"
 #include "lsfg.hpp"
+
+#include <vulkan/vulkan_core.h>
+
+#include <memory>
 
 using namespace LSFG::Core;
 

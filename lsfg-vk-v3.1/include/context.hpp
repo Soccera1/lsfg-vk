@@ -1,12 +1,22 @@
-#ifndef CONTEXT_HPP
-#define CONTEXT_HPP
+#pragma once
 
+#include "core/image.hpp"
+#include "core/semaphore.hpp"
+#include "core/fence.hpp"
+#include "core/commandbuffer.hpp"
 #include "shaders/alpha.hpp"
 #include "shaders/beta.hpp"
 #include "shaders/delta.hpp"
 #include "shaders/gamma.hpp"
 #include "shaders/generate.hpp"
 #include "shaders/mipmaps.hpp"
+#include "utils/utils.hpp"
+
+#include <vulkan/vulkan_core.h>
+
+#include <vector>
+#include <cstdint>
+#include <array>
 
 namespace LSFG {
 
@@ -71,5 +81,3 @@ namespace LSFG {
     };
 
 }
-
-#endif // CONTEXT_HPP

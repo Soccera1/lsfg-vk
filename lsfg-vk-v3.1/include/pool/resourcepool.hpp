@@ -1,11 +1,12 @@
-#ifndef RESOURCEPOOL_HPP
-#define RESOURCEPOOL_HPP
+#pragma once
 
 #include "core/device.hpp"
 #include "core/buffer.hpp"
 #include "core/sampler.hpp"
+
 #include "vulkan/vulkan_core.h"
 
+#include <cstdint>
 #include <unordered_map>
 
 namespace LSFG::Pool {
@@ -66,5 +67,3 @@ namespace LSFG::Pool {
     };
 
 }
-
-#endif // RESOURCEPOOL_HPP

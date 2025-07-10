@@ -1,4 +1,13 @@
 #include "shaders/alpha.hpp"
+#include "utils/utils.hpp"
+#include "core/commandbuffer.hpp"
+#include "core/image.hpp"
+
+#include <vulkan/vulkan_core.h>
+
+#include <utility>
+#include <cstddef>
+#include <cstdint>
 
 using namespace LSFG::Shaders;
 

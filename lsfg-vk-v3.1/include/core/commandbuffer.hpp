@@ -1,5 +1,4 @@
-#ifndef COMMANDBUFFER_HPP
-#define COMMANDBUFFER_HPP
+#pragma once
 
 #include "core/commandpool.hpp"
 #include "core/fence.hpp"
@@ -8,6 +7,7 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <cstdint>
 #include <optional>
 #include <vector>
 #include <memory>
@@ -110,5 +110,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // COMMANDBUFFER_HPP

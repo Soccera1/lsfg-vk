@@ -1,5 +1,14 @@
 #include "core/shadermodule.hpp"
+#include "core/device.hpp"
 #include "lsfg.hpp"
+
+#include <vulkan/vulkan_core.h>
+
+#include <vector>
+#include <cstdint>
+#include <utility>
+#include <cstddef>
+#include <memory>
 
 using namespace LSFG::Core;
 

@@ -1,5 +1,4 @@
-#ifndef SAMPLER_HPP
-#define SAMPLER_HPP
+#pragma once
 
 #include "core/device.hpp"
 
@@ -47,5 +46,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // SAMPLER_HPP

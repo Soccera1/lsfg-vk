@@ -1,7 +1,12 @@
 #include "pool/resourcepool.hpp"
 #include "core/buffer.hpp"
+#include "core/device.hpp"
+#include "core/sampler.hpp"
+
+#include <vulkan/vulkan_core.h>
 
 #include <array>
+#include <cstdint>
 
 using namespace LSFG;
 using namespace LSFG::Pool;

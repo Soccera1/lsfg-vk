@@ -1,6 +1,11 @@
 #include "core/device.hpp"
+#include "core/instance.hpp"
 #include "lsfg.hpp"
 
+#include <vulkan/vulkan_core.h>
+
+#include <cstdint>
+#include <memory>
 #include <optional>
 #include <vector>
 

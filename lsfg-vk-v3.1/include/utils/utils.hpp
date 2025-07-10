@@ -1,15 +1,21 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#pragma once
 
 #include "core/commandbuffer.hpp"
+#include "core/commandpool.hpp"
 #include "core/descriptorpool.hpp"
 #include "core/image.hpp"
 #include "core/device.hpp"
 #include "pool/resourcepool.hpp"
 #include "pool/shaderpool.hpp"
 
+#include <vulkan/vulkan_core.h>
+
+#include <optional>
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <array>
+#include <vector>
 
 namespace LSFG::Utils {
 
@@ -100,5 +106,3 @@ namespace LSFG {
         Pool::ResourcePool resources;
     };
 }
-
-#endif // UTILS_HPP

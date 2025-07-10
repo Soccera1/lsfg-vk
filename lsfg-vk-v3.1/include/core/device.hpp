@@ -1,5 +1,4 @@
-#ifndef DEVICE_HPP
-#define DEVICE_HPP
+#pragma once
 
 #include "core/instance.hpp"
 
@@ -52,5 +51,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // DEVICE_HPP

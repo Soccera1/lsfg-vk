@@ -1,10 +1,10 @@
-#ifndef FENCE_HPP
-#define FENCE_HPP
+#pragma once
 
 #include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
+#include <cstdint>
 #include <memory>
 
 namespace LSFG::Core {
@@ -61,5 +61,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // FENCE_HPP

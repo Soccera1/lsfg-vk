@@ -1,6 +1,11 @@
 #include "core/image.hpp"
+#include "core/device.hpp"
 #include "lsfg.hpp"
 
+#include <vulkan/vulkan_core.h>
+
+#include <cstdint>
+#include <memory>
 #include <optional>
 
 using namespace LSFG::Core;

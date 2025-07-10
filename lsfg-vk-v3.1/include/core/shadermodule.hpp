@@ -1,10 +1,11 @@
-#ifndef SHADERMODULE_HPP
-#define SHADERMODULE_HPP
+#pragma once
 
 #include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
+#include <cstdint>
+#include <cstddef>
 #include <utility>
 #include <vector>
 #include <memory>
@@ -49,5 +50,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // SHADERMODULE_HPP

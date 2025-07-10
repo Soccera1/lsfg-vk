@@ -1,5 +1,4 @@
-#ifndef DESCRIPTORSET_HPP
-#define DESCRIPTORSET_HPP
+#pragma once
 
 #include "core/buffer.hpp"
 #include "core/commandbuffer.hpp"
@@ -12,6 +11,10 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <vector>
+#include <cstddef>
+#include <array>
+#include <optional>
 #include <memory>
 
 namespace LSFG::Core {
@@ -119,5 +122,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // DESCRIPTORSET_HPP

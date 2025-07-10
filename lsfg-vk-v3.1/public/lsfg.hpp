@@ -1,10 +1,11 @@
-#ifndef LSFG_3_1_HPP
-#define LSFG_3_1_HPP
+#pragma once
 
 #include <vulkan/vulkan_core.h>
 
 #include <functional>
 #include <stdexcept>
+#include <cstdint>
+#include <string>
 #include <vector>
 
 namespace LSFG {
@@ -22,8 +23,7 @@ namespace LSFG {
     ///
     void initialize(uint64_t deviceUUID,
         bool isHdr, float flowScale, uint64_t generationCount,
-        const std::function<std::vector<uint8_t>(const std::string&)>& loader
-    );
+        const std::function<std::vector<uint8_t>(const std::string&)>& loader);
 
     ///
     /// Create a new LSFG context on a swapchain.
@@ -89,5 +89,3 @@ namespace LSFG {
     };
 
 }
-
-#endif // LSFG_3_1_HPP

@@ -1,10 +1,10 @@
-#ifndef SEMAPHORE_HPP
-#define SEMAPHORE_HPP
+#pragma once
 
 #include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
+#include <cstdint>
 #include <optional>
 #include <memory>
 
@@ -78,5 +78,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // SEMAPHORE_HPP

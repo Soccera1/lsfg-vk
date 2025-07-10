@@ -1,7 +1,16 @@
 #include "pool/shaderpool.hpp"
+#include "core/shadermodule.hpp"
+#include "core/device.hpp"
+#include "core/pipeline.hpp"
 #include "utils/trans.hpp"
 
+#include <vulkan/vulkan_core.h>
+
+#include <cstddef>
 #include <stdexcept>
+#include <string>
+#include <vector>
+#include <utility>
 
 using namespace LSFG;
 using namespace LSFG::Pool;

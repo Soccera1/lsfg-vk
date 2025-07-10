@@ -1,14 +1,17 @@
-#ifndef GENERATE_HPP
-#define GENERATE_HPP
+#pragma once
 
+#include "core/buffer.hpp"
 #include "core/commandbuffer.hpp"
 #include "core/descriptorset.hpp"
 #include "core/image.hpp"
 #include "core/pipeline.hpp"
+#include "core/sampler.hpp"
 #include "core/shadermodule.hpp"
 #include "utils/utils.hpp"
 
 #include <array>
+#include <vector>
+#include <cstdint>
 
 namespace LSFG::Shaders {
 
@@ -63,5 +66,3 @@ namespace LSFG::Shaders {
     };
 
 }
-
-#endif // GENERATE_HPP

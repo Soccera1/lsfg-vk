@@ -1,7 +1,12 @@
 #include "core/buffer.hpp"
+#include "core/device.hpp"
 #include "lsfg.hpp"
 
+#include <vulkan/vulkan_core.h>
+
 #include <algorithm>
+#include <cstdint>
+#include <memory>
 #include <optional>
 
 using namespace LSFG::Core;

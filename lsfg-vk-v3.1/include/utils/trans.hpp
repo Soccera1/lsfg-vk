@@ -1,5 +1,4 @@
-#ifndef TRANS_HPP
-#define TRANS_HPP
+#pragma once
 
 #include <cstdint>
 #include <vector>
@@ -15,5 +14,3 @@ namespace LSFG::Utils::Trans {
     [[nodiscard]] std::vector<uint8_t> translateShader(std::vector<uint8_t> bytecode);
 
 }
-
-#endif // TRANS_HPP

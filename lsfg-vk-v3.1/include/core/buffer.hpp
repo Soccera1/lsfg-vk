@@ -1,10 +1,10 @@
-#ifndef BUFFER_HPP
-#define BUFFER_HPP
+#pragma once
 
 #include "core/device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
+#include <cstddef>
 #include <memory>
 
 namespace LSFG::Core {
@@ -69,5 +69,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // BUFFER_HPP

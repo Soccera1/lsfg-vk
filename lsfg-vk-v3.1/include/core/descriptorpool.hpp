@@ -1,5 +1,4 @@
-#ifndef DESCRIPTORPOOL_HPP
-#define DESCRIPTORPOOL_HPP
+#pragma once
 
 #include "core/device.hpp"
 
@@ -41,5 +40,3 @@ namespace LSFG::Core {
     };
 
 }
-
-#endif // DESCRIPTORPOOL_HPP

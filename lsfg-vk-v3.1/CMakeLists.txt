@@ -5,6 +5,8 @@ project(lsfg-vk-v3.1
     DESCRIPTION "Lossless Scaling Frame Generation v3.1"
     LANGUAGES CXX)
 
+option(LDFGVK_EXCESS_DEBUG "Enable excessive debug output" OFF)
+
 file(GLOB SOURCES
     "src/core/*.cpp"
     "src/pool/*.cpp"
@@ -33,7 +35,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-if(LSFGVK_EXCESS_DEBUG STREQUAL "ON")
+if(LSFGVK_EXCESS_DEBUG)
+    message(STATUS "LSFGVK_EXCESS_DEBUG is only compatible with clang")
     target_compile_options(lsfg-vk-v3.1 PRIVATE
         -Weverything
         # disable compat c++ flags
@@ -53,5 +56,5 @@ if(LSFGVK_EXCESS_DEBUG STREQUAL "ON")
     )
 
     set_target_properties(lsfg-vk-v3.1 PROPERTIES
-        CMAKE_CXX_CLANG_TIDY clang-tidy)
+        CXX_CLANG_TIDY clang-tidy)
 endif()
