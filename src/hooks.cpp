@@ -210,6 +210,20 @@ namespace {
         auto& deviceInfo = devices.at(swapchainToDeviceTable.at(*pPresentInfo->pSwapchains));
         auto& swapchain = swapchains.at(*pPresentInfo->pSwapchains);
 
+        // patch vsync NOLINTBEGIN
+        const VkSwapchainPresentModeInfoEXT* presentModeInfo =
+            reinterpret_cast<const VkSwapchainPresentModeInfoEXT*>(pPresentInfo->pNext);
+        while (presentModeInfo) {
+            if (presentModeInfo->sType == VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_MODE_INFO_EXT) {
+                for (size_t i = 0; i < presentModeInfo->swapchainCount; i++)
+                    const_cast<VkPresentModeKHR*>(presentModeInfo->pPresentModes)[i] =
+                        VK_PRESENT_MODE_FIFO_KHR;
+            }
+            presentModeInfo =
+                reinterpret_cast<const VkSwapchainPresentModeInfoEXT*>(presentModeInfo->pNext);
+        } // NOLINTEND
+
+        // present the next frame
         Log::debug("hooks2", "Presenting swapchain: {:x} on queue: {:x}",
             reinterpret_cast<uintptr_t>(*pPresentInfo->pSwapchains),
             reinterpret_cast<uintptr_t>(queue));
