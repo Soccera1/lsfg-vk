@@ -37,7 +37,7 @@ namespace LSFG::Shaders {
         Generate(Vulkan& vk,
             Core::Image inImg1, Core::Image inImg2,
             Core::Image inImg3, Core::Image inImg4, Core::Image inImg5,
-            const std::vector<int>& fds);
+            const std::vector<int>& fds, VkFormat format);
 
         ///
         /// Dispatch the shaderchain.

@@ -56,7 +56,7 @@ Context::Context(Vulkan& vk,
         this->gamma.at(6).getOutImage(),
         this->delta.at(2).getOutImage1(),
         this->delta.at(2).getOutImage2(),
-        outN);
+        outN, format);
 }
 
 void Context::present(Vulkan& vk,

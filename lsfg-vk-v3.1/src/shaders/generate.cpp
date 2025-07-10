@@ -15,7 +15,7 @@ using namespace LSFG::Shaders;
 Generate::Generate(Vulkan& vk,
     Core::Image inImg1, Core::Image inImg2,
     Core::Image inImg3, Core::Image inImg4, Core::Image inImg5,
-    const std::vector<int>& fds)
+    const std::vector<int>& fds, VkFormat format)
         : inImg1(std::move(inImg1)), inImg2(std::move(inImg2)),
           inImg3(std::move(inImg3)), inImg4(std::move(inImg4)),
           inImg5(std::move(inImg5)) {
@@ -33,8 +33,7 @@ Generate::Generate(Vulkan& vk,
     // create internal images/outputs
     const VkExtent2D extent = this->inImg1.getExtent();
     for (size_t i = 0; i < vk.generationCount; i++)
-        this->outImgs.emplace_back(vk.device, extent,
-            VK_FORMAT_R8G8B8A8_UNORM,
+        this->outImgs.emplace_back(vk.device, extent, format,
             VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
             VK_IMAGE_ASPECT_COLOR_BIT, fds.at(i));
 
