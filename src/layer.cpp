@@ -16,6 +16,8 @@ namespace {
     PFN_vkCreateDevice  next_vkCreateDevice{};
     PFN_vkDestroyDevice next_vkDestroyDevice{};
 
+    PFN_vkSetDeviceLoaderData next_vSetDeviceLoaderData{};
+
     PFN_vkGetInstanceProcAddr next_vkGetInstanceProcAddr{};
     PFN_vkGetDeviceProcAddr   next_vkGetDeviceProcAddr{};
 
@@ -152,11 +154,28 @@ namespace {
             return VK_ERROR_INITIALIZATION_FAILED;
         }
 
-        // advance link info (i don't really know what this does)
-        next_vkGetDeviceProcAddr = layerDesc->u.pLayerInfo->pfnNextGetDeviceProcAddr;
+        next_vkGetDeviceProcAddr = layerDesc->u.pLayerInfo->pfnNextGetDeviceProcAddr;;
         Log::debug("layer", "Next device proc addr: {:x}",
             reinterpret_cast<uintptr_t>(next_vkGetDeviceProcAddr));
 
+        // find second layer creation info
+        auto* layerDesc2 = const_cast<VkLayerDeviceCreateInfo*>(
+            reinterpret_cast<const VkLayerDeviceCreateInfo*>(pCreateInfo->pNext));
+        while (layerDesc2 && (layerDesc2->sType != VK_STRUCTURE_TYPE_LOADER_DEVICE_CREATE_INFO
+                || layerDesc2->function != VK_LOADER_DATA_CALLBACK)) {
+                    layerDesc2 = const_cast<VkLayerDeviceCreateInfo*>(
+                        reinterpret_cast<const VkLayerDeviceCreateInfo*>(layerDesc2->pNext));
+        }
+        if (!layerDesc2) {
+            Log::error("layer", "No layer creation info found in pNext chain");
+            return VK_ERROR_INITIALIZATION_FAILED;
+        }
+
+        next_vSetDeviceLoaderData = layerDesc2->u.pfnSetDeviceLoaderData;
+        Log::debug("layer", "Next device loader data: {:x}",
+            reinterpret_cast<uintptr_t>(next_vSetDeviceLoaderData));
+
+        // advance link info (i don't really know what this does)
         layerDesc->u.pLayerInfo = layerDesc->u.pLayerInfo->pNext;
 
         // create device
@@ -315,6 +334,12 @@ void Layer::ovkDestroyDevice(
     next_vkDestroyDevice(device, pAllocator);
     Log::debug("vulkan", "Device {:x} destroyed successfully",
         reinterpret_cast<uintptr_t>(device));
+}
+
+VkResult Layer::ovkSetDeviceLoaderData(VkDevice device, void* object) {
+    Log::debug("vulkan", "vkSetDeviceLoaderData called for object {:x}",
+        reinterpret_cast<uintptr_t>(object));
+    return next_vSetDeviceLoaderData(device, object);
 }
 
 PFN_vkVoidFunction Layer::ovkGetInstanceProcAddr(

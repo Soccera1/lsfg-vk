@@ -25,6 +25,11 @@ namespace Layer {
         VkDevice device,
         const VkAllocationCallbacks* pAllocator);
 
+    /// Call to the original vkSetDeviceLoaderData function.
+    VkResult ovkSetDeviceLoaderData(
+        VkDevice device,
+        void* object);
+
     /// Call to the original vkGetInstanceProcAddr function.
     PFN_vkVoidFunction ovkGetInstanceProcAddr(
         VkInstance instance,

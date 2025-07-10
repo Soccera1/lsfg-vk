@@ -36,6 +36,10 @@ std::pair<uint32_t, VkQueue> Utils::findQueue(VkDevice device, VkPhysicalDevice 
     VkQueue queue{};
     Layer::ovkGetDeviceQueue(device, *idx, 0, &queue);
 
+    auto res = Layer::ovkSetDeviceLoaderData(device, queue);
+    if (res != VK_SUCCESS)
+        throw LSFG::vulkan_error(res, "Unable to set device loader data for queue");
+
     return { *idx, queue };
 }
 
