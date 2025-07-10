@@ -5,10 +5,15 @@
 #include "utils/utils.hpp"
 
 #include <lsfg.hpp>
+#include <vulkan/vulkan_core.h>
 
+#include <cstdint>
+#include <cstdlib>
+#include <algorithm>
+#include <exception>
 #include <string>
 #include <unordered_map>
-#include <vulkan/vulkan_core.h>
+#include <vector>
 
 using namespace Hooks;
 
@@ -86,7 +91,7 @@ namespace {
     VkResult myvkCreateDevicePost(
             VkPhysicalDevice physicalDevice,
             VkDeviceCreateInfo* pCreateInfo,
-            const VkAllocationCallbacks*, // NOLINT
+            const VkAllocationCallbacks*,
             VkDevice* pDevice) {
         // store device info
         Log::debug("hooks", "Creating device info for device: {:x}",

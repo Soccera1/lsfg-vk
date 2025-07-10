@@ -9,6 +9,8 @@
 #include "core/shadermodule.hpp"
 #include "utils/utils.hpp"
 
+#include <vulkan/vulkan_core.h>
+
 #include <array>
 #include <vector>
 #include <cstdint>

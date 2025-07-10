@@ -1,5 +1,4 @@
-#ifndef SEMAPHORE_HPP
-#define SEMAPHORE_HPP
+#pragma once
 
 #include <vulkan/vulkan_core.h>
 
@@ -49,5 +48,3 @@ namespace Mini {
     };
 
 }
-
-#endif // SEMAPHORE_HPP

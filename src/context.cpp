@@ -1,13 +1,19 @@
 #include "context.hpp"
 #include "extract/extract.hpp"
 #include "extract/trans.hpp"
-#include "layer.hpp"
-#include "utils/log.hpp"
 #include "utils/utils.hpp"
+#include "utils/log.hpp"
+#include "hooks.hpp"
+#include "layer.hpp"
 
+#include <vulkan/vulkan_core.h>
 #include <lsfg.hpp>
 
+#include <algorithm>
+#include <cstdint>
 #include <cstdlib>
+#include <string>
+#include <memory>
 #include <vector>
 
 LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
@@ -19,7 +25,7 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     float flowScale = lsfgFlowScaleStr
         ? std::stof(lsfgFlowScaleStr)
         : 1.0F;
-    flowScale = std::max(0.3F, std::min(flowScale, 1.0F));
+    flowScale = std::max(0.25F, std::min(flowScale, 1.0F));
 
     const char* lsfgHdrStr = getenv("LSFG_HDR");
     const bool isHdr = lsfgHdrStr
@@ -67,7 +73,7 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
 
     // initialize lsfg
     Log::debug("context", "(entering LSFG initialization)");
-    setenv("DISABLE_LSFG", "1", 1);
+    setenv("DISABLE_LSFG", "1", 1); // NOLINT
     Extract::extractShaders();
     LSFG::initialize(
         Utils::getDeviceUUID(info.physicalDevice),
@@ -78,7 +84,7 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
             return spirv;
         }
     );
-    unsetenv("DISABLE_LSFG");
+    unsetenv("DISABLE_LSFG"); // NOLINT
     Log::debug("context", "(exiting LSFG initialization)");
 
     // create lsfg context

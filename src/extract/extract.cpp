@@ -1,8 +1,8 @@
 #include "extract/extract.hpp"
 
-#include <cstdlib>
 #include <pe-parse/parse.h>
 
+#include <cstdlib>
 #include <algorithm>
 #include <cstdint>
 #include <stdexcept>
@@ -53,7 +53,7 @@ namespace {
         return hash;
     }
 
-    int on_resource(void*, const peparse::resource& res) { // NOLINT
+    int on_resource(void*, const peparse::resource& res) {
         if (res.type != peparse::RT_RCDATA || res.buf == nullptr || res.buf->bufLen <= 0)
             return 0;
         std::vector<uint8_t> resource_data(res.buf->bufLen);

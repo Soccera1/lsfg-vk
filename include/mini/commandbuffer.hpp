@@ -1,8 +1,6 @@
-#ifndef COMMANDBUFFER_HPP
-#define COMMANDBUFFER_HPP
+#pragma once
 
 #include "mini/commandpool.hpp"
-#include "mini/semaphore.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -91,5 +89,3 @@ namespace Mini {
     };
 
 }
-
-#endif // COMMANDBUFFER_HPP

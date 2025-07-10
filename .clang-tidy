@@ -8,13 +8,13 @@ Checks:
 - "readability-*"
 - "bugprone-*"
 - "misc-*"
-- "-misc-include-cleaner"
 - "-readability-braces-around-statements"
 - "-readability-function-cognitive-complexity"
 - "-readability-identifier-length"
 - "-readability-implicit-bool-conversion"
 - "-readability-magic-numbers"
 - "-readability-math-missing-parentheses"
+- "-readability-named-parameter"
 - "-bugprone-easily-swappable-parameters"
 # configure modernization
 - "modernize-*"
@@ -24,3 +24,4 @@ Checks:
 - "-cppcoreguidelines-avoid-magic-numbers"
 - "-cppcoreguidelines-pro-type-reinterpret-cast" # allows reinterpret_cast
 - "-cppcoreguidelines-avoid-non-const-global-variables"
+- "-cppcoreguidelines-pro-type-union-access"

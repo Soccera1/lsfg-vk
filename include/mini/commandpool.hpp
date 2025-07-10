@@ -1,8 +1,8 @@
-#ifndef COMMANDPOOL_HPP
-#define COMMANDPOOL_HPP
+#pragma once
 
 #include <vulkan/vulkan_core.h>
 
+#include <cstdint>
 #include <memory>
 
 namespace Mini {
@@ -40,5 +40,3 @@ namespace Mini {
     };
 
 }
-
-#endif // COMMANDPOOL_HPP

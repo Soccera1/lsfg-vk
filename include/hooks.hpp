@@ -1,8 +1,8 @@
-#ifndef HOOKS_HPP
-#define HOOKS_HPP
+#pragma once
 
 #include <vulkan/vulkan_core.h>
 
+#include <cstdint>
 #include <unordered_map>
 #include <utility>
 #include <string>
@@ -21,5 +21,3 @@ namespace Hooks {
     extern std::unordered_map<std::string, PFN_vkVoidFunction> hooks;
 
 }
-
-#endif // HOOKS_HPP

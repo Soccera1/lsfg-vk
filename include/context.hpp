@@ -1,5 +1,4 @@
-#ifndef CONTEXT_HPP
-#define CONTEXT_HPP
+#pragma once
 
 #include "hooks.hpp"
 #include "mini/commandbuffer.hpp"
@@ -7,11 +6,11 @@
 #include "mini/image.hpp"
 #include "mini/semaphore.hpp"
 
+#include <vulkan/vulkan_core.h>
+
 #include <array>
 #include <cstdint>
 #include <memory>
-#include <vulkan/vulkan_core.h>
-
 #include <vector>
 
 ///
@@ -79,5 +78,3 @@ private:
     }; // data for a single render pass
     std::array<RenderPassInfo, 8> passInfos; // allocate 8 because why not
 };
-
-#endif // CONTEXT_HPP

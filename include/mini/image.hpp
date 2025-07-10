@@ -1,5 +1,4 @@
-#ifndef IMAGE_HPP
-#define IMAGE_HPP
+#pragma once
 
 #include <vulkan/vulkan_core.h>
 
@@ -59,5 +58,3 @@ namespace Mini {
     };
 
 }
-
-#endif // IMAGE_HPP

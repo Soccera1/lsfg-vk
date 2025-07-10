@@ -2,6 +2,10 @@
 #include "layer.hpp"
 
 #include <lsfg.hpp>
+#include <vulkan/vulkan_core.h>
+
+#include <cstdint>
+#include <memory>
 
 using namespace Mini;
 

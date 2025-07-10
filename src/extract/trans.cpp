@@ -4,6 +4,8 @@
 #include <dxbc/dxbc_module.h>
 #include <dxbc/dxbc_reader.h>
 
+#include <cstdint>
+#include <cstddef>
 #include <algorithm>
 #include <vector>
 

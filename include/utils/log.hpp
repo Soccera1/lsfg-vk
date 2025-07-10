@@ -1,11 +1,12 @@
-#ifndef LOG_HPP
-#define LOG_HPP
+#pragma once
 
 #include <format>
 #include <fstream>
 #include <iostream>
 #include <mutex>
 #include <set>
+#include <string>
+#include <string_view>
 
 namespace Log {
 
@@ -26,10 +27,10 @@ namespace Log {
             std::format_string<Args...> fmt, Args&&... args) {
         Internal::setup();
 
-        std::string prefix = std::format("lsfg-vk({}): ", module);
-        std::string message = std::format(fmt, std::forward<Args>(args)...);
+        const std::string prefix = std::format("lsfg-vk({}): ", module);
+        const std::string message = std::format(fmt, std::forward<Args>(args)...);
 
-        std::lock_guard<std::mutex> lock(Internal::logMutex);
+        const std::lock_guard<std::mutex> lock(Internal::logMutex);
         std::cerr << color << prefix << message << "\033[0m" << '\n';
         if (Internal::logFile.is_open()) {
             Internal::logFile << prefix << message << '\n';
@@ -60,7 +61,7 @@ namespace Log {
 
 #ifdef LSFG_NO_DEBUG
 template<typename... Args>
-void debug(std::string_view, std::format_string<Args...>, Args&&...) {} // NOLINT
+void debug(std::string_view, std::format_string<Args...>, Args&&...) {}
 #else
     template<typename... Args>
     void debug(std::string_view module, std::format_string<Args...> fmt, Args&&... args) {
@@ -71,5 +72,3 @@ void debug(std::string_view, std::format_string<Args...>, Args&&...) {} // NOLIN
 #endif
 
 }
-
-#endif // LOG_HPP

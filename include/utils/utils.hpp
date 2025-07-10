@@ -1,8 +1,9 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#pragma once
 
 #include <vulkan/vulkan_core.h>
 
+#include <cstdint>
+#include <cstddef>
 #include <vector>
 #include <utility>
 
@@ -59,5 +60,3 @@ namespace Utils {
             bool makeSrcPresentable, bool makeDstPresentable);
 
 }
-
-#endif // UTILS_HPP

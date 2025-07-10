@@ -1,8 +1,11 @@
 #include "mini/image.hpp"
 #include "layer.hpp"
 
+#include <vulkan/vulkan_core.h>
 #include <lsfg.hpp>
 
+#include <memory>
+#include <cstdint>
 #include <optional>
 
 using namespace Mini;

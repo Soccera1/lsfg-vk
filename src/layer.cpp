@@ -2,12 +2,11 @@
 #include "hooks.hpp"
 #include "utils/log.hpp"
 
-#include <lsfg.hpp>
 #include <vulkan/vk_layer.h>
+#include <vulkan/vulkan_core.h>
 
 #include <string>
 #include <unordered_map>
-#include <vulkan/vulkan_core.h>
 
 namespace {
     PFN_vkCreateInstance  next_vkCreateInstance{};

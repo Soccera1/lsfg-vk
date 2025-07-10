@@ -1,7 +1,8 @@
-#ifndef LAYER_HPP
-#define LAYER_HPP
+#pragma once
 
 #include <vulkan/vulkan_core.h>
+
+#include <cstdint>
 
 namespace Layer {
     /// Call to the original vkCreateInstance function.
@@ -216,5 +217,3 @@ namespace Layer {
 extern "C" PFN_vkVoidFunction layer_vkGetInstanceProcAddr(VkInstance instance, const char* pName);
 /// Symbol definition for Vulkan device layer.
 extern "C" PFN_vkVoidFunction layer_vkGetDeviceProcAddr(VkDevice device, const char* pName);
-
-#endif // LAYER_HPP

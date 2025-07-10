@@ -29,7 +29,7 @@ Core::Buffer ResourcePool::getBuffer(
     uint64_t hash = 0;
     const union { float f; uint32_t i; } u{
         .f = timestamp };
-    hash |= u.i; // NOLINT
+    hash |= u.i;
     hash |= static_cast<uint64_t>(firstIter) << 32;
     hash |= static_cast<uint64_t>(firstIterS) << 33;
 
