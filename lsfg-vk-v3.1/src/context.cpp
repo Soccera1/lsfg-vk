@@ -26,10 +26,10 @@ Context::Context(Vulkan& vk,
     // prepare render data
     for (size_t i = 0; i < 8; i++) {
         auto& data = this->data.at(i);
-        data.internalSemaphores.resize(outN.size());
-        data.outSemaphores.resize(outN.size());
-        data.completionFences.resize(outN.size());
-        data.cmdBuffers2.resize(outN.size());
+        data.internalSemaphores.resize(vk.generationCount);
+        data.outSemaphores.resize(vk.generationCount);
+        data.completionFences.resize(vk.generationCount);
+        data.cmdBuffers2.resize(vk.generationCount);
     }
 
     // create shader chains
@@ -68,11 +68,12 @@ void Context::present(Vulkan& vk,
         for (auto& fence : data.completionFences)
             if (!fence.wait(vk.device, UINT64_MAX))
                 throw LSFG::vulkan_error(VK_TIMEOUT, "Fence wait timed out");
+    data.shouldWait = true;
 
     // 1. create mipmaps and process input image
     data.inSemaphore = Core::Semaphore(vk.device, inSem);
-    for (size_t i = 0; i < outSem.size(); i++)
-        data.internalSemaphores.at(i) = Core::Semaphore(vk.device, outSem.at(i));
+    for (size_t i = 0; i < vk.generationCount; i++)
+        data.internalSemaphores.at(i) = Core::Semaphore(vk.device);
 
     data.cmdBuffer1 = Core::CommandBuffer(vk.device, vk.commandPool);
     data.cmdBuffer1.begin();
@@ -88,22 +89,28 @@ void Context::present(Vulkan& vk,
         data.internalSemaphores, std::nullopt);
 
     // 2. generate intermediary frames
-    for (size_t i = 0; i < 7; i++) {
-        data.outSemaphores.at(i) = Core::Semaphore(vk.device, outSem.at(i));
-        data.completionFences.at(i) = Core::Fence(vk.device);
+    for (size_t pass = 0; pass < vk.generationCount; pass++) {
+        auto& internalSemaphore = data.internalSemaphores.at(pass);
+        auto& outSemaphore = data.outSemaphores.at(pass);
+        outSemaphore = Core::Semaphore(vk.device, outSem.at(pass));
+        auto& completionFence = data.completionFences.at(pass);
+        completionFence = Core::Fence(vk.device);
 
-        data.cmdBuffers2.at(i) = Core::CommandBuffer(vk.device, vk.commandPool);
-        data.cmdBuffers2.at(i).begin();
+        auto& buf2 = data.cmdBuffers2.at(pass);
+        buf2 = Core::CommandBuffer(vk.device, vk.commandPool);
+        buf2.begin();
 
-        this->gamma.at(i).Dispatch(data.cmdBuffers2.at(i), this->frameIdx, i);
-        if (i >= 4)
-            this->delta.at(i - 4).Dispatch(data.cmdBuffers2.at(i), this->frameIdx, i);
-        this->generate.Dispatch(data.cmdBuffers2.at(i), this->frameIdx, i);
+        for (size_t i = 0; i < 7; i++) {
+            this->gamma.at(i).Dispatch(buf2, this->frameIdx, pass);
+            if (i >= 4)
+                this->delta.at(i - 4).Dispatch(buf2, this->frameIdx, pass);
+        }
+        this->generate.Dispatch(buf2, this->frameIdx, pass);
 
-        data.cmdBuffers2.at(i).end();
-        data.cmdBuffers2.at(i).submit(vk.device.getComputeQueue(), std::nullopt,
-            { data.internalSemaphores.at(i) }, std::nullopt,
-            data.outSemaphores, std::nullopt);
+        buf2.end();
+        buf2.submit(vk.device.getComputeQueue(), completionFence,
+            { internalSemaphore }, std::nullopt,
+            { outSemaphore }, std::nullopt);
     }
 
     this->frameIdx++;
