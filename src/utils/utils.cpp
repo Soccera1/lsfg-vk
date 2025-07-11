@@ -53,6 +53,17 @@ uint64_t Utils::getDeviceUUID(VkPhysicalDevice physicalDevice) {
     return static_cast<uint64_t>(properties.vendorID) << 32 | properties.deviceID;
 }
 
+uint32_t Utils::getMaxImageCount(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) {
+    VkSurfaceCapabilitiesKHR capabilities{};
+    auto res = Layer::ovkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice,
+        surface, &capabilities);
+    if (res != VK_SUCCESS)
+        throw LSFG::vulkan_error(res, "Failed to get surface capabilities");
+    if (capabilities.maxImageCount == 0)
+        return 999; // :3
+    return capabilities.maxImageCount;
+}
+
 std::vector<const char*> Utils::addExtensions(const char* const* extensions, size_t count,
         const std::vector<const char*>& requiredExtensions) {
     std::vector<const char*> ext(count);

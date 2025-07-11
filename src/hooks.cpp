@@ -151,13 +151,21 @@ namespace {
 
         // update swapchain create info
         VkSwapchainCreateInfoKHR createInfo = *pCreateInfo;
-        createInfo.minImageCount += 1 + deviceInfo.frameGen; // 1 deferred + N framegen, FIXME: check hardware max
+        const uint32_t maxImageCount = Utils::getMaxImageCount(deviceInfo.physicalDevice, pCreateInfo->surface);
+        const uint32_t imageCount = createInfo.minImageCount + 1 + static_cast<uint32_t>(deviceInfo.frameGen);
+        Log::debug("hooks", "Creating swapchain with max image count: {}/{}", imageCount, maxImageCount);
+        if (imageCount > maxImageCount) {
+            Log::warn("hooks", "LSFG_MULTIPLIER is set very high. This might lead to performance degradation");
+            createInfo.minImageCount = maxImageCount; // limit to max possible
+        } else {
+            createInfo.minImageCount = imageCount; // set to frameGen + 1
+        }
         createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT; // allow copy from/to images
         createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR; // force vsync
         auto res = Layer::ovkCreateSwapchainKHR(device, &createInfo, pAllocator, pSwapchain);
         if (res != VK_SUCCESS) {
-            Log::error("hooks", "Failed to create swapchain: {:x}", static_cast<uint32_t>(res));
+            Log::error("hooks", "Failed to create swapchain: {}", static_cast<uint32_t>(res));
             return res;
         }
         Log::info("hooks", "Swapchain created successfully: {:x}",
@@ -235,6 +243,8 @@ namespace {
         auto& swapchain = it3->second;
 
         // patch vsync NOLINTBEGIN
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
         const VkSwapchainPresentModeInfoEXT* presentModeInfo =
             reinterpret_cast<const VkSwapchainPresentModeInfoEXT*>(pPresentInfo->pNext);
         while (presentModeInfo) {
@@ -246,6 +256,7 @@ namespace {
             presentModeInfo =
                 reinterpret_cast<const VkSwapchainPresentModeInfoEXT*>(presentModeInfo->pNext);
         } // NOLINTEND
+#pragma clang diagnostic pop
 
         // present the next frame
         Log::debug("hooks2", "Presenting swapchain: {:x} on queue: {:x}",

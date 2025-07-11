@@ -32,6 +32,15 @@ namespace Utils {
     uint64_t getDeviceUUID(VkPhysicalDevice physicalDevice);
 
     ///
+    /// Get the max image count for a swapchain.
+    ///
+    /// @param physicalDevice The physical device to query.
+    /// @param surface The surface to query the capabilities for.
+    /// @return The maximum image count for the swapchain.
+    ///
+    uint32_t getMaxImageCount(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
+
+    ///
     /// Ensure a list of extensions is present in the given array.
     ///
     /// @param extensions The array of extensions to check.

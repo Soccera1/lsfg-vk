@@ -23,6 +23,7 @@ namespace {
     PFN_vkGetPhysicalDeviceQueueFamilyProperties next_vkGetPhysicalDeviceQueueFamilyProperties{};
     PFN_vkGetPhysicalDeviceMemoryProperties next_vkGetPhysicalDeviceMemoryProperties{};
     PFN_vkGetPhysicalDeviceProperties next_vkGetPhysicalDeviceProperties{};
+    PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR next_vkGetPhysicalDeviceSurfaceCapabilitiesKHR{};
 
     PFN_vkCreateSwapchainKHR  next_vkCreateSwapchainKHR{};
     PFN_vkQueuePresentKHR     next_vkQueuePresentKHR{};
@@ -122,6 +123,8 @@ namespace {
             "vkGetPhysicalDeviceMemoryProperties", &next_vkGetPhysicalDeviceMemoryProperties);
         success &= initInstanceFunc(*pInstance,
             "vkGetPhysicalDeviceProperties", &next_vkGetPhysicalDeviceProperties);
+        success &= initInstanceFunc(*pInstance,
+            "vkGetPhysicalDeviceSurfaceCapabilitiesKHR", &next_vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
         if (!success) {
             Log::error("layer", "Failed to get instance function pointers");
             return VK_ERROR_INITIALIZATION_FAILED;
@@ -373,6 +376,15 @@ void Layer::ovkGetPhysicalDeviceProperties(
     Log::debug("vulkan", "vkGetPhysicalDeviceProperties called for physical device {:x}",
         reinterpret_cast<uintptr_t>(physicalDevice));
     next_vkGetPhysicalDeviceProperties(physicalDevice, pProperties);
+}
+VkResult Layer::ovkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+        VkPhysicalDevice physicalDevice,
+        VkSurfaceKHR surface,
+        VkSurfaceCapabilitiesKHR* pSurfaceCapabilities) {
+    Log::debug("vulkan", "vkGetPhysicalDeviceSurfaceCapabilitiesKHR called for physical device {:x} and surface {:x}",
+        reinterpret_cast<uintptr_t>(physicalDevice),
+        reinterpret_cast<uintptr_t>(surface));
+    return next_vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, pSurfaceCapabilities);
 }
 
 VkResult Layer::ovkCreateSwapchainKHR(

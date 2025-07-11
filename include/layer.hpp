@@ -53,6 +53,11 @@ namespace Layer {
     void ovkGetPhysicalDeviceProperties(
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceProperties* pProperties);
+    /// Call to the original vkGetPhysicalDeviceSurfaceCapabilitiesKHR function.
+    VkResult ovkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+        VkPhysicalDevice physicalDevice,
+        VkSurfaceKHR surface,
+        VkSurfaceCapabilitiesKHR* pSurfaceCapabilities);
 
     /// Call to the original vkCreateSwapchainKHR function.
     VkResult ovkCreateSwapchainKHR(
