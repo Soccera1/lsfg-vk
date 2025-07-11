@@ -3,6 +3,7 @@
 #include <pe-parse/parse.h>
 
 #include <cstdlib>
+#include <filesystem>
 #include <algorithm>
 #include <cstdint>
 #include <stdexcept>
@@ -66,35 +67,44 @@ namespace {
         shaders()[hash] = resource_data;
         return 0;
     }
+
+    const std::vector<std::filesystem::path> PATHS{{
+        ".local/share/Steam/steamapps/common",
+        ".steam/steam/steamapps/common",
+        ".steam/debian-installation/steamapps/common",
+        ".var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common",
+        "snap/steam/common/.local/share/Steam/steamapps/common"
+    }};
+
+    std::string getDllPath() {
+        // overriden path
+        const char* dllPath = getenv("LSFG_DLL_PATH");
+        if (dllPath && *dllPath != '\0')
+            return{dllPath};
+        // home based paths
+        const char* home = getenv("HOME");
+        const std::string homeStr = home ? home : "";
+        for (const auto& base : PATHS) {
+            const std::filesystem::path path =
+                std::filesystem::path(homeStr) / base / "Lossless Scaling" / "Lossless.dll";
+            if (std::filesystem::exists(path))
+                return path.string();
+        }
+        // xdg home
+        const char* dataDir = getenv("XDG_DATA_HOME");
+        if (dataDir && *dataDir != '\0')
+            return std::string(dataDir) + "/Steam/steamapps/common/Lossless Scaling/Lossless.dll";
+        // final fallback
+        return "Lossless.dll";
+    }
 }
 
 void Extract::extractShaders() {
     if (!shaders().empty())
         return;
 
-    // find path to dll (absolutely beautiful code)
-    char* dllPath = getenv("LSFG_DLL_PATH");
-    std::string dllPathStr;
-    if (dllPath && *dllPath != '\0') {
-        dllPathStr = std::string(dllPath);
-    } else {
-        const char* dataDir = getenv("XDG_DATA_HOME");
-        if (dataDir && *dataDir != '\0') {
-            dllPathStr = std::string(dataDir) +
-                "/Steam/steamapps/common/Lossless Scaling/Lossless.dll";
-        } else {
-            const char* homeDir = getenv("HOME");
-            if (homeDir && *homeDir != '\0') {
-                dllPathStr = std::string(homeDir) +
-                    "/.local/share/Steam/steamapps/common/Lossless Scaling/Lossless.dll";
-            } else {
-                dllPathStr = "Lossless.dll";
-            }
-        }
-    }
-
     // parse the dll
-    peparse::parsed_pe* dll = peparse::ParsePEFromFile(dllPathStr.c_str());
+    peparse::parsed_pe* dll = peparse::ParsePEFromFile(getDllPath().c_str());
     if (!dll)
         throw std::runtime_error("Unable to read Lossless.dll, is it installed?");
     peparse::IterRsrc(dll, on_resource, nullptr);
