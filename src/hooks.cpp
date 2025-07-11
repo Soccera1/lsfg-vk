@@ -142,7 +142,12 @@ namespace {
             const VkSwapchainCreateInfoKHR* pCreateInfo,
             const VkAllocationCallbacks* pAllocator,
             VkSwapchainKHR* pSwapchain) {
-        auto& deviceInfo = devices.at(device);
+        auto it = devices.find(device);
+        if (it == devices.end()) {
+            Log::warn("hooks", "Created swapchain without device info present");
+            return Layer::ovkCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);
+        }
+        auto& deviceInfo = it->second;
 
         // update swapchain create info
         VkSwapchainCreateInfoKHR createInfo = *pCreateInfo;
@@ -207,8 +212,27 @@ namespace {
     VkResult myvkQueuePresentKHR(
             VkQueue queue,
             const VkPresentInfoKHR* pPresentInfo) {
-        auto& deviceInfo = devices.at(swapchainToDeviceTable.at(*pPresentInfo->pSwapchains));
-        auto& swapchain = swapchains.at(*pPresentInfo->pSwapchains);
+        auto it = swapchainToDeviceTable.find(*pPresentInfo->pSwapchains);
+        if (it == swapchainToDeviceTable.end()) {
+            Log::warn("hooks2", "Swapchain {:x} not found in swapchainToDeviceTable",
+                reinterpret_cast<uintptr_t>(*pPresentInfo->pSwapchains));
+            return Layer::ovkQueuePresentKHR(queue, pPresentInfo);
+        }
+        auto it2 = devices.find(it->second);
+        if (it2 == devices.end()) {
+            Log::warn("hooks2", "Device {:x} not found in devices",
+                reinterpret_cast<uintptr_t>(it->second));
+            return Layer::ovkQueuePresentKHR(queue, pPresentInfo);
+        }
+        auto it3 = swapchains.find(*pPresentInfo->pSwapchains);
+        if (it3 == swapchains.end()) {
+            Log::warn("hooks2", "Swapchain {:x} not found in swapchains",
+                reinterpret_cast<uintptr_t>(*pPresentInfo->pSwapchains));
+            return Layer::ovkQueuePresentKHR(queue, pPresentInfo);
+        }
+
+        auto& deviceInfo = it2->second;
+        auto& swapchain = it3->second;
 
         // patch vsync NOLINTBEGIN
         const VkSwapchainPresentModeInfoEXT* presentModeInfo =
