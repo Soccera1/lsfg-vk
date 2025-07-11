@@ -104,7 +104,7 @@ namespace {
                 frameGen + 1);
 
             auto queue = Utils::findQueue(*pDevice, physicalDevice, pCreateInfo,
-                VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT);
+                VK_QUEUE_GRAPHICS_BIT);
             Log::debug("hooks", "Found queue at index {}: {:x}",
                 queue.first, reinterpret_cast<uintptr_t>(queue.second));
 
