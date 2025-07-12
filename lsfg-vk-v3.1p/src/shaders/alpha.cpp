@@ -14,28 +14,28 @@ using namespace LSFG_3_1P::Shaders;
 Alpha::Alpha(Vulkan& vk, Core::Image inImg) : inImg(std::move(inImg)) {
     // create resources
     this->shaderModules = {{
-        vk.shaders.getShader(vk.device, "alpha[0]",
+        vk.shaders.getShader(vk.device, "p_alpha[0]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        vk.shaders.getShader(vk.device, "alpha[1]",
+        vk.shaders.getShader(vk.device, "p_alpha[1]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        vk.shaders.getShader(vk.device, "alpha[2]",
+        vk.shaders.getShader(vk.device, "p_alpha[2]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        vk.shaders.getShader(vk.device, "alpha[3]",
+        vk.shaders.getShader(vk.device, "p_alpha[3]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
     }};
     this->pipelines = {{
-        vk.shaders.getPipeline(vk.device, "alpha[0]"),
-        vk.shaders.getPipeline(vk.device, "alpha[1]"),
-        vk.shaders.getPipeline(vk.device, "alpha[2]"),
-        vk.shaders.getPipeline(vk.device, "alpha[3]")
+        vk.shaders.getPipeline(vk.device, "p_alpha[0]"),
+        vk.shaders.getPipeline(vk.device, "p_alpha[1]"),
+        vk.shaders.getPipeline(vk.device, "p_alpha[2]"),
+        vk.shaders.getPipeline(vk.device, "p_alpha[3]")
     }};
     this->sampler = vk.resources.getSampler(vk.device);
     for (size_t i = 0; i < 3; i++)

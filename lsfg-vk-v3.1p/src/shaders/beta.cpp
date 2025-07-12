@@ -16,34 +16,34 @@ Beta::Beta(Vulkan& vk, std::array<std::array<Core::Image, 2>, 3> inImgs)
         : inImgs(std::move(inImgs)) {
     // create resources
     this->shaderModules = {{
-        vk.shaders.getShader(vk.device, "beta[0]",
+        vk.shaders.getShader(vk.device, "p_beta[0]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        vk.shaders.getShader(vk.device, "beta[1]",
+        vk.shaders.getShader(vk.device, "p_beta[1]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        vk.shaders.getShader(vk.device, "beta[2]",
+        vk.shaders.getShader(vk.device, "p_beta[2]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        vk.shaders.getShader(vk.device, "beta[3]",
+        vk.shaders.getShader(vk.device, "p_beta[3]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
-        vk.shaders.getShader(vk.device, "beta[4]",
+        vk.shaders.getShader(vk.device, "p_beta[4]",
             { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
               { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 6, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
     }};
     this->pipelines = {{
-        vk.shaders.getPipeline(vk.device, "beta[0]"),
-        vk.shaders.getPipeline(vk.device, "beta[1]"),
-        vk.shaders.getPipeline(vk.device, "beta[2]"),
-        vk.shaders.getPipeline(vk.device, "beta[3]"),
-        vk.shaders.getPipeline(vk.device, "beta[4]")
+        vk.shaders.getPipeline(vk.device, "p_beta[0]"),
+        vk.shaders.getPipeline(vk.device, "p_beta[1]"),
+        vk.shaders.getPipeline(vk.device, "p_beta[2]"),
+        vk.shaders.getPipeline(vk.device, "p_beta[3]"),
+        vk.shaders.getPipeline(vk.device, "p_beta[4]")
     }};
     this->samplers.at(0) = vk.resources.getSampler(vk.device);
     this->samplers.at(1) = vk.resources.getSampler(vk.device,

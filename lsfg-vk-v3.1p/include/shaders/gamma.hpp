@@ -65,7 +65,7 @@ namespace LSFG_3_1P::Shaders {
         std::array<std::array<Core::Image, 2>, 3> inImgs1;
         Core::Image inImg2;
         std::optional<Core::Image> optImg;
-        std::array<Core::Image, 2> tempImgs1;
+        std::array<Core::Image, 3> tempImgs1;
         std::array<Core::Image, 2> tempImgs2;
         Core::Image outImg;
     };
