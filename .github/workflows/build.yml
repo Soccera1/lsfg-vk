@@ -36,7 +36,7 @@ jobs:
     - name: Upload lsfg-vk artifact
       uses: actions/upload-artifact@v4
       with:
-        name: lsfg-vk
+        name: lsfg-vk_archlinux
         path: |
           build-release/share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json
           build-release/lib/liblsfg-vk.so
