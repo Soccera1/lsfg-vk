@@ -24,11 +24,11 @@ namespace LSFG::Shaders {
         ///
         /// Initialize the shaderchain.
         ///
-        /// @param inImgs Three sets of four RGBA images, corresponding to a frame count % 3.
+        /// @param inImgs Three sets of two RGBA images, corresponding to a frame count % 3.
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Beta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs);
+        Beta(Vulkan& vk, std::array<std::array<Core::Image, 2>, 3> inImgs);
 
         ///
         /// Dispatch the shaderchain.
@@ -52,7 +52,7 @@ namespace LSFG::Shaders {
         std::array<Core::DescriptorSet, 3> firstDescriptorSet;
         std::array<Core::DescriptorSet, 4> descriptorSets;
 
-        std::array<std::array<Core::Image, 4>, 3> inImgs;
+        std::array<std::array<Core::Image, 2>, 3> inImgs;
         std::array<Core::Image, 2> tempImgs1;
         std::array<Core::Image, 2> tempImgs2;
         std::array<Core::Image, 6> outImgs;

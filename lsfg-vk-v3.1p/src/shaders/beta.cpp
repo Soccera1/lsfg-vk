@@ -12,13 +12,13 @@
 
 using namespace LSFG::Shaders;
 
-Beta::Beta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs)
+Beta::Beta(Vulkan& vk, std::array<std::array<Core::Image, 2>, 3> inImgs)
         : inImgs(std::move(inImgs)) {
     // create resources
     this->shaderModules = {{
         vk.shaders.getShader(vk.device, "beta[0]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 12, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "beta[1]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
