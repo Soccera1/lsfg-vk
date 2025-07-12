@@ -26,7 +26,7 @@ namespace LSFG::Shaders {
         ///
         /// Initialize the shaderchain.
         ///
-        /// @param inImgs1 Three sets of four RGBA images, corresponding to a frame count % 3.
+        /// @param inImgs1 Three sets of two RGBA images, corresponding to a frame count % 3.
         /// @param inImg2 Second Input image
         /// @param optImg1 Optional image for non-first passes.
         /// @param optImg2 Second optional image for non-first passes.
@@ -34,7 +34,7 @@ namespace LSFG::Shaders {
         ///
         /// @throws LSFG::vulkan_error if resource creation fails.
         ///
-        Delta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
+        Delta(Vulkan& vk, std::array<std::array<Core::Image, 2>, 3> inImgs1,
             Core::Image inImg2,
             std::optional<Core::Image> optImg1,
             std::optional<Core::Image> optImg2,
@@ -68,11 +68,11 @@ namespace LSFG::Shaders {
         };
         std::vector<DeltaPass> passes;
 
-        std::array<std::array<Core::Image, 4>, 3> inImgs1;
+        std::array<std::array<Core::Image, 2>, 3> inImgs1;
         Core::Image inImg2;
         std::optional<Core::Image> optImg1, optImg2, optImg3;
-        std::array<Core::Image, 4> tempImgs1;
-        std::array<Core::Image, 4> tempImgs2;
+        std::array<Core::Image, 3> tempImgs1;
+        std::array<Core::Image, 2> tempImgs2;
         Core::Image outImg1, outImg2;
     };
 

@@ -13,7 +13,7 @@
 
 using namespace LSFG::Shaders;
 
-Delta::Delta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
+Delta::Delta(Vulkan& vk, std::array<std::array<Core::Image, 2>, 3> inImgs1,
         Core::Image inImg2,
         std::optional<Core::Image> optImg1,
         std::optional<Core::Image> optImg2,
@@ -26,46 +26,46 @@ Delta::Delta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
         vk.shaders.getShader(vk.device, "delta[0]",
             { { 1 , VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 9, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "delta[1]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "delta[2]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
+              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "delta[3]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
+              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "delta[4]",
             { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "delta[5]",
             { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 10, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
+              { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "delta[6]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
+              { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "delta[7]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
+              { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "delta[8]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
+              { 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "delta[9]",
             { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
     }};
     this->pipelines = {{
@@ -88,10 +88,10 @@ Delta::Delta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
 
     // create internal images/outputs
     const VkExtent2D extent = this->inImgs1.at(0).at(0).getExtent();
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 3; i++)
         this->tempImgs1.at(i) = Core::Image(vk.device, extent);
+    for (size_t i = 0; i < 2; i++)
         this->tempImgs2.at(i) = Core::Image(vk.device, extent);
-    }
 
     this->outImg1 = Core::Image(vk.device,
         { extent.width, extent.height },
@@ -116,18 +116,14 @@ Delta::Delta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImgs1.at((i + 2) % 3))
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->inImgs1.at(i % 3))
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg1)
-                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(0))
-                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(1))
-                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(2))
+                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1)
                 .build();
         }
         pass.descriptorSets.at(0) = Core::DescriptorSet(vk.device, vk.descriptorPool,
             this->shaderModules.at(1));
         pass.descriptorSets.at(0).update(vk.device)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, this->samplers.at(0))
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(0))
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(1))
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(2))
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
             .build();
         pass.descriptorSets.at(1) = Core::DescriptorSet(vk.device, vk.descriptorPool,
@@ -135,13 +131,15 @@ Delta::Delta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
         pass.descriptorSets.at(1).update(vk.device)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, this->samplers.at(0))
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2)
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1)
+            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(0))
+            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(1))
             .build();
         pass.descriptorSets.at(2) = Core::DescriptorSet(vk.device, vk.descriptorPool,
             this->shaderModules.at(3));
         pass.descriptorSets.at(2).update(vk.device)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, this->samplers.at(0))
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1)
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(0))
+            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(1))
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2)
             .build();
         pass.descriptorSets.at(3) = Core::DescriptorSet(vk.device, vk.descriptorPool,
@@ -167,7 +165,6 @@ Delta::Delta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg1)
                 .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg2)
                 .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2.at(0))
-                .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2.at(1))
                 .build();
         }
         pass.descriptorSets.at(4) = Core::DescriptorSet(vk.device, vk.descriptorPool,
@@ -175,27 +172,21 @@ Delta::Delta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
         pass.descriptorSets.at(4).update(vk.device)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, this->samplers.at(0))
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2.at(0))
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2.at(1))
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(0))
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(1))
             .build();
         pass.descriptorSets.at(5) = Core::DescriptorSet(vk.device, vk.descriptorPool,
             this->shaderModules.at(7));
         pass.descriptorSets.at(5).update(vk.device)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, this->samplers.at(0))
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(0))
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(1))
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2.at(0))
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs2.at(1))
             .build();
         pass.descriptorSets.at(6) = Core::DescriptorSet(vk.device, vk.descriptorPool,
             this->shaderModules.at(8));
         pass.descriptorSets.at(6).update(vk.device)
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, this->samplers.at(0))
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2.at(0))
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs2.at(1))
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(0))
-            .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->tempImgs1.at(1))
             .build();
         pass.descriptorSets.at(7) = Core::DescriptorSet(vk.device, vk.descriptorPool,
             this->shaderModules.at(9));
@@ -204,7 +195,6 @@ Delta::Delta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, this->samplers.at(0))
             .add(VK_DESCRIPTOR_TYPE_SAMPLER, this->samplers.at(2))
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(0))
-            .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->tempImgs1.at(1))
             .add(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, this->optImg3)
             .add(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, this->outImg2)
             .build();
@@ -223,9 +213,7 @@ void Delta::Dispatch(const Core::CommandBuffer& buf, uint64_t frameCount, uint64
         .addW2R(this->inImgs1.at((frameCount + 2) % 3))
         .addW2R(this->inImgs1.at(frameCount % 3))
         .addW2R(this->optImg1)
-        .addR2W(this->tempImgs1.at(0))
-        .addR2W(this->tempImgs1.at(1))
-        .addR2W(this->tempImgs1.at(2))
+        .addR2W(this->tempImgs1)
         .build();
 
     this->pipelines.at(0).bind(buf);
@@ -234,9 +222,7 @@ void Delta::Dispatch(const Core::CommandBuffer& buf, uint64_t frameCount, uint64
 
     // second shader
     Utils::BarrierBuilder(buf)
-        .addW2R(this->tempImgs1.at(0))
-        .addW2R(this->tempImgs1.at(1))
-        .addW2R(this->tempImgs1.at(2))
+        .addW2R(this->tempImgs1)
         .addR2W(this->tempImgs2)
         .build();
 
@@ -282,8 +268,7 @@ void Delta::Dispatch(const Core::CommandBuffer& buf, uint64_t frameCount, uint64
         .addW2R(this->inImgs1.at(frameCount % 3))
         .addW2R(this->optImg1)
         .addW2R(this->optImg2)
-        .addR2W(this->tempImgs2.at(0))
-        .addR2W(this->tempImgs2.at(1))
+        .addR2W(this->tempImgs2)
         .build();
 
     this->pipelines.at(5).bind(buf);
@@ -292,8 +277,7 @@ void Delta::Dispatch(const Core::CommandBuffer& buf, uint64_t frameCount, uint64
 
     // seventh shader
     Utils::BarrierBuilder(buf)
-        .addW2R(this->tempImgs2.at(0))
-        .addW2R(this->tempImgs2.at(1))
+        .addW2R(this->tempImgs2)
         .addR2W(this->tempImgs1.at(0))
         .addR2W(this->tempImgs1.at(1))
         .build();
@@ -306,8 +290,7 @@ void Delta::Dispatch(const Core::CommandBuffer& buf, uint64_t frameCount, uint64
     Utils::BarrierBuilder(buf)
         .addW2R(this->tempImgs1.at(0))
         .addW2R(this->tempImgs1.at(1))
-        .addR2W(this->tempImgs2.at(0))
-        .addR2W(this->tempImgs2.at(1))
+        .addR2W(this->tempImgs2)
         .build();
     this->pipelines.at(7).bind(buf);
     pass.descriptorSets.at(5).bind(buf, this->pipelines.at(7));
@@ -315,8 +298,7 @@ void Delta::Dispatch(const Core::CommandBuffer& buf, uint64_t frameCount, uint64
 
     // ninth shader
     Utils::BarrierBuilder(buf)
-        .addW2R(this->tempImgs2.at(0))
-        .addW2R(this->tempImgs2.at(1))
+        .addW2R(this->tempImgs2)
         .addW2R(this->optImg3)
         .addR2W(this->tempImgs1.at(0))
         .addR2W(this->tempImgs1.at(1))
