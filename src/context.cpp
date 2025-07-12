@@ -8,7 +8,8 @@
 #include "common/exception.hpp"
 
 #include <vulkan/vulkan_core.h>
-#include <lsfg.hpp>
+#include <lsfg_3_1.hpp>
+#include <lsfg_3_1p.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -31,6 +32,11 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     const char* lsfgHdrStr = getenv("LSFG_HDR");
     const bool isHdr = lsfgHdrStr
         ? *lsfgHdrStr == '1'
+        : false;
+
+    const char* lsfgPerfModeStr = getenv("LSFG_PERF_MODE");
+    const bool perfMode = lsfgPerfModeStr
+        ? *lsfgPerfModeStr == '1'
         : false;
 
     // we could take the format from the swapchain,
@@ -72,11 +78,21 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
             i, out_n_fds.at(i));
     }
 
+    auto* lsfgInitialize = LSFG_3_1::initialize;
+    auto* lsfgCreateContext = LSFG_3_1::createContext;
+    auto* lsfgDeleteContext = LSFG_3_1::deleteContext;
+    if (perfMode) {
+        Log::debug("context", "Using performance mode");
+        this->isPerfMode = true;
+        lsfgInitialize = LSFG_3_1P::initialize;
+        lsfgCreateContext = LSFG_3_1P::createContext;
+        lsfgDeleteContext = LSFG_3_1P::deleteContext;
+    }
     // initialize lsfg
     Log::debug("context", "(entering LSFG initialization)");
     setenv("DISABLE_LSFG", "1", 1); // NOLINT
     Extract::extractShaders();
-    LSFG_3_1::initialize(
+    lsfgInitialize(
         Utils::getDeviceUUID(info.physicalDevice),
         isHdr, 1.0F / flowScale, info.frameGen,
         [](const std::string& name) {
@@ -91,12 +107,12 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     // create lsfg context
     Log::debug("context", "(entering LSFG context creation)");
     this->lsfgCtxId = std::shared_ptr<int32_t>(
-        new int32_t(LSFG_3_1::createContext(frame_0_fd, frame_1_fd, out_n_fds,
+        new int32_t(lsfgCreateContext(frame_0_fd, frame_1_fd, out_n_fds,
             extent, format)),
-        [](const int32_t* id) {
+        [lsfgDeleteContext = lsfgDeleteContext](const int32_t* id) {
             Log::info("context",
                 "(entering LSFG context deletion with id: {})", *id);
-            LSFG_3_1::deleteContext(*id);
+            lsfgDeleteContext(*id);
             Log::info("context",
                 "(exiting LSFG context deletion with id: {})", *id);
         }
@@ -157,9 +173,15 @@ VkResult LsContext::present(const Hooks::DeviceInfo& info, const void* pNext, Vk
 
     Log::debug("context2",
         "(entering LSFG present with id: {})", *this->lsfgCtxId);
-    LSFG_3_1::presentContext(*this->lsfgCtxId,
-        preCopySemaphoreFd,
-        renderSemaphoreFds);
+    if (this->isPerfMode) {
+        LSFG_3_1P::presentContext(*this->lsfgCtxId,
+            preCopySemaphoreFd,
+            renderSemaphoreFds);
+    } else {
+        LSFG_3_1::presentContext(*this->lsfgCtxId,
+            preCopySemaphoreFd,
+            renderSemaphoreFds);
+    }
     Log::debug("context2",
         "(exiting LSFG present with id: {})", *this->lsfgCtxId);
 

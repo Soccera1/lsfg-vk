@@ -3,7 +3,8 @@
 #include "utils/log.hpp"
 
 #include <vulkan/vulkan_core.h>
-#include <lsfg.hpp>
+#include <lsfg_3_1.hpp>
+#include <lsfg_3_1p.hpp>
 
 #include <cstdint>
 #include <chrono>
@@ -34,6 +35,7 @@ namespace {
         const char* lsfgMultiplier = std::getenv("LSFG_MULTIPLIER");
         const char* lsfgExtentWidth = std::getenv("LSFG_EXTENT_WIDTH");
         const char* lsfgExtentHeight = std::getenv("LSFG_EXTENT_HEIGHT");
+        const char* lsfgPerfMode = std::getenv("LSFG_PERF_MODE");
 
         const float flowScale = lsfgFlowScale
             ? std::stof(lsfgFlowScale) : 1.0F;
@@ -45,6 +47,17 @@ namespace {
             ? static_cast<uint32_t>(std::stoul(lsfgExtentWidth)) : 1920;
         const uint32_t height = lsfgExtentHeight
             ? static_cast<uint32_t>(std::stoul(lsfgExtentHeight)) : 1080;
+        const bool perfMode = lsfgPerfMode
+            ? *lsfgPerfMode == '1' : false;
+
+        auto* lsfgInitialize = LSFG_3_1::initialize;
+        auto* lsfgCreateContext = LSFG_3_1::createContext;
+        auto* lsfgPresentContext = LSFG_3_1::presentContext;
+        if (perfMode) {
+            lsfgInitialize = LSFG_3_1P::initialize;
+            lsfgCreateContext = LSFG_3_1P::createContext;
+            lsfgPresentContext = LSFG_3_1P::presentContext;
+        }
 
         Log::info("bench", "Running {}x benchmark with {}x{} extent and flow scale of {} {} HDR",
             multiplier, width, height, flowScale, isHdr ? "with" : "without");
@@ -55,7 +68,7 @@ namespace {
             ? std::stoull(std::string(lsfgDeviceUUID), nullptr, 16) : 0x1463ABAC;
 
         Extract::extractShaders();
-        LSFG_3_1::initialize(
+        lsfgInitialize(
             deviceUUID, // some magic number if not given
             isHdr, 1.0F / flowScale, multiplier - 1,
             [](const std::string& name) -> std::vector<uint8_t> {
@@ -64,7 +77,7 @@ namespace {
                 return spirv;
             }
         );
-        const int32_t ctx = LSFG_3_1::createContext(-1, -1, {},
+        const int32_t ctx = lsfgCreateContext(-1, -1, {},
             { .width = width, .height = height },
             isHdr ? VK_FORMAT_R16G16B16A16_SFLOAT : VK_FORMAT_R8G8B8A8_UNORM
         );
@@ -75,7 +88,7 @@ namespace {
         const auto now = std::chrono::high_resolution_clock::now();
         const uint64_t iterations = (8 * 500) + 1;
         for (uint64_t count = 0; count < iterations; count++) {
-            LSFG_3_1::presentContext(ctx, -1, {});
+            lsfgPresentContext(ctx, -1, {});
 
             if (count % 500 == 0)
                 Log::info("bench", "{:.2f}% done ({}/{})",

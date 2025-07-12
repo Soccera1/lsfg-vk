@@ -63,6 +63,7 @@ private:
 
     Mini::CommandPool cmdPool;
     uint64_t frameIdx{0};
+    bool isPerfMode{false};
 
     struct RenderPassInfo {
         Mini::CommandBuffer preCopyBuf; // copy from swapchain image to frame_0/frame_1

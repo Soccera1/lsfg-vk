@@ -16,6 +16,7 @@ include(cmake/FetchPeParse.cmake)
 
 add_subdirectory(lsfg-vk-common)
 add_subdirectory(lsfg-vk-v3.1)
+add_subdirectory(lsfg-vk-v3.1p)
 
 # main project
 project(lsfg-vk
@@ -38,8 +39,9 @@ set_target_properties(lsfg-vk PROPERTIES
     CXX_STANDARD_REQUIRED ON)
 target_include_directories(lsfg-vk
     PRIVATE include)
-target_link_libraries(lsfg-vk
-    PRIVATE lsfg-vk-common lsfg-vk-v3.1 peparse dxvk vulkan)
+target_link_libraries(lsfg-vk PRIVATE
+    lsfg-vk-common lsfg-vk-v3.1 lsfg-vk-v3.1p
+    peparse dxvk vulkan)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_target_properties(lsfg-vk PROPERTIES
