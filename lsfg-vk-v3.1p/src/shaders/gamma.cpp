@@ -13,7 +13,7 @@
 
 using namespace LSFG::Shaders;
 
-Gamma::Gamma(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
+Gamma::Gamma(Vulkan& vk, std::array<std::array<Core::Image, 2>, 3> inImgs1,
         Core::Image inImg2,
         std::optional<Core::Image> optImg)
         : inImgs1(std::move(inImgs1)), inImg2(std::move(inImg2)),
@@ -23,24 +23,24 @@ Gamma::Gamma(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
         vk.shaders.getShader(vk.device, "gamma[0]",
             { { 1 , VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 9, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "gamma[1]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
               { 3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "gamma[2]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
+              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "gamma[3]",
             { { 1, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
-              { 4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
+              { 2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } }),
         vk.shaders.getShader(vk.device, "gamma[4]",
             { { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
               { 2, VK_DESCRIPTOR_TYPE_SAMPLER },
-              { 6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+              { 4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
               { 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE } })
     }};
     this->pipelines = {{
@@ -58,7 +58,7 @@ Gamma::Gamma(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
 
     // create internal images/outputs
     const VkExtent2D extent = this->inImgs1.at(0).at(0).getExtent();
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 2; i++) {
         this->tempImgs1.at(i) = Core::Image(vk.device, extent);
         this->tempImgs2.at(i) = Core::Image(vk.device, extent);
     }
