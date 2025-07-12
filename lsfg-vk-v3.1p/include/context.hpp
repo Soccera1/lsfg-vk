@@ -18,7 +18,9 @@
 #include <cstdint>
 #include <array>
 
-namespace LSFG {
+namespace LSFG_3_1P {
+
+    using namespace LSFG;
 
     class Context {
     public:

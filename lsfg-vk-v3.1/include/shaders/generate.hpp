@@ -15,7 +15,9 @@
 #include <vector>
 #include <cstdint>
 
-namespace LSFG::Shaders {
+namespace LSFG_3_1::Shaders {
+
+    using namespace LSFG;
 
     ///
     /// Generate shader.

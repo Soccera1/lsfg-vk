@@ -14,7 +14,9 @@
 #include <optional>
 #include <vector>
 
-namespace LSFG::Shaders {
+namespace LSFG_3_1::Shaders {
+
+    using namespace LSFG;
 
     ///
     /// Delta shader.

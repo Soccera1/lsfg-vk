@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace LSFG::Shaders;
+using namespace LSFG_3_1::Shaders;
 
 Delta::Delta(Vulkan& vk, std::array<std::array<Core::Image, 4>, 3> inImgs1,
         Core::Image inImg2,

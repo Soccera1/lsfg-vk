@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace LSFG::Shaders;
+using namespace LSFG_3_1P::Shaders;
 
 Alpha::Alpha(Vulkan& vk, Core::Image inImg) : inImg(std::move(inImg)) {
     // create resources

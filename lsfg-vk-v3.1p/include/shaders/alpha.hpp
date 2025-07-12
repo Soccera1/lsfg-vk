@@ -11,7 +11,9 @@
 #include <array>
 #include <cstdint>
 
-namespace LSFG::Shaders {
+namespace LSFG_3_1P::Shaders {
+
+    using namespace LSFG;
 
     ///
     /// Alpha shader.

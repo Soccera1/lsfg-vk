@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace LSFG::Shaders;
+using namespace LSFG_3_1::Shaders;
 
 Generate::Generate(Vulkan& vk,
     Core::Image inImg1, Core::Image inImg2,

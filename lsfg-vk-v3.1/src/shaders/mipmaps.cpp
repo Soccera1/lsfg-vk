@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace LSFG::Shaders;
+using namespace LSFG_3_1::Shaders;
 
 Mipmaps::Mipmaps(Vulkan& vk,
         Core::Image inImg_0, Core::Image inImg_1)

@@ -11,6 +11,7 @@
 #include <cstdint>
 
 using namespace LSFG;
+using namespace LSFG_3_1P;
 
 Context::Context(Vulkan& vk,
         int in0, int in1, const std::vector<int>& outN,
