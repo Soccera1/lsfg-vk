@@ -1,6 +1,6 @@
 #include "context.hpp"
-#include "lsfg.hpp"
-#include "utils/utils.hpp"
+#include "common/utils.hpp"
+#include "common/exception.hpp"
 
 #include <vulkan/vulkan_core.h>
 

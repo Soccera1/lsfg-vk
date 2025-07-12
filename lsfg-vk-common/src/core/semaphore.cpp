@@ -1,6 +1,6 @@
 #include "core/semaphore.hpp"
 #include "core/device.hpp"
-#include "lsfg.hpp"
+#include "common/exception.hpp"
 
 #include <vulkan/vulkan_core.h>
 

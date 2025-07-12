@@ -2,7 +2,7 @@
 #include "core/device.hpp"
 #include "core/shadermodule.hpp"
 #include "core/commandbuffer.hpp"
-#include "lsfg.hpp"
+#include "common/exception.hpp"
 
 #include <vulkan/vulkan_core.h>
 

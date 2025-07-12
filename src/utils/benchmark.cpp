@@ -55,7 +55,7 @@ namespace {
             ? std::stoull(std::string(lsfgDeviceUUID), nullptr, 16) : 0x1463ABAC;
 
         Extract::extractShaders();
-        LSFG::initialize(
+        LSFG_3_1::initialize(
             deviceUUID, // some magic number if not given
             isHdr, 1.0F / flowScale, multiplier - 1,
             [](const std::string& name) -> std::vector<uint8_t> {
@@ -64,7 +64,7 @@ namespace {
                 return spirv;
             }
         );
-        const int32_t ctx = LSFG::createContext(-1, -1, {},
+        const int32_t ctx = LSFG_3_1::createContext(-1, -1, {},
             { .width = width, .height = height },
             isHdr ? VK_FORMAT_R16G16B16A16_SFLOAT : VK_FORMAT_R8G8B8A8_UNORM
         );
@@ -75,7 +75,7 @@ namespace {
         const auto now = std::chrono::high_resolution_clock::now();
         const uint64_t iterations = (8 * 500) + 1;
         for (uint64_t count = 0; count < iterations; count++) {
-            LSFG::presentContext(ctx, -1, {});
+            LSFG_3_1::presentContext(ctx, -1, {});
 
             if (count % 500 == 0)
                 Log::info("bench", "{:.2f}% done ({}/{})",

@@ -1,5 +1,5 @@
 #include "core/instance.hpp"
-#include "lsfg.hpp"
+#include "common/exception.hpp"
 
 #include <cstdint>
 #include <memory>

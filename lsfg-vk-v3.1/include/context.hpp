@@ -10,7 +10,7 @@
 #include "shaders/gamma.hpp"
 #include "shaders/generate.hpp"
 #include "shaders/mipmaps.hpp"
-#include "utils/utils.hpp"
+#include "common/utils.hpp"
 
 #include <vulkan/vulkan_core.h>
 

@@ -1,5 +1,5 @@
 #include "shaders/mipmaps.hpp"
-#include "utils/utils.hpp"
+#include "common/utils.hpp"
 #include "core/image.hpp"
 #include "core/commandbuffer.hpp"
 

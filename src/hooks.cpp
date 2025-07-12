@@ -3,8 +3,8 @@
 #include "layer.hpp"
 #include "utils/log.hpp"
 #include "utils/utils.hpp"
+#include "common/exception.hpp"
 
-#include <lsfg.hpp>
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>

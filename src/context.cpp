@@ -5,6 +5,7 @@
 #include "utils/log.hpp"
 #include "hooks.hpp"
 #include "layer.hpp"
+#include "common/exception.hpp"
 
 #include <vulkan/vulkan_core.h>
 #include <lsfg.hpp>
@@ -75,7 +76,7 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     Log::debug("context", "(entering LSFG initialization)");
     setenv("DISABLE_LSFG", "1", 1); // NOLINT
     Extract::extractShaders();
-    LSFG::initialize(
+    LSFG_3_1::initialize(
         Utils::getDeviceUUID(info.physicalDevice),
         isHdr, 1.0F / flowScale, info.frameGen,
         [](const std::string& name) {
@@ -90,12 +91,12 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
     // create lsfg context
     Log::debug("context", "(entering LSFG context creation)");
     this->lsfgCtxId = std::shared_ptr<int32_t>(
-        new int32_t(LSFG::createContext(frame_0_fd, frame_1_fd, out_n_fds,
+        new int32_t(LSFG_3_1::createContext(frame_0_fd, frame_1_fd, out_n_fds,
             extent, format)),
         [](const int32_t* id) {
             Log::info("context",
                 "(entering LSFG context deletion with id: {})", *id);
-            LSFG::deleteContext(*id);
+            LSFG_3_1::deleteContext(*id);
             Log::info("context",
                 "(exiting LSFG context deletion with id: {})", *id);
         }
@@ -156,7 +157,7 @@ VkResult LsContext::present(const Hooks::DeviceInfo& info, const void* pNext, Vk
 
     Log::debug("context2",
         "(entering LSFG present with id: {})", *this->lsfgCtxId);
-    LSFG::presentContext(*this->lsfgCtxId,
+    LSFG_3_1::presentContext(*this->lsfgCtxId,
         preCopySemaphoreFd,
         renderSemaphoreFds);
     Log::debug("context2",

@@ -1,6 +1,6 @@
 #include "core/device.hpp"
 #include "core/instance.hpp"
-#include "lsfg.hpp"
+#include "common/exception.hpp"
 
 #include <vulkan/vulkan_core.h>
 

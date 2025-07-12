@@ -1,8 +1,8 @@
 #include "mini/image.hpp"
+#include "common/exception.hpp"
 #include "layer.hpp"
 
 #include <vulkan/vulkan_core.h>
-#include <lsfg.hpp>
 
 #include <memory>
 #include <cstdint>

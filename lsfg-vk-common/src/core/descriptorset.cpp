@@ -7,7 +7,7 @@
 #include "core/image.hpp"
 #include "core/sampler.hpp"
 #include "core/buffer.hpp"
-#include "lsfg.hpp"
+#include "common/exception.hpp"
 
 #include <vulkan/vulkan_core.h>
 

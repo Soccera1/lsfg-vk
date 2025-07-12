@@ -14,6 +14,7 @@ endif()
 include(cmake/FetchDXVK.cmake)
 include(cmake/FetchPeParse.cmake)
 
+add_subdirectory(lsfg-vk-common)
 add_subdirectory(lsfg-vk-v3.1)
 
 # main project
@@ -38,7 +39,7 @@ set_target_properties(lsfg-vk PROPERTIES
 target_include_directories(lsfg-vk
     PRIVATE include)
 target_link_libraries(lsfg-vk
-    PRIVATE lsfg-vk-v3.1 peparse dxvk vulkan)
+    PRIVATE lsfg-vk-common lsfg-vk-v3.1 peparse dxvk vulkan)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_target_properties(lsfg-vk PROPERTIES

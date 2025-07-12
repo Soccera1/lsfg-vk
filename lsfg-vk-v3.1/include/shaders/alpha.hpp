@@ -6,7 +6,7 @@
 #include "core/pipeline.hpp"
 #include "core/sampler.hpp"
 #include "core/shadermodule.hpp"
-#include "utils/utils.hpp"
+#include "common/utils.hpp"
 
 #include <array>
 #include <cstdint>
