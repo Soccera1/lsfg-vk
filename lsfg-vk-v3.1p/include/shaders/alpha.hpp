@@ -51,10 +51,10 @@ namespace LSFG::Shaders {
         std::array<Core::DescriptorSet, 3> lastDescriptorSet;
 
         Core::Image inImg;
-        std::array<Core::Image, 2> tempImgs1;
-        std::array<Core::Image, 2> tempImgs2;
-        std::array<Core::Image, 4> tempImgs3;
-        std::array<std::array<Core::Image, 4>, 3> outImgs;
+        Core::Image tempImg1;
+        Core::Image tempImg2;
+        std::array<Core::Image, 2> tempImgs3;
+        std::array<std::array<Core::Image, 2>, 3> outImgs;
     };
 
 }
