@@ -16,10 +16,10 @@ jobs:
       run: |
         pacman -Syu --noconfirm \
           base-devel \
-          git sdl3 \
+          git \
           clang llvm \
-          cmake meson ninja \
-          glslang vulkan-headers vulkan-icd-loader
+          cmake ninja \
+          spirv-headers vulkan-headers vulkan-icd-loader
     - name: Checkout repository
       uses: actions/checkout@v4
     - name: Configure with CMake and Ninja
