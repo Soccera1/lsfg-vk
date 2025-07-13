@@ -10,10 +10,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # subprojects
+add_compile_options(-fPIC
+    -Wno-deprecated-declarations
+    -Wno-unused-template)
 
-include(cmake/FetchDXBC.cmake)
-include(cmake/FetchPeParse.cmake)
-
+add_subdirectory(dxbc)
+add_subdirectory(pe-parse/pe-parser-library)
 add_subdirectory(lsfg-vk-common)
 add_subdirectory(lsfg-vk-v3.1)
 add_subdirectory(lsfg-vk-v3.1p)
@@ -41,7 +43,7 @@ target_include_directories(lsfg-vk
     PRIVATE include)
 target_link_libraries(lsfg-vk PRIVATE
     lsfg-vk-common lsfg-vk-v3.1 lsfg-vk-v3.1p
-    peparse dxvk_dxbc vulkan)
+    pe-parse dxbc vulkan)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_target_properties(lsfg-vk PROPERTIES

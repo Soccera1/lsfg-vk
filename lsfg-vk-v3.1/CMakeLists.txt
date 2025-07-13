@@ -24,8 +24,6 @@ target_include_directories(lsfg-vk-v3.1
     PUBLIC public)
 target_link_libraries(lsfg-vk-v3.1
     PUBLIC lsfg-vk-common vulkan)
-target_compile_options(lsfg-vk-v3.1 PRIVATE
-    -fPIC)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_target_properties(lsfg-vk-v3.1 PROPERTIES
