@@ -1,25 +1,26 @@
-name: Build lsfg-vk on Arch Linux
+name: Build lsfg-vk on Fedora
 on: [push]
 
 jobs:
-  build-arch:
+  build-fedora:
     runs-on: ubuntu-latest
     container:
-      image: archlinux:latest
+      image: fedora:latest
     steps:
-    - name: Prepare cache for pacman packages
+    - name: Prepare cache for dnf packages
       uses: actions/cache@v4
       with:
-        path: /var/cache/pacman/pkg
-        key: archlinux-pacman-cache
+        path: /var/cache/libdnf5
+        key: fedora-dnf-cache
     - name: Install build dependencies
       run: |
-        pacman -Syu --noconfirm \
-          base-devel \
+        echo "keepcache=1" >> /etc/dnf/dnf.conf
+        dnf update -y
+        dnf install -y \
           git \
           clang llvm \
-          cmake ninja \
-          spirv-headers vulkan-headers vulkan-icd-loader
+          cmake ninja-build \
+          spirv-headers-devel vulkan-headers vulkan-loader-devel
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -38,7 +39,7 @@ jobs:
     - name: Upload lsfg-vk artifact
       uses: actions/upload-artifact@v4
       with:
-        name: lsfg-vk_archlinux
+        name: lsfg-vk_fedora
         path: |
           build-release/share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json
           build-release/lib/liblsfg-vk.so

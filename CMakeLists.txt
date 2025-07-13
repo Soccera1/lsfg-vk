@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.28)
 
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_CXX_COMPILER clang++)
@@ -14,8 +14,8 @@ add_compile_options(-fPIC
     -Wno-deprecated-declarations
     -Wno-unused-template)
 
-add_subdirectory(dxbc)
-add_subdirectory(pe-parse/pe-parser-library)
+add_subdirectory(dxbc EXCLUDE_FROM_ALL)
+add_subdirectory(pe-parse/pe-parser-library EXCLUDE_FROM_ALL)
 add_subdirectory(lsfg-vk-common)
 add_subdirectory(lsfg-vk-v3.1)
 add_subdirectory(lsfg-vk-v3.1p)
