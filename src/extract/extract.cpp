@@ -13,59 +13,59 @@
 
 using namespace Extract;
 
-const std::unordered_map<std::string, uint32_t> nameHashTable = {{
-    { "p_mipmaps",  0xe365474d },
-    { "p_alpha[0]", 0x0bf6c705 },
-    { "p_alpha[1]", 0x4badbc24 },
-    { "p_alpha[2]", 0x08a0f71c },
-    { "p_alpha[3]", 0x5cc4d794 },
-    { "p_beta[0]",  0x598efc9c },
-    { "p_beta[1]",  0x17e25e8d },
-    { "p_beta[2]",  0x6b8971f7 },
-    { "p_beta[3]",  0x80a351c9 },
-    { "p_beta[4]",  0xda0fcd5a },
-    { "p_gamma[0]", 0x9dae0419 },
-    { "p_gamma[1]", 0x96285646 },
-    { "p_gamma[2]", 0xca44bb67 },
-    { "p_gamma[3]", 0xa942fb59 },
-    { "p_gamma[4]", 0x31996b8d },
-    { "p_delta[0]", 0x9dae0419 },
-    { "p_delta[1]", 0x67912aaa },
-    { "p_delta[2]", 0xec138d48 },
-    { "p_delta[3]", 0xdcb8247f },
-    { "p_delta[4]", 0xd37c9bc8 },
-    { "p_delta[5]", 0x62973dce },
-    { "p_delta[6]", 0xe2ed5f66 },
-    { "p_delta[7]", 0xc964a42a },
-    { "p_delta[8]", 0x74536ad9 },
-    { "p_delta[9]", 0xf472482a },
-    { "p_generate", 0x5c040bd5 },
-    { "mipmaps",  0xe365474d },
-    { "alpha[0]", 0xf37c8aa8 },
-    { "alpha[1]", 0xeb7a52d4 },
-    { "alpha[2]", 0x8901788e },
-    { "alpha[3]", 0xa06a5e36 },
-    { "beta[0]",  0x63c16b89 },
-    { "beta[1]",  0xe3967ed5 },
-    { "beta[2]",  0x570085ee },
-    { "beta[3]",  0x4f4530db },
-    { "beta[4]",  0x39727389 },
-    { "gamma[0]", 0x94c4edf6 },
-    { "gamma[1]", 0xf4e32702 },
-    { "gamma[2]", 0xa3dc56fc },
-    { "gamma[3]", 0x8b5ed8f6 },
-    { "gamma[4]", 0x1cbf3c4d },
-    { "delta[0]", 0x94c4edf6 },
-    { "delta[1]", 0xacfd805b },
-    { "delta[2]", 0x891dc48b },
-    { "delta[3]", 0x98536d9d },
-    { "delta[4]", 0x8e3f2155 },
-    { "delta[5]", 0x8f0e70a1 },
-    { "delta[6]", 0xd5eca8f1 },
-    { "delta[7]", 0xa9e54e37 },
-    { "delta[8]", 0x1dee8b84 },
-    { "delta[9]", 0x1576c3f5 },
-    { "generate", 0x5c040bd5 }
+const std::unordered_map<std::string, uint32_t> nameIdxTable = {{
+    { "mipmaps", 255 },
+    { "alpha[0]", 267 },
+    { "alpha[1]", 268 },
+    { "alpha[2]", 269 },
+    { "alpha[3]", 270 },
+    { "beta[0]", 275 },
+    { "beta[1]", 276 },
+    { "beta[2]", 277 },
+    { "beta[3]", 278 },
+    { "beta[4]", 279 },
+    { "gamma[0]", 257 },
+    { "gamma[1]", 259 },
+    { "gamma[2]", 260 },
+    { "gamma[3]", 261 },
+    { "gamma[4]", 262 },
+    { "delta[0]", 257 },
+    { "delta[1]", 263 },
+    { "delta[2]", 264 },
+    { "delta[3]", 265 },
+    { "delta[4]", 266 },
+    { "delta[5]", 258 },
+    { "delta[6]", 271 },
+    { "delta[7]", 272 },
+    { "delta[8]", 273 },
+    { "delta[9]", 274 },
+    { "generate", 256 },
+    { "p_mipmaps", 255 },
+    { "p_alpha[0]", 290 },
+    { "p_alpha[1]", 291 },
+    { "p_alpha[2]", 292 },
+    { "p_alpha[3]", 293 },
+    { "p_beta[0]", 298 },
+    { "p_beta[1]", 299 },
+    { "p_beta[2]", 300 },
+    { "p_beta[3]", 301 },
+    { "p_beta[4]", 302 },
+    { "p_gamma[0]", 280 },
+    { "p_gamma[1]", 282 },
+    { "p_gamma[2]", 283 },
+    { "p_gamma[3]", 284 },
+    { "p_gamma[4]", 285 },
+    { "p_delta[0]", 280 },
+    { "p_delta[1]", 286 },
+    { "p_delta[2]", 287 },
+    { "p_delta[3]", 288 },
+    { "p_delta[4]", 289 },
+    { "p_delta[5]", 281 },
+    { "p_delta[6]", 294 },
+    { "p_delta[7]", 295 },
+    { "p_delta[8]", 296 },
+    { "p_delta[9]", 297 },
+    { "p_generate", 256 },
 }};
 
 namespace {
@@ -74,23 +74,12 @@ namespace {
         return shaderData;
     }
 
-    uint32_t fnv1a_hash(const std::vector<uint8_t>& data) {
-        uint32_t hash = 0x811C9DC5;
-        for (auto byte : data) {
-            hash ^= byte;
-            hash *= 0x01000193;
-        }
-        return hash;
-    }
-
     int on_resource(void*, const peparse::resource& res) {
         if (res.type != peparse::RT_RCDATA || res.buf == nullptr || res.buf->bufLen <= 0)
             return 0;
         std::vector<uint8_t> resource_data(res.buf->bufLen);
         std::copy_n(res.buf->buf, res.buf->bufLen, resource_data.data());
-
-        const uint32_t hash = fnv1a_hash(resource_data);
-        shaders()[hash] = resource_data;
+        shaders()[res.name] = resource_data;
         return 0;
     }
 
@@ -141,8 +130,8 @@ std::vector<uint8_t> Extract::getShader(const std::string& name) {
     if (shaders().empty())
         throw std::runtime_error("Shaders are not loaded.");
 
-    auto hit = nameHashTable.find(name);
-    if (hit == nameHashTable.end())
+    auto hit = nameIdxTable.find(name);
+    if (hit == nameIdxTable.end())
         throw std::runtime_error("Shader hash not found: " + name);
 
     auto sit = shaders().find(hit->second);
