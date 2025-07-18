@@ -58,3 +58,6 @@ jobs:
         path: |
           build-release/share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json
           build-release/lib/liblsfg-vk.so
+    - name: Prepare permissions for apt cache
+      run: |
+        sudo chmod a+rwx -R /var/cache/apt/archives
