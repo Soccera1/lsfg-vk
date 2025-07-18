@@ -28,7 +28,7 @@ jobs:
         submodules: true
     - name: Configure with CMake and Ninja
       run: |
-        cmake -B build -G Ninja \
+        CC=clang CXX=clang++ cmake -B build -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_INSTALL_PREFIX=./build-release
     - name: Build with Ninja
