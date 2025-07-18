@@ -22,6 +22,8 @@
 #include <optional>
 #include <fstream>
 #include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <utility>
 #include <cstring>
 #include <vector>
@@ -268,6 +270,37 @@ void Config::updateConfig(const std::string& file) {
 }
 
 Configuration Config::getConfig(const std::pair<std::string, std::string>& name) {
+    // process legacy environment variables
+    if (std::getenv("LSFG_LEGACY")) {
+        Configuration conf{
+            .enable = true,
+            .multiplier = 2,
+            .flowScale = 1.0F,
+            .e_present = VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR,
+            .valid = std::make_shared<std::atomic_bool>(true)
+        };
+
+        const char* dll = std::getenv("LSFG_DLL_PATH");
+        if (dll) conf.dll = std::string(dll);
+        const char* multiplier = std::getenv("LSFG_MULTIPLIER");
+        if (multiplier) conf.multiplier = std::stoul(multiplier);
+        const char* flow_scale = std::getenv("LSFG_FLOW_SCALE");
+        if (flow_scale) conf.flowScale = std::stof(flow_scale);
+        const char* performance = std::getenv("LSFG_PERFORMANCE_MODE");
+        if (performance) conf.performance = std::string(performance) == "1";
+        const char* hdr = std::getenv("LSFG_HDR_MODE");
+        if (hdr) conf.hdr = std::string(hdr) == "1";
+        const char* e_present = std::getenv("LSFG_EXPERIMENTAL_PRESENT_MODE");
+        if (e_present) conf.e_present = into_present(std::string(e_present));
+        const char* e_fps_limit = std::getenv("LSFG_EXPERIMENTAL_FPS_LIMIT");
+        if (e_fps_limit) conf.e_fps_limit = static_cast<uint32_t>(std::stoul(e_fps_limit));
+        const char* envs = std::getenv("LSFG_ENV");
+        if (envs) conf.env = parse_env(std::string(envs));
+
+        return conf;
+    }
+
+    // process new configuration system
     if (!gameConfs.has_value())
         return globalConf;
 
