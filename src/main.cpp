@@ -17,29 +17,31 @@
 
 namespace {
     __attribute__((constructor)) void lsfgvk_init() {
+        std::cerr << std::unitbuf;
+
         // read configuration
         const std::string file = Utils::getConfigFile();
         try {
             Config::loadAndWatchConfig(file);
         } catch (const std::exception& e) {
-            std::cerr << "lsfg-vk: An error occured while trying to parse the configuration, exiting:\n";
+            std::cerr << "lsfg-vk: An error occured while trying to parse the configuration, IGNORING:\n";
             std::cerr << "- " << e.what() << '\n';
-            Utils::showErrorGui(e.what());
+            return; // default configuration will unload
         }
 
         const auto name = Utils::getProcessName();
         try {
             Config::activeConf = Config::getConfig(name);
         } catch (const std::exception& e) {
-            std::cerr << "lsfg-vk: The configuration for " << name.second << " is invalid, exiting:\n";
+            std::cerr << "lsfg-vk: The configuration for " << name.second << " is invalid, IGNORING:\n";
             std::cerr << e.what() << '\n';
-            Utils::showErrorGui(e.what());
+            return; // default configuration will unload
         }
 
         // exit silently if not enabled
         auto& conf = Config::activeConf;
         if (!conf.enable && name.second != "benchmark")
-            return;
+            return; // default configuration will unload
 
         // print config
         std::cerr << "lsfg-vk: Loaded configuration for " << name.second << ":\n";
