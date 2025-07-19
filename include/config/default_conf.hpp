@@ -16,7 +16,7 @@ const std::string DEFAULT_CONFIG = R"(version = 1
 # performance_mode = true
 # hdr_mode = false
 #
-# experimental_present_mode = fifo
+# experimental_present_mode = "fifo"
 # experimental_fps_limit = 48
 
 [[game]] # default vkcube entry
