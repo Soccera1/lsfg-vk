@@ -11,14 +11,16 @@
 #include <lsfg_3_1.hpp>
 #include <lsfg_3_1p.hpp>
 
+#include <filesystem>
 #include <exception>
 #include <iostream>
 #include <cstdint>
 #include <cstdlib>
-#include <atomic>
-#include <string>
-#include <memory>
 #include <vector>
+#include <chrono>
+#include <memory>
+#include <string>
+#include <thread>
 #include <array>
 
 LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
@@ -27,8 +29,13 @@ LsContext::LsContext(const Hooks::DeviceInfo& info, VkSwapchainKHR swapchain,
           extent(extent) {
     // get updated configuration
     auto& conf = Config::activeConf;
-    if (!conf.valid->load(std::memory_order_relaxed)) {
+    if (!conf.config_file.empty()
+            && (
+                    !std::filesystem::exists(conf.config_file)
+                  || conf.timestamp != std::filesystem::last_write_time(conf.config_file)
+            )) {
         std::cerr << "lsfg-vk: Rereading configuration, as it is no longer valid.\n";
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         // reread configuration
         const std::string file = Utils::getConfigFile();

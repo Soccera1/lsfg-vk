@@ -8,13 +8,13 @@
 #include <vulkan/vulkan_core.h>
 
 #include <unordered_map>
+#include <filesystem>
 #include <stdexcept>
 #include <algorithm>
 #include <exception>
 #include <iostream>
 #include <cstdint>
 #include <cstdlib>
-#include <atomic>
 #include <string>
 #include <vector>
 
@@ -261,7 +261,11 @@ namespace {
         try {
             // ensure config is valid
             auto& conf = Config::activeConf;
-            if (!conf.valid->load(std::memory_order_relaxed)) {
+            if (!conf.config_file.empty()
+                    && (
+                            !std::filesystem::exists(conf.config_file)
+                          || conf.timestamp != std::filesystem::last_write_time(conf.config_file)
+                    )) {
                 Layer::ovkQueuePresentKHR(queue, pPresentInfo);
                 return VK_ERROR_OUT_OF_DATE_KHR;
             }

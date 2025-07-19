@@ -22,7 +22,7 @@ namespace {
         // read configuration
         const std::string file = Utils::getConfigFile();
         try {
-            Config::loadAndWatchConfig(file);
+            Config::updateConfig(file);
         } catch (const std::exception& e) {
             std::cerr << "lsfg-vk: An error occured while trying to parse the configuration, IGNORING:\n";
             std::cerr << "- " << e.what() << '\n';
