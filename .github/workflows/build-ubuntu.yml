@@ -7,25 +7,18 @@ jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
     steps:
-    - name: Prepare permissions for apt cache
-      run: |
-        sudo chmod a+rwx -R /var/cache/apt/archives
-    - name: Prepare cache for apt packages
-      uses: actions/cache@v4
-      with:
-        path: /var/cache/apt/archives
-        key: ubuntu-apt-cache
     - name: Install build dependencies
-      run: |
-        export DEBIAN_FRONTEND=noninteractive
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          clang clang-tools llvm \
-          git tar \
-          cmake ninja-build \
-          spirv-headers libvulkan-dev \
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: build-essential
+          clang clang-tools llvm
+          git
+          cmake ninja-build
+          spirv-headers libvulkan-dev
           xorg-dev xutils-dev
+          libwayland-dev libxkbcommon-x11-dev
+        version: 1.0
+        execute_install_scripts: true
     - name: Checkout SPIR-V
       uses: actions/checkout@v4
       with:
@@ -58,6 +51,3 @@ jobs:
         path: |
           build-release/share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json
           build-release/lib/liblsfg-vk.so
-    - name: Prepare permissions for apt cache
-      run: |
-        sudo chmod a+rwx -R /var/cache/apt/archives

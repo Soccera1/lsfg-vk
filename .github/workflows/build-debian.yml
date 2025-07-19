@@ -21,10 +21,11 @@ jobs:
         apt-get install -y \
           build-essential \
           clang clang-tools llvm \
-          git tar \
+          git \
           cmake ninja-build \
           spirv-headers libvulkan-dev \
-          xorg-dev xutils-dev
+          xorg-dev xutils-dev \
+          libwayland-dev libxkbcommon-dev
     - name: Checkout repository
       uses: actions/checkout@v4
       with:

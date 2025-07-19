@@ -21,7 +21,7 @@ jobs:
           clang llvm \
           cmake ninja \
           spirv-headers vulkan-headers vulkan-icd-loader \
-          xorg
+          xorg wayland wayland-protocols mesa-utils
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
