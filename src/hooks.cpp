@@ -194,7 +194,7 @@ namespace {
             Utils::logLimitN("swapCtxCreate", 5,
                 "An error occurred while creating the swapchain wrapper:\n"
                 "- " + std::string(e.what()));
-            return VK_ERROR_INITIALIZATION_FAILED;
+            return VK_SUCCESS; // swapchain is still valid
         }
         return VK_SUCCESS;
     }
