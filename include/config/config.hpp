@@ -5,9 +5,6 @@
 #include <filesystem>
 #include <chrono>
 #include <cstddef>
-#include <vector>
-#include <atomic>
-#include <memory>
 #include <string>
 
 namespace Config {
@@ -18,8 +15,6 @@ namespace Config {
         bool enable{false};
         /// Path to Lossless.dll.
         std::string dll;
-        /// Additional environment variables to set.
-        std::vector<std::pair<std::string, std::string>> env;
 
         /// The frame generation muliplier
         size_t multiplier{2};
@@ -32,8 +27,6 @@ namespace Config {
 
         /// Experimental flag for overriding the synchronization method.
         VkPresentModeKHR e_present;
-        /// Experimental flag for limiting the framerate of DXVK games.
-        uint32_t e_fps_limit;
 
         /// Path to the configuration file.
         std::filesystem::path config_file;

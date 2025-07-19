@@ -46,21 +46,14 @@ namespace {
         // print config
         std::cerr << "lsfg-vk: Loaded configuration for " << name.second << ":\n";
         if (!conf.dll.empty()) std::cerr << "  Using DLL from: " << conf.dll << '\n';
-        for (const auto& [key, value] : conf.env)
-            std::cerr << "  Environment: " << key << "=" << value << '\n';
         std::cerr << "  Multiplier: " << conf.multiplier << '\n';
         std::cerr << "  Flow Scale: " << conf.flowScale << '\n';
         std::cerr << "  Performance Mode: " << (conf.performance ? "Enabled" : "Disabled") << '\n';
         std::cerr << "  HDR Mode: " << (conf.hdr ? "Enabled" : "Disabled") << '\n';
         if (conf.e_present != 2) std::cerr << "  ! Present Mode: " << conf.e_present << '\n';
-        if (conf.e_fps_limit > 0) std::cerr << "  ! FPS Limit: " << conf.e_fps_limit << '\n';
 
-        // update environment variables
+        // remove mesa var in favor of config
         unsetenv("MESA_VK_WSI_PRESENT_MODE"); // NOLINT
-        for (const auto& [key, value] : conf.env)
-            setenv(key.c_str(), value.c_str(), 1); // NOLINT
-        if (conf.e_fps_limit > 0)
-            setenv("DXVK_FRAME_RATE", std::to_string(conf.e_fps_limit).c_str(), 1); // NOLINT
 
         // write latest file
         try {

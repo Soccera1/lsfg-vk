@@ -16,10 +16,8 @@
 #include <iostream>
 #include <optional>
 #include <fstream>
-#include <cstdint>
 #include <cstdlib>
 #include <utility>
-#include <vector>
 #include <string>
 
 using namespace Config;
@@ -41,46 +39,6 @@ namespace {
         if (mode == "immediate")
             return VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR;
         return VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR;
-    }
-
-    /// Parse environment variables from a string.
-    std::vector<std::pair<std::string, std::string>> parse_env(const std::string& envs) {
-        std::vector<std::pair<std::string, std::string>> vars{};
-        const std::string env_str = envs + ' ';
-
-        std::string current{};
-        bool escape{false};
-        for (const char c : env_str) {
-            // toggle escape mode
-            if (c == '\'') {
-                escape = !escape;
-                continue;
-            }
-
-            // parse variable
-            if (c == ' ' && !escape) {
-                if (current.empty())
-                    continue;
-
-                auto eq_pos = current.find('=');
-                if (eq_pos == std::string::npos)
-                    throw std::runtime_error("Invalid environment variable: " + current);
-
-                std::string key = current.substr(0, eq_pos);
-                std::string value = current.substr(eq_pos + 1);
-                if (key.empty() || value.empty())
-                    throw std::runtime_error("Invalid environment variable: " + current);
-
-                vars.emplace_back(std::move(key), std::move(value));
-
-                current.clear();
-                continue;
-            }
-
-            current += c;
-        }
-
-        return vars;
     }
 }
 
@@ -139,13 +97,11 @@ void Config::updateConfig(const std::string& file) {
         Configuration game{
             .enable = true,
             .dll = global.dll,
-            .env = parse_env(toml::find_or(gameTable, "env", std::string())),
             .multiplier = toml::find_or(gameTable, "multiplier", 2U),
             .flowScale = toml::find_or(gameTable, "flow_scale", 1.0F),
             .performance = toml::find_or(gameTable, "performance_mode", false),
             .hdr = toml::find_or(gameTable, "hdr_mode", false),
             .e_present =   into_present(toml::find_or(gameTable, "experimental_present_mode", "")),
-            .e_fps_limit = toml::find_or(gameTable, "experimental_fps_limit", 0U),
             .config_file = file,
             .timestamp = global.timestamp
         };
@@ -185,10 +141,6 @@ Configuration Config::getConfig(const std::pair<std::string, std::string>& name)
         if (hdr) conf.hdr = std::string(hdr) == "1";
         const char* e_present = std::getenv("LSFG_EXPERIMENTAL_PRESENT_MODE");
         if (e_present) conf.e_present = into_present(std::string(e_present));
-        const char* e_fps_limit = std::getenv("LSFG_EXPERIMENTAL_FPS_LIMIT");
-        if (e_fps_limit) conf.e_fps_limit = static_cast<uint32_t>(std::stoul(e_fps_limit));
-        const char* envs = std::getenv("LSFG_ENV");
-        if (envs) conf.env = parse_env(std::string(envs));
 
         return conf;
     }
