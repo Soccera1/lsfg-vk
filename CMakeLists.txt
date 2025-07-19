@@ -9,6 +9,10 @@ add_compile_options(-fPIC
     -Wno-tautological-compare
     -Wno-undef)
 
+set(BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_WAYLAND ON)
+set(GLFW_BUILD_X11 ON)
+
 add_subdirectory(thirdparty/dxbc EXCLUDE_FROM_ALL)
 add_subdirectory(thirdparty/pe-parse/pe-parser-library EXCLUDE_FROM_ALL)
 add_subdirectory(thirdparty/toml11 EXCLUDE_FROM_ALL)
