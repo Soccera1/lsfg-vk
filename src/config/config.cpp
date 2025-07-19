@@ -128,6 +128,9 @@ void Config::loadAndWatchConfig(const std::string& file) {
     updateConfig(file);
 
     // prepare config watcher
+    if (std::getenv("LSFG_NO_HOT_RELOAD"))
+        return;
+
     std::thread([file = file, valid = globalConf.valid]() {
         try {
             thread(file, valid);
