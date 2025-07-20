@@ -22,7 +22,7 @@ jobs:
           git \
           clang llvm \
           cmake ninja-build \
-          spirv-headers-devel vulkan-headers vulkan-loader-devel \
+          vulkan-headers vulkan-loader-devel \
           libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel \
           wayland-devel libxkbcommon-devel
     - name: Checkout repository

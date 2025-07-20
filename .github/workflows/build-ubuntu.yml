@@ -14,21 +14,11 @@ jobs:
           clang clang-tools llvm
           git
           cmake ninja-build
-          spirv-headers libvulkan-dev
+          libvulkan-dev
           xorg-dev xutils-dev
           libwayland-dev libxkbcommon-x11-dev
         version: 1.0
         execute_install_scripts: true
-    - name: Checkout SPIR-V
-      uses: actions/checkout@v4
-      with:
-        repository: 'KhronosGroup/SPIRV-Headers'
-        ref: 'vulkan-sdk-1.4.313.0'
-        path: 'spirv-headers'
-    - name: Build SPIR-V headers
-      run: |
-        cmake -S spirv-headers -B spirv-headers/build
-        sudo cmake --build spirv-headers/build --target install
     - name: Checkout repository
       uses: actions/checkout@v4
       with:

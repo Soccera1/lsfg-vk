@@ -23,7 +23,7 @@ jobs:
           clang clang-tools llvm \
           git \
           cmake ninja-build \
-          spirv-headers libvulkan-dev \
+          libvulkan-dev \
           xorg-dev xutils-dev \
           libwayland-dev libxkbcommon-dev
     - name: Checkout repository

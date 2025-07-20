@@ -20,7 +20,7 @@ jobs:
           base-devel git \
           clang llvm \
           cmake ninja \
-          spirv-headers vulkan-headers vulkan-icd-loader \
+          vulkan-headers vulkan-icd-loader \
           xorg wayland wayland-protocols mesa-utils
     - name: Checkout repository
       uses: actions/checkout@v4
