@@ -25,7 +25,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: 'recursive'
     - name: Configure with CMake and Ninja
       run: |
         CC=clang CXX=clang++ cmake -B build -G Ninja \
