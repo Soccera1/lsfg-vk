@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.28)
 
+set(CMAKE_CXX_COMPILER clang++) # gcc release build crashes
+set(CMAKE_C_COMPILER clang)     # feel free to fix :3
+
 set(CMAKE_SKIP_RPATH ON)
 
 # subprojects
@@ -42,7 +45,7 @@ set_target_properties(lsfg-vk PROPERTIES
 target_include_directories(lsfg-vk
     PRIVATE include)
 target_link_libraries(lsfg-vk PRIVATE
-    pe-parse dxbc toml11 raylib
+    pe-parse dxbc toml11 raylib SPIRV-Headers
     lsfg-vk-framegen vulkan)
 
 get_target_property(TOML11_INCLUDE_DIRS toml11 INTERFACE_INCLUDE_DIRECTORIES)
