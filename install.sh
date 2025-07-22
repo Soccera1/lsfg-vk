@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/dash
 
 : "${INSTALL_PATH:=$HOME/.local}"
 BASE_URL='https://pancake.gay/lsfg-vk'
