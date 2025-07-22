@@ -13,11 +13,10 @@ else
 fi
 
 # offer to uninstall
-echo -n "Do you want to uninstall lsfg-vk? (y/n) "
+echo -n "Do you want to uninstall lsfg-vk? (y/N) "
 read -r uninstall_answer < /dev/tty
 if [ "$uninstall_answer" = "y" ]; then
-  rm -v $INSTALL_PATH/lib/liblsfg-vk.so
-  rm -v $INSTALL_PATH/share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json
-  rm -v "$SHA_FILE"
+  rm $INSTALL_PATH/lib/liblsfg-vk.so
+  rm $INSTALL_PATH/share/vulkan/implicit_layer.d/VkLayer_LS_frame_generation.json
   echo "Uninstallation completed."
 fi
