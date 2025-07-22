@@ -4,24 +4,8 @@
 BASE_URL='https://pancake.gay/lsfg-vk'
 NIX_FLAKE_REPO='https://github.com/pabloaul/lsfg-vk-flake'
 
-# prompt for distro
-echo "Which version would you like to install?"
-echo "1) Arch Linux (Artix Linux, CachyOS, Steam Deck, etc.)"
-echo "2) Debian"
-echo "3) Ubuntu"
-echo "4) Fedora"
-echo "5) NixOS (external flake project)"
-printf "Enter the number (1-5): "
-read -r version_choice < /dev/tty
-
-case "$version_choice" in
-    1) DISTRO="archlinux"; DISTRO_PRETTY="Arch Linux" ;;
-    2) DISTRO="debian"; DISTRO_PRETTY="Debian" ;;
-    3) DISTRO="ubuntu"; DISTRO_PRETTY="Ubuntu" ;;
-    4) DISTRO="fedora"; DISTRO_PRETTY="Fedora" ;;
-    5) DISTRO="nixos"; DISTRO_PRETTY="NixOS"; USE_NIX=true ;;
-    *) echo "Invalid choice."; exit 1 ;;
-esac
+DISTRO=$(awk -F'=' '/^ID=/ {print $2}' /etc/os-release)
+DISTRO_PRETTY=$(awk -F'=' '/^PRETTY_NAME=/ { gsub(/"/, "", $2); print $2 }' /etc/os-release)
 
 ZIP_NAME="lsfg-vk_${DISTRO}.zip"
 SHA_NAME="lsfg-vk_${DISTRO}.zip.sha"
